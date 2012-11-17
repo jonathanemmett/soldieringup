@@ -60,7 +60,7 @@ public class Welcome extends HttpServlet {
 		while(i.hasNext()) { 
 			Map.Entry me = (Map.Entry)i.next(); 
 			log.debug ("Key:" + me.getKey() + ": "); 
-			log.debug ("Value:" + me.getValue()); 
+			log.debug ("Value:" + ((Roster)me.getValue()).get_title()); 
 			}
 		
 		req.setAttribute ("roster", engine.retrieveRoster ());
