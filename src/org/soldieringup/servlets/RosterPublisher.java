@@ -51,7 +51,7 @@ public class RosterPublisher extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String cmd = request.getParameter (_cmd);
-		
+		log.debug ("Loading Roster Publisher");
 		if (cmd != null) {
 			switch (cmd) {
 				case "roster":
