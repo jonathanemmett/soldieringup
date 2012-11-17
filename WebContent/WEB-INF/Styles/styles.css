@@ -1,0 +1,38 @@
+@font-face 
+{  
+	font-family: "Steamer";  
+    src: url( ../Images/steamer.ttf) format("truetype");  
+}  
+ 
+/* Then use it like you would any other font */  
+.soldierFont
+{ 
+	font-family: "Steamer", verdana, helvetica, sans-serif;  
+}  
+body
+{
+	width:100%;
+	height:100%;
+	background-image: url(../Images/background.png);
+	background-color:#3AB29B;
+}
+
+#wrapper
+{
+	width:900px;
+	margin:10px auto;
+}
+
+#logo
+{
+	color:#FFFFFF;
+	font-size:xx-large;
+}
+
+#content_area
+{
+	color:#fff;
+	background-color:#fff;
+	min-height:500px;
+	border:#000 solid 1px;
+}
