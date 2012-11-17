@@ -28,7 +28,6 @@ import org.soldieringup.database.MySQL;
 public class Engine
 {
 	private static final Logger log = Logger.getLogger(Engine.class.getName());
-	private MySQL mysql = new MySQL ();
 
 	public Engine ()
 	{
@@ -41,12 +40,14 @@ public class Engine
 	 */
 	public Map<Object,Roster> retrieveRoster ()
 	{
-		log.debug ("Attempting to contact the database and retrieve roster events");
+		log.debug ("Attempting to contact the database and retrieve roster events - This is fun right?");
+		MySQL mysql = new MySQL ();
 		return mysql.retrieveRoster ();
 	}
 
 	public Map<Object,Account> retrieveAccounts ()
 	{
+		MySQL mysql = new MySQL ();
 		return mysql.retrieveAccounts ();
 	}
 }

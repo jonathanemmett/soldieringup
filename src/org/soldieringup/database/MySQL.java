@@ -56,6 +56,7 @@ public class MySQL
 
 	private void dbConn ()
 	{
+		log.debug ("creating db connection");
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			connect = DriverManager.getConnection(_jdbcConnString);
