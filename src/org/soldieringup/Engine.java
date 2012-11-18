@@ -16,6 +16,7 @@
 
 package org.soldieringup;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -49,5 +50,12 @@ public class Engine
 	{
 		MySQL mysql = new MySQL ();
 		return mysql.retrieveAccounts ();
+	}
+
+	public void AddAccount (HashMap<String, String> values)
+	{
+		MySQL mysql = new MySQL ();
+		mysql.AddAccount (values);
+		
 	}
 }

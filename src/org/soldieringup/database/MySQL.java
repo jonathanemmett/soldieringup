@@ -133,4 +133,54 @@ public class MySQL
 		return null;
 	}
 
+	public void AddAccount (HashMap<String, String> values)
+	{
+		try {
+			PreparedStatement ps = connect.prepareStatement("INSERT INTO `solderingup`.`accounts`" +
+										"(`fname`,"+
+										"`lname`,"+
+										"`company`,"+
+										"`cellphone`,"+
+										"`homephone`,"+
+										"`businessphone`,"+
+										"`address`,"+
+										"`city`,"+
+										"`state`,"+
+										"`zip`,"+
+										"`email`)"+
+										"VALUES"+
+										"(?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?,"+
+										"?");
+			ps.setString (1, values.get ("fname"));
+			ps.setString (2, values.get ("lname"));
+			ps.setString (3, values.get ("company"));
+			ps.setString (4, values.get ("cellphone"));
+			ps.setString (5, values.get ("homephone"));
+			ps.setString (6, values.get ("businessphone"));
+			ps.setString (7, values.get ("address"));
+			ps.setString (8, values.get ("city"));
+			ps.setString (9, values.get ("state"));
+			ps.setString (10, values.get ("zip"));
+			ps.setString (11, values.get ("email"));
+		        
+			if (ps.executeUpdate() == 0) { 
+		        	log.error (ps.getWarnings ());
+		        	throw new SQLException("Failed, no rows affected.");
+		        }
+			
+		} catch (Exception e) {
+			log.error ("Failed to add account", e);
+		}
+		
+	}
+
 }
