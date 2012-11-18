@@ -80,4 +80,10 @@ public class Engine
 		MySQL mysql = new MySQL ();
 		return mysql.retrieveTags ();
 	}
+
+	public void addTags (HashMap<String, String> values)
+	{
+		MySQL mysql = new MySQL ();
+		mysql.addTags (values);
+	}
 }

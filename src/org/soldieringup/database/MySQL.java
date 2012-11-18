@@ -224,4 +224,10 @@ public class MySQL
 		return tag;
 	}
 
+	public void addTags (HashMap<String, String> values)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }
