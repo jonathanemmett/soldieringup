@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -224,10 +225,34 @@ public class MySQL
 		return tag;
 	}
 
-	public void addTags (HashMap<String, String> values)
+	public void addTags (HashMap<String, String> mp)
 	{
-		// TODO Auto-generated method stub
+		    Iterator<?> it = mp.entrySet().iterator();
+		    while (it.hasNext()) {
+		        @SuppressWarnings("rawtypes")
+			Map.Entry pairs = (Map.Entry)it.next();
+		        addTag (pairs.getValue());
+		        it.remove(); // avoids a ConcurrentModificationException
+		    }		
 		
 	}
-
+	
+	private void addTag (Object tag_name)
+	{
+		try {
+			PreparedStatement ps = connect.prepareStatement("INSERT IGNORE INTO `solderingup`.`tags` (`name`) VALUES (?)");
+			ps.setString (1, (String)tag_name);
+			log.debug (ps.toString ());
+			int result = ps.executeUpdate();
+			if (result == 0) { 
+		        	log.error (ps.getWarnings ());
+		        	throw new SQLException("Failed, no rows affected.");
+		        } else {
+		        	log.debug ("Successfully added " + result + " to the tag database");
+		        }
+			
+		} catch (Exception e) {
+			log.error ("Failed to add tag", e);
+		}		
+	}
 }
