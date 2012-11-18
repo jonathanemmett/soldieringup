@@ -48,6 +48,8 @@ public class MySQL
 	private static final String _roster_description = "description";
 	private static final String _roster_id = "id";
 	private static final String _roster_tags = "tags";
+	private static final String _tag_name = "name";
+	private static final String _tag_id = "id";
 	
 	public MySQL ()
 	{
@@ -68,13 +70,23 @@ public class MySQL
 		}
 	}
 	
+	public Map<Object,Roster> retrieveRoster () throws SQLException
+	{
+		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster`");
+		return retrieveRoster (ps);
+	}
+	public Map<Object,Roster> retrieveRoster (int account_id) throws SQLException
+	{
+		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster` WHERE account_id=?");
+		ps.setInt (1, account_id);
+		return retrieveRoster (ps);
+	}
 	
-	public Map<Object,Roster> retrieveRoster ()
+	private Map<Object,Roster> retrieveRoster (PreparedStatement ps)
 	{
 		Map<Object,Roster> mp = new HashMap<Object, Roster>();
 		// got all the Roster entries
 		try {
-			PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster`");
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Roster roster = new Roster ();
@@ -184,6 +196,32 @@ public class MySQL
 			log.error ("Failed to add account", e);
 		}
 		
+	}
+
+	public Map<Integer, Tag> retrieveTags ()
+	{
+		Map<Integer,Tag> mp = new HashMap<Integer, Tag>();
+		// got all the Roster entries
+		try {
+			PreparedStatement ps = connect.prepareStatement("select id,name from `solderingup`.`tags`");
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Tag tag = new Tag ();
+				tag = parse(rs, tag);
+				mp.put (tag.get_id (), tag);
+			}			
+		} catch (Exception e) {
+			log.error ("Failed to retrieve roster events", e);
+		}
+		log.debug ("Loaded " + mp.size () + "Roster posts from the database");
+		return mp;
+	}
+
+	private Tag parse (ResultSet rs, Tag tag) throws SQLException
+	{
+		tag.set_id ((Integer) rs.getInt (_tag_id));
+		tag.set_name (rs.getString (_tag_name));
+		return tag;
 	}
 
 }

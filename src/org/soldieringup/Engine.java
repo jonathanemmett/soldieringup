@@ -16,6 +16,7 @@
 
 package org.soldieringup;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,9 +42,24 @@ public class Engine
 	 */
 	public Map<Object,Roster> retrieveRoster ()
 	{
-		log.debug ("Attempting to contact the database and retrieve roster events - This is fun right?");
 		MySQL mysql = new MySQL ();
-		return mysql.retrieveRoster ();
+		try {
+			return mysql.retrieveRoster ();
+		} catch (SQLException e) {
+			log.error ("Failed to retrieve roster", e);
+		}
+		return null;
+	}
+	
+	public Map<Object,Roster> retrieveRoster (int account_id)
+	{
+		MySQL mysql = new MySQL ();
+		try {
+			return mysql.retrieveRoster ();
+		} catch (SQLException e) {
+			log.error ("Failed to retrieve roster", e);
+		}
+		return null;
 	}
 
 	public Map<Object,Account> retrieveAccounts ()
@@ -57,5 +73,11 @@ public class Engine
 		MySQL mysql = new MySQL ();
 		mysql.AddAccount (values);
 		
+	}
+
+	public Map<Integer, Tag> retrieveTags ()
+	{
+		MySQL mysql = new MySQL ();
+		return mysql.retrieveTags ();
 	}
 }
