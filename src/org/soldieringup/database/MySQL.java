@@ -159,7 +159,7 @@ public class MySQL
 										"?,"+
 										"?,"+
 										"?,"+
-										"?");
+										"?)");
 			ps.setString (1, values.get ("fname"));
 			ps.setString (2, values.get ("lname"));
 			ps.setString (3, values.get ("company"));
@@ -171,10 +171,13 @@ public class MySQL
 			ps.setString (9, values.get ("state"));
 			ps.setString (10, values.get ("zip"));
 			ps.setString (11, values.get ("email"));
-		        
-			if (ps.executeUpdate() == 0) { 
+			log.debug (ps.toString ());
+			int result = ps.executeUpdate();
+			if (result == 0) { 
 		        	log.error (ps.getWarnings ());
 		        	throw new SQLException("Failed, no rows affected.");
+		        } else {
+		        	log.debug ("Successfully added " + result + " account to the database");
 		        }
 			
 		} catch (Exception e) {

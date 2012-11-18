@@ -9,7 +9,7 @@
 </head>
 <body>
 	<div id="stylized" class="myform">
-		<form id="form" name="form" method="post" action="ddAccount">
+		<form id="form" name="form" method="post" action="addAccount">
 			<h1>Sign-up form</h1>
 			<p>Create an account to publish. Creating an account allows you to advertise how you will be helping Veterans.</p>
 
@@ -56,8 +56,14 @@
 			<label>State 
 				<span class="small">Add a valid State Name</span>
 			</label>
-				<input type="text" name="state" id="state" />
-				
+				<span class="small">
+				<select name="state" id="state"> 
+					<option value="1">MO</option>
+					<option value="2">AR</option>
+					<option value="3">NY</option>
+					<option value="4">WA</option>
+				</select>
+				</span>
 			<label>ZIP
 				<span class="small">Add a valid ZIP code</span>
 			</label>
@@ -71,7 +77,7 @@
 			<label>Password
 				<span class="small">Min. size 6 chars</span>
 			</label>
-				<input type="text" name="password" id="password" />				
+				<input type="password" name="password" id="password" />				
 
 			<button type="submit">Sign-up</button>
 			<div class="spacer"></div>

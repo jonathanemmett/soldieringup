@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.soldieringup.Engine;
 
 /**
@@ -16,6 +17,7 @@ import org.soldieringup.Engine;
  */
 @WebServlet({ "/AccountSubscriber", "/addAccount" })
 public class AccountSubscriber extends HttpServlet {
+	private static final Logger log = Logger.getLogger (AccountSubscriber.class.getName ());
 	private static final long serialVersionUID = 1L;
 	private static final String _regex_fname = "^[a-zA-Z0-9]*$";
 	private static final String _regex_lname = "^[a-zA-Z0-9]*$";
@@ -52,7 +54,12 @@ public class AccountSubscriber extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (ParseRequest (request, response)) {
 			Engine engine = new Engine ();
-			engine.AddAccount (values);
+			try {
+				engine.AddAccount (values);
+				request.getRequestDispatcher ("account_add_success.jsp").include (request, response);
+			} catch (Exception e) {
+				log.error ("Failed to add account", e);
+			}
 		}
 	}
 	
