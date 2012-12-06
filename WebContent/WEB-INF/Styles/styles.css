@@ -1,0 +1,190 @@
+@font-face 
+{  
+	font-family: "Steamer";  
+    src: url( ../Images/steamer.ttf) format("truetype");  
+}  
+ 
+/* Then use it like you would any other font */  
+.soldierFont
+{ 
+	font-family: "Steamer", verdana, helvetica, sans-serif;  
+}  
+body
+{
+	width:100%;
+	height:100%;
+	background-image: url(../Images/background.png);
+	background-color:#3AB29B;
+}
+
+#wrapper
+{
+	width:900px;
+	margin:10px auto;
+}
+
+#logo
+{
+	color:#FFFFFF;
+	font-size:xx-large;
+	margin-bottom:5px;
+}
+
+#content_area
+{
+	background-color:#fff;
+	padding:5px;
+	padding-bottom:20px;
+	overflow:auto;
+	font-family:Arial, Helvetica, sans-serif;
+	
+}
+
+.front_section
+{
+	width:442px;
+	float:left;
+	margin-top:5px;
+}
+
+.main_link
+{
+	display:inline-block; 
+	text-align:center; 
+	background-color:#C9EDEC; 
+	width:100%; 
+	height:60px; 
+	padding-top:20px;
+	font-family: "Steamer", verdana, helvetica, sans-serif;
+	background-image:url(../Images/FrontButtonBack.png);
+	color:#FFFFFF;
+	font-size:2.5em;
+	border-radius:25px;
+	text-decoration:none;
+}
+
+.front_section p
+{
+	padding-left:30px;
+	padding-right:30px;
+}
+
+img
+{
+	margin:0;
+	padding:0;
+}
+
+.second
+{
+	float:right;
+}
+
+/* Roster page*/
+.description
+{
+	display:inline-block;	
+	position:absolute;
+	right:0;
+}
+
+
+.odd
+{
+	background-color:#F9E8F7;
+}
+
+.roster
+{
+	padding:5px;
+	position:relative;
+}
+
+.roster a
+{
+	color:#000;
+}
+
+/*Registration page*/
+#join_info
+{
+	width:400px;
+	float:right;
+	margin-right: 30px;
+}
+
+#join_info h1
+{
+	border-bottom:#000 solid 1px;
+}
+
+#join_info ul
+{
+	padding:0px;
+	font-size:medium;
+}
+
+
+/* Business profile page*/
+#comment_form
+{
+	font-family:Arial, Helvetica, sans-serif;
+	padding:2px;
+	margin-top:6px;
+}
+
+#comment_form label
+{
+	width:100px;
+	display:inline-block;
+	text-align:right;
+	vertical-align:top;
+	padding-right:5px;
+}
+
+#comment_form input[type="text"]
+{
+	width:350px;
+}
+
+.profile img
+{
+	border:#000 solid 1px; 
+	float:left;
+}
+
+.profile h1
+{
+	border-bottom:#000 solid 1px;
+	position:relative;
+}
+
+.profile h1 img
+{
+	display: inline;
+	float:none;
+	border:none;
+}
+
+.medals_section 
+{
+	font-size:medium;
+	position:absolute;
+	right:10px;
+}
+
+#cancel_comment
+{
+	position:absolute;
+	right:0px;
+	top:0px;
+	padding: 1px 6px;
+	background-color:#b9b9ad;
+	color:#FFFFFF;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+.profile p
+{
+	margin-left:320px;
+}	
