@@ -22,6 +22,121 @@
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`divisions`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`divisions` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `title` VARCHAR(100) NOT NULL ,
+  PRIMARY KEY (`id`) )
+ENGINE = InnoDB
+AUTO_INCREMENT = 5
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`users`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`users` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `first_name` VARCHAR(50) NOT NULL ,
+  `last_name` VARCHAR(100) NOT NULL ,
+  `email` VARCHAR(100) NOT NULL ,
+  `address` VARCHAR(500) NOT NULL ,
+  `primary_number` VARCHAR(20) NOT NULL ,
+  `secondary_number` VARCHAR(20) NULL DEFAULT NULL ,
+  `password` CHAR(40) NOT NULL ,
+  `salt` BIGINT(20) NOT NULL ,
+  `zip` VARCHAR(20) NOT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `zip` (`zip` ASC) )
+ENGINE = InnoDB
+AUTO_INCREMENT = 9
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`experience`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`experience` (
+  `uid` INT(11) NOT NULL ,
+  `did` INT(11) NOT NULL ,
+  `TitleName` VARCHAR(100) NOT NULL ,
+  `StartDate` DATETIME NOT NULL ,
+  `EndDate` DATETIME NOT NULL ,
+  `Description` VARCHAR(500) NOT NULL ,
+  PRIMARY KEY (`uid`, `did`, `TitleName`) ,
+  INDEX `did` (`did` ASC) ,
+  CONSTRAINT `experience_ibfk_1`
+    FOREIGN KEY (`uid` )
+    REFERENCES `solderingup`.`users` (`id` ),
+  CONSTRAINT `experience_ibfk_2`
+    FOREIGN KEY (`did` )
+    REFERENCES `solderingup`.`divisions` (`id` ))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`passwordkeys`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`passwordkeys` (
+  `id` INT(11) NOT NULL ,
+  `password_key` CHAR(40) NOT NULL ,
+  `creation_date` DATETIME NOT NULL ,
+  PRIMARY KEY (`id`) ,
+  CONSTRAINT `passwordkeys_ibfk_1`
+    FOREIGN KEY (`id` )
+    REFERENCES `solderingup`.`users` (`id` ))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`soldierexperience`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`soldierexperience` (
+  `VID` INT(11) NOT NULL ,
+  `DID` INT(11) NOT NULL ,
+  `TitleName` VARCHAR(100) NOT NULL ,
+  `StartDate` DATETIME NOT NULL ,
+  `EndDate` DATETIME NOT NULL ,
+  `Description` VARCHAR(500) NOT NULL )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`veterans`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`veterans` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `Goal` VARCHAR(200) NULL DEFAULT NULL ,
+  PRIMARY KEY (`id`) ,
+  CONSTRAINT `veterans_ibfk_1`
+    FOREIGN KEY (`id` )
+    REFERENCES `solderingup`.`users` (`id` ))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `solderingup`.`zip`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `solderingup`.`zip` (
+  `zip` VARCHAR(20) NOT NULL ,
+  `city` VARCHAR(100) NOT NULL ,
+  `state` CHAR(2) NOT NULL ,
+  `latitude` DECIMAL(7,4) NULL DEFAULT NULL ,
+  `longitude` DECIMAL(7,4) NULL DEFAULT NULL ,
+  PRIMARY KEY (`zip`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+
 CREATE TABLE `accounts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fname` varchar(255) DEFAULT NULL,
