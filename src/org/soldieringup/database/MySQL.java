@@ -16,12 +16,16 @@
 
 package org.soldieringup.database;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,9 +33,17 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import org.soldieringup.Account;
+import org.soldieringup.Business;
+import org.soldieringup.Photo;
 import org.soldieringup.Roster;
 import org.soldieringup.Tag;
+import org.soldieringup.User;
+import org.soldieringup.Utilities;
+import org.soldieringup.Veteran;
 
 /**
  * This class is responsible for database transactions
@@ -40,8 +52,10 @@ import org.soldieringup.Tag;
  */
 public class MySQL
 {
-	static final Logger log = Logger.getLogger(MySQL.class.getName());
+	static final Logger log = Logger.getLogger( MySQL.class.getName() );
+	private static MySQL classInstance = null;
 	private static final String _jdbcConnString = "jdbc:mysql://localhost/solderingup?user=dbService&password=8w8p21zy0c4pyn";
+	private static final String _jakeDB = "jdbc:mysql://localhost/solderingup?user=root&password=mtcs2012";
 	private Connection connect = null;
 	
 	// database table column titles
@@ -52,7 +66,17 @@ public class MySQL
 	private static final String _tag_name = "name";
 	private static final String _tag_id = "id";
 	
-	public MySQL ()
+	public static MySQL getInstance()
+	{
+		if( classInstance == null )
+		{
+			classInstance = new MySQL();
+		}
+		
+		return classInstance;
+	}
+	
+	private MySQL ()
 	{
 		dbConn();
 	}
@@ -62,7 +86,11 @@ public class MySQL
 		log.debug ("creating db connection");
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			connect = DriverManager.getConnection(_jdbcConnString);
+			connect = DriverManager.getConnection(_jakeDB);
+			if( connect == null )
+			{
+				connect = DriverManager.getConnection(_jakeDB);
+			}
 			
 		} catch (ClassNotFoundException ex) {
 			log.log(Level.ERROR, null, ex);
@@ -254,5 +282,510 @@ public class MySQL
 		} catch (Exception e) {
 			log.error ("Failed to add tag", e);
 		}		
+	}
+	
+	public Statement getStatement() throws SQLException
+	{
+		return connect.createStatement();
+	}
+	
+	public PreparedStatement getPreparedStatement(String sql) throws SQLException
+	{
+		return connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+	}
+	 
+	/**
+	 * 
+	 * @param oid
+	 * @return 
+	 * @throws SQLException Database could not be queried
+	 */
+	public Map<Integer,Business> getBusinessesFromOwner( long oid ) throws SQLException
+	{
+		Map<Integer,Business> businessesOwnerHas = new HashMap<Integer,Business>();
+		
+		PreparedStatement businessesQuery = connect.prepareStatement( "SELECT * FROM Business WHERE contact_id = ?" );
+		businessesQuery.setLong( 1, oid );
+		ResultSet businessesResults = businessesQuery.executeQuery();
+		
+		while( businessesResults.next() )
+		{
+			Business nextBusiness = new Business();
+			nextBusiness.setBid( businessesResults.getLong( "bid" ) );
+			nextBusiness.setContactId( businessesResults.getLong( "contact_id" ) );
+			System.out.println("The cover id is: " +  businessesResults.getLong( "cover_photo_id" ) );
+			nextBusiness.setCoverId( businessesResults.getLong( "cover_photo_id" ) );
+			nextBusiness.setName( businessesResults.getString( "name" ) );
+			nextBusiness.setShortSummary( businessesResults.getString( "short_summary" ) );
+			nextBusiness.setLongSummary( businessesResults.getString("long_summary") );
+			nextBusiness.setAddress( businessesResults.getString("address") );
+			nextBusiness.setZip( businessesResults.getString( "zip" ) );
+			businessesOwnerHas.put( businessesResults.getInt( "bid" ), nextBusiness );
+		}
+	
+		return businessesOwnerHas;
+	}
+	
+	/**
+	 * Gets the business information for a given business id. 
+	 * @param bid The business id for the business to query
+	 * @return The Business associated with bid
+	 */
+	public Business getBusiness( long bid ) throws SQLException
+	{
+		PreparedStatement businessQuery = connect.prepareStatement("SELECT * FROM Business WHERE bid = ?");
+		businessQuery.setLong( 1, bid );
+		ResultSet businessQueryResults = businessQuery.executeQuery();
+		Business foundBusiness = new Business();
+		if( businessQueryResults.first() )
+		{
+			foundBusiness.setBid( businessQueryResults.getInt( "bid" ) );
+			foundBusiness.setContactId( businessQueryResults.getInt( "contact_id" ) );
+			foundBusiness.setName( businessQueryResults.getString( "name" ) );
+			foundBusiness.setCoverId( businessQueryResults.getLong( "cover_photo_id" ) );
+			foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
+			foundBusiness.setLongSummary( businessQueryResults.getString("long_summary") );
+			foundBusiness.setAddress( businessQueryResults.getString("address") );
+			foundBusiness.setZip( businessQueryResults.getString( "zip" ) );
+		}
+		return foundBusiness; 
+	}
+	
+	/**
+	 * Get the ZIP code information for a given ZIP code.
+	 * @param aZip ZIP Code to find the information for.
+	 * @return The ZIP information for a given zip code.
+	 */
+	public ZIP getZIP( String aZip )
+	{
+		MySQL connection = MySQL.getInstance();
+		
+		ZIP queriedZip = new ZIP();
+		PreparedStatement stmt;
+		
+		try 
+		{
+			stmt = connection.getPreparedStatement("SELECT * FROM zip WHERE zip = ?");
+		
+			stmt.setString( 1, aZip );
+			ResultSet rs = stmt.executeQuery(); 
+			
+			if( rs.first() )
+			{
+				queriedZip.setZip( rs.getString("zip") );
+				queriedZip.setCity( rs.getString("city") );
+				queriedZip.setState( rs.getString("state") );
+				queriedZip.setLatitude( rs.getDouble("latitude") );
+				queriedZip.setLongtitude( rs.getDouble("longitude") );
+			}
+		}
+		catch (SQLException e)
+		{
+			log.error( "ZIP code could not be queried", e );
+			e.printStackTrace();
+		}
+		
+		return queriedZip;
+	}
+	
+	/**
+	 *  Logs a user into the system
+	 *  @param aEmail E-mail address of the user
+	 *  @param aPassword Password of the registered user
+	 *  @result The result set of the login attempt
+	 */
+	public User validateUser( String aEmail, String aPassword )
+	{
+		User newUser = null;
+		
+		try 
+		{
+			PreparedStatement userQuery = connect.prepareStatement( "SELECT * FROM Users WHERE email = ? and password = SHA1( CONCAT( salt, ? ) )" );
+			userQuery.setString( 1, aEmail );
+			userQuery.setString( 2, aPassword );
+			
+			
+			ResultSet userQueryResults = userQuery.executeQuery();
+			if( userQueryResults.first() )
+			{
+				newUser = new User();
+				newUser.setId( userQueryResults.getLong( "id" ) );
+				newUser.setFirstName( userQueryResults.getString( "first_name" ) );
+				newUser.setLastName( userQueryResults.getString( "last_name" ) );
+				newUser.setPrimaryNumber( userQueryResults.getString( "primary_number" ) );
+				newUser.setSecondaryNumber( userQueryResults.getString( "secondary_number" ) ); 
+				newUser.setAddress( userQueryResults.getString( "address" ) );
+				newUser.setEmail(  userQueryResults.getString( "email" ) );
+				newUser.setZip( userQueryResults.getString( "zip" ) );
+			}
+		} 
+		catch (SQLException e)
+		{
+			// Database could not be queried
+			log.log(Level.ERROR, null, e);
+		}
+		
+		return newUser;
+	}
+	
+	/**
+	 * Get the user from an associated id
+	 * @param uid User ID to query
+	 * @return The User if the id exists in the database, null otherwise
+	 */
+	public User getUserFromId( long uid )
+	{
+		User foundUser = null;
+		
+		try
+		{
+			PreparedStatement foundUserSql = connect.prepareStatement( "SELECT * FROM Users WHERE id = ?" );
+			foundUserSql.setLong( 1, uid );
+			ResultSet foundUserResults = foundUserSql.executeQuery();
+			
+			if( foundUserResults.first() )
+			{
+				foundUser = new User();
+				foundUser.setAddress( foundUserResults.getString( "address" ) );
+				foundUser.setEmail( foundUserResults.getString( "email" ) );
+				foundUser.setFirstName( foundUserResults.getString( "first_name" ) );
+				foundUser.setLastName( foundUserResults.getString( "last_name" ) );
+				foundUser.setId( foundUserResults.getLong( "id" ) );
+				foundUser.setPrimaryNumber( foundUserResults.getString( "primary_number" ) );
+				foundUser.setSecondaryNumber( foundUserResults.getString( "secondary_number" ) );
+				foundUser.setZip( foundUserResults.getString( "zip" ) );
+			}
+		}
+		catch(SQLException e)
+		{
+			log.error ("Errors occured while querying user", e);
+
+		}
+		
+		return foundUser;
+	}
+	
+	/**
+	 * Checks to see if the email exist
+	 * @param aEmail
+	 * @return
+	 */
+	public boolean checkIfEmailIsInUse( String aEmail )
+	{
+		try
+		{
+			PreparedStatement checkEmail = connect.prepareStatement( "SELECT email FROM Users WHERE email = ?" );
+			checkEmail.setString( 1, aEmail );
+			ResultSet emailResults = checkEmail.executeQuery();
+			return emailResults.first();
+		} 
+		catch (SQLException e)
+		{
+			log.log(Level.ERROR, null, e);
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Inserts a new user into the database
+	 * @param firstName			User's first name
+	 * @param lastName			User's last name
+	 * @param email				User's email
+	 * @param address			User's address
+	 * @param primaryNumber		User's primary phone 
+	 * @param secondaryNumber	User's secondary phone
+	 * @param password			User's password
+	 * @param zip				User's zip
+	 * @param aErrors			Error messages retrieved while inserting the user
+	 * @return					The result set containing the user's id
+	 */
+	public ResultSet registerUser( String aFirstName, String aLastName, String aEmail, 
+								   String aAddress, String aPrimaryNumber, String aSecondaryNumber,
+								   String aPassword, String aZip, String aCity, 
+								   String aState, Map<String, String> aErrors )
+	{
+		MySQL databaseConnection = MySQL.getInstance();
+		try 
+		{
+			verityZipInDatabase( aZip, aCity, aState );
+			PreparedStatement businessSQLInsert = 
+					databaseConnection.getPreparedStatement("INSERT INTO Users( first_name, last_name, " +
+					"email, address, primary_number, secondary_number, password, salt, zip ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+			
+			// The salt for the user will be the time that they registered
+			long salt = new Date().getTime();
+			
+			businessSQLInsert.setString(1, aFirstName);
+			businessSQLInsert.setString(2, aLastName);
+			businessSQLInsert.setString(3, aEmail);
+			businessSQLInsert.setString(4, aAddress);
+			businessSQLInsert.setString(5, aPrimaryNumber);
+			businessSQLInsert.setString(6, aSecondaryNumber == null ? "" : aSecondaryNumber);
+			businessSQLInsert.setString(7, Utilities.sha1Output( salt + aPassword) );
+			businessSQLInsert.setLong( 8, salt );
+			businessSQLInsert.setString( 9, aZip );
+			
+			businessSQLInsert.executeUpdate();
+			return businessSQLInsert.getGeneratedKeys();
+		} 
+		catch (SQLException e) 
+		{
+			aErrors.put("result", "Your account could not be entered. " + e.getMessage() );
+			e.printStackTrace();
+		} 
+		catch (NoSuchAlgorithmException e) 
+		{
+			e.printStackTrace();
+		} 
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public ResultSet registerVeteran( long uid, String goal )
+	{
+		String insertSql = "INSERT INTO veterans( id, Goal ) VALUES( ?, ? )";
+		ResultSet generatedKeys = null;
+		
+		try 
+		{
+			PreparedStatement insertStmt = getPreparedStatement( insertSql );
+			insertStmt.setLong( 1, uid );
+			insertStmt.setString( 2, goal );
+			insertStmt.executeUpdate();
+			generatedKeys = insertStmt.getGeneratedKeys();
+			System.out.println( "Generated keys: " + (generatedKeys == null ) );
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return generatedKeys;
+	}
+	/**
+	 * Registers a business with SoldierUp
+	 * @param aContactID 	Contact ID of the primary business contact
+	 * @param aBusinessName Business Name
+	 * @param aShortSummary Short description of the business 
+	 * @param aLongSummary  Detailed description of the business
+	 * @param aWorkNumber   Work number for the business
+	 * @param aAddress      Street address for the associated business
+	 * @param aZip			ZIP address for the associated business
+	 * @return				The result set containing the new businesses id
+	 */
+	public ResultSet registerBusiness( int aContactID, String aBusinessName, String aShortSummary,
+								  	String aLongSummary, String aWorkNumber, String aAddress,
+								    String aCity, String aState, String aZip )
+	{
+		try 
+		{
+			verityZipInDatabase( aZip, aCity, aState );
+			
+			MySQL databaseConnection = MySQL.getInstance();
+			String businessInsertQuery = "INSERT INTO BUSINESS ";
+			businessInsertQuery += "(contact_id,name,short_summary,long_summary,work_number,address,ZIP)";
+			businessInsertQuery += "VALUES(?,?,?,?,?,?,?)";
+			PreparedStatement businessSQLInsert = databaseConnection.getPreparedStatement(businessInsertQuery);
+			businessSQLInsert.setInt( 1, aContactID );
+			businessSQLInsert.setString( 2, aBusinessName );
+			businessSQLInsert.setString( 3, aShortSummary );
+			businessSQLInsert.setString( 4, aLongSummary );
+			businessSQLInsert.setString( 5, aWorkNumber );
+			businessSQLInsert.setString( 6, aAddress);
+			businessSQLInsert.setString( 7, aZip );
+			
+			businessSQLInsert.executeUpdate();
+			return businessSQLInsert.getGeneratedKeys();
+		} 
+		catch (SQLException e)
+		{
+			log.error ("Business could not be registered", e);
+			return null;
+		}
+		
+	}
+
+	/**
+	 * Checks to see if a given zip is in the database, and if not, insert it
+	 * and it's associated information
+	 * @param aZip ZIP code
+	 * @param aCity City associated to aZip
+	 * @param aState State associated to aZip
+	 */
+	public void verityZipInDatabase( String aZip, String aCity, String aState )
+	{
+		if( Utilities.stringIsNumeric(aZip) )
+		{
+			try 
+			{
+				PreparedStatement findZipSql = connect.prepareStatement( "SELECT * FROM zip WHERE zip = ?" );
+				findZipSql.setString( 1, aZip );
+				ResultSet findZipResults = findZipSql.executeQuery();
+				
+				if( !findZipResults.first() && aCity != null && aState != null )
+				{
+					PreparedStatement insertZip = connect.prepareStatement( "INSERT INTO zip ( zip, city, state ) VALUES ( ?, ?, ? )" );
+					insertZip.setString( 1, aZip );
+					insertZip.setString( 2, aCity );
+					insertZip.setString( 3, aState );
+					insertZip.executeUpdate();
+				}
+			} 
+			catch (SQLException e) 
+			{
+				log.error ("Errors occured while querying zip table", e);
+			}	
+		}
+	}
+	
+	/**
+	 * Retrieves a photo from a pid
+	 * @param pid Photo id of the photo to retrieve
+	 * @return The photo associated with the pid
+	 */
+	public Photo getPhotoFromId( long pid )
+	{
+		Photo foundPhoto = null;
+		
+		System.out.println("Querying the photo: " + pid);
+		try 
+		{
+			PreparedStatement photoQuery = connect.prepareStatement( "SELECT * FROM Photos WHERE pid = ?");
+			photoQuery.setLong( 1, pid );
+			
+			ResultSet photoQueryResult = photoQuery.executeQuery();
+			if( photoQueryResult.first() )
+			{
+				foundPhoto = new Photo();
+				foundPhoto.setBid( photoQueryResult.getLong( "bid" ) );
+				foundPhoto.setPid( photoQueryResult.getLong( "pid" ) );
+				foundPhoto.setSrc( photoQueryResult.getString( "src" ) );
+				foundPhoto.setTitle( photoQueryResult.getString( "title" ) );
+			}
+		} 
+		catch (SQLException e)
+		{
+			log.error ("Errors occured while querying photo table", e);
+		}
+		
+		return foundPhoto;
+	}
+	
+	/**
+	 * Inserts a tag into the database if it does not exist
+	 * @param tag Tag to insert into the database
+	 * @return The id if the insertion tag was successful, 0 otherwise
+	 */
+	public long insertTag( String tag)
+	{
+		try 
+		{
+			String insertSql = "INSERT INGORE INTO tags(tag) VALUES( ? )";
+			PreparedStatement insertTagStmt = connect.prepareStatement( insertSql );
+			insertTagStmt.setString( 1, tag );
+			insertTagStmt.executeUpdate();
+			ResultSet insertTagId = insertTagStmt.getGeneratedKeys();
+			
+			if( insertTagId.first() )
+			{
+				return insertTagId.getLong( 0 );
+			}
+			else
+			{
+				String findTagSql = "SELECT * FROM tags WHERE tags = ?";
+				PreparedStatement findTagId = connect.prepareStatement( findTagSql );
+				findTagId.setString( 1, tag );
+				ResultSet query = findTagId.executeQuery();
+				return query.getLong(0);
+			}
+		} 
+		catch (SQLException e)
+		{
+			log.error ("Errors occured while trying to insert a tag", e);
+			return 0;
+		}
+	}
+	
+	/**
+	 * Attaches a tag to a given business
+	 * @param tag Tag to attach to business
+	 * @param bid Business id of business to attach tag to
+	 */
+	public void attachTagToBusiness( String tag, long bid )
+	{
+		try
+		{
+			long insertResult = insertTag( tag );
+			
+			if( insertResult > 0)
+			{
+				String attachTagToBusinessSql = "INSERT IGNORE INTO business_tags VALUE(?, ?)";
+				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToBusinessSql );
+				attachTagStmt.setLong( 1, insertResult );
+				attachTagStmt.setLong( 2, bid );
+			}
+		}
+		catch( SQLException e)
+		{
+			log.error ("Errors occured while trying to attach a tag to a business", e);
+		}
+	}
+	
+	/**
+	 * Gets a veteran from a user id
+	 * @param uid The user id of the user
+	 * @return The Veteran object if found, false otherwise
+	 */
+	public Veteran getVeteran( long uid )
+	{
+		Veteran foundVeteran = null;
+		try
+		{
+			PreparedStatement veteranSql = connect.prepareStatement( "SELECT * FROM veterans WHERE uid = ?" );
+			veteranSql.setLong( 1, uid );
+			
+			ResultSet veteranQuery = veteranSql.executeQuery();
+			if( veteranQuery.first() )
+			{
+				foundVeteran = new Veteran();
+				foundVeteran.setVid( veteranQuery.getLong( "vid" ) );
+				foundVeteran.setGoal( veteranQuery.getString( "goal" ) );
+			}
+		}
+		catch( SQLException e)
+		{
+			log.error ("Errors occured while trying to retrieve a veteran", e);
+		}
+		
+		return foundVeteran;
+	}
+	
+	public JSONObject getAllTags()
+	{
+		JSONObject tagsObject = new JSONObject();
+		JSONArray arrayOfTags = new JSONArray();
+		
+		try
+		{
+			PreparedStatement stmt = connect.prepareStatement( "SELECT * FROM tags" );
+			ResultSet tags = stmt.executeQuery();
+			while( tags.next() )
+			{
+				arrayOfTags.add( tags.getString( "tag" ) );
+			}
+			
+			tagsObject.put( "tags", arrayOfTags );
+		}
+		catch(SQLException e)
+		{
+			
+		}
+		
+		return tagsObject;
 	}
 }
