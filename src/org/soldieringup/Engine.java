@@ -42,7 +42,7 @@ public class Engine
 	 */
 	public Map<Object,Roster> retrieveRoster ()
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		try {
 			return mysql.retrieveRoster ();
 		} catch (SQLException e) {
@@ -53,7 +53,7 @@ public class Engine
 	
 	public Map<Object,Roster> retrieveRoster (int account_id)
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		try {
 			return mysql.retrieveRoster ();
 		} catch (SQLException e) {
@@ -64,26 +64,26 @@ public class Engine
 
 	public Map<Object,Account> retrieveAccounts ()
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		return mysql.retrieveAccounts ();
 	}
 
 	public void AddAccount (HashMap<String, String> values)
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		mysql.AddAccount (values);
 		
 	}
 
 	public Map<Integer, Tag> retrieveTags ()
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		return mysql.retrieveTags ();
 	}
 
 	public void addTags (HashMap<String, String> values)
 	{
-		MySQL mysql = new MySQL ();
+		MySQL mysql = MySQL.getInstance();
 		mysql.addTags (values);
 	}
 }
