@@ -1,8 +1,14 @@
 package org.soldieringup;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspWriter;
 
 /**
  * Class represents various functions that are used throughout the web application
@@ -54,4 +60,44 @@ public class Utilities {
 		
 		return true;
 	}
+	
+	/**
+	 * Determines if a given string from a request with a given key is null. If it is, we add an error to the error map
+	 * @param aString Key to check
+	 * @param request HTTP request
+	 * @param aErrorMap Error mapping for request
+	 */
+	public static void checkParameterIsNull(String aString, HttpServletRequest request, Map<String,String> aErrorMap )
+	{
+		if( request.getParameter(aString) == null || request.getParameter( aString ).isEmpty() )
+		{
+			aErrorMap.put(aString, "required" );
+		}
+	}
+	
+	/**
+	 * Prints out a error span if the given key has an error 
+	 * @param aWriter JspWriter that we will output the error to
+	 * @param aKey The key used to search for an error.
+	 */
+	public static void printErrorSpan( JspWriter aWriter, String aKey, Map<String,String> aErrors )
+	{
+		try 
+		{	
+			if( aErrors != null && aErrors.containsKey( aKey ) )
+			{
+				aWriter.print("<span class=\"form_error\">"+aErrors.get( aKey ) + "</span>");
+			}
+		} 
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}	
+	}
+	
+	public static String getValueFromString( String value )
+	{
+		return value == null ? "" : value;
+	}
+	
 }
