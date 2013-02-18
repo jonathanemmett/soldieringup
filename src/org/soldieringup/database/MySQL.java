@@ -16,6 +16,8 @@
 
 package org.soldieringup.database;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -30,7 +32,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.catalina.tribes.util.Arrays;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
@@ -44,6 +48,7 @@ import org.soldieringup.Tag;
 import org.soldieringup.User;
 import org.soldieringup.Utilities;
 import org.soldieringup.Veteran;
+import org.soldieringup.ZIP;
 
 /**
  * This class is responsible for database transactions
@@ -65,6 +70,10 @@ public class MySQL
 	private static final String _roster_tags = "tags";
 	private static final String _tag_name = "name";
 	private static final String _tag_id = "id";
+	
+	// Types of images to store in the temp uploads file
+	public static final String TEMP_UPLOAD_IMAGE_PROFILE = "profile";
+	public static final String TEMP_UPLOAD_IMAGE_COVER = "cover";
 	
 	public static MySQL getInstance()
 	{
@@ -284,20 +293,21 @@ public class MySQL
 		}		
 	}
 	
-	public Statement getStatement() throws SQLException
-	{
-		return connect.createStatement();
-	}
-	
+	/**
+	 * Creates a prepared statement that allows for the return of generated primary keys
+	 * @param sql SQL statement to initialize the PreparedStatement with
+	 * @return The generated PreparedStatement
+	 * @throws SQLException
+	 */
 	public PreparedStatement getPreparedStatement(String sql) throws SQLException
 	{
 		return connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	}
 	 
 	/**
-	 * 
-	 * @param oid
-	 * @return 
+	 * Gets all the businesses associated with a user account
+	 * @param oid The ID of the user
+	 * @return All the businesses associated with the given account
 	 * @throws SQLException Database could not be queried
 	 */
 	public Map<Integer,Business> getBusinessesFromOwner( long oid ) throws SQLException
@@ -313,8 +323,8 @@ public class MySQL
 			Business nextBusiness = new Business();
 			nextBusiness.setBid( businessesResults.getLong( "bid" ) );
 			nextBusiness.setContactId( businessesResults.getLong( "contact_id" ) );
-			System.out.println("The cover id is: " +  businessesResults.getLong( "cover_photo_id" ) );
 			nextBusiness.setCoverId( businessesResults.getLong( "cover_photo_id" ) );
+			nextBusiness.setProfilePhotoId( businessesResults.getLong( "profile_photo_id") );
 			nextBusiness.setName( businessesResults.getString( "name" ) );
 			nextBusiness.setShortSummary( businessesResults.getString( "short_summary" ) );
 			nextBusiness.setLongSummary( businessesResults.getString("long_summary") );
@@ -331,22 +341,33 @@ public class MySQL
 	 * @param bid The business id for the business to query
 	 * @return The Business associated with bid
 	 */
-	public Business getBusiness( long bid ) throws SQLException
+	public Business getBusiness( long bid )
 	{
-		PreparedStatement businessQuery = connect.prepareStatement("SELECT * FROM Business WHERE bid = ?");
-		businessQuery.setLong( 1, bid );
-		ResultSet businessQueryResults = businessQuery.executeQuery();
-		Business foundBusiness = new Business();
-		if( businessQueryResults.first() )
+		Business foundBusiness = null;
+		System.out.println( "This business: "+bid );
+		try
 		{
-			foundBusiness.setBid( businessQueryResults.getInt( "bid" ) );
-			foundBusiness.setContactId( businessQueryResults.getInt( "contact_id" ) );
-			foundBusiness.setName( businessQueryResults.getString( "name" ) );
-			foundBusiness.setCoverId( businessQueryResults.getLong( "cover_photo_id" ) );
-			foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
-			foundBusiness.setLongSummary( businessQueryResults.getString("long_summary") );
-			foundBusiness.setAddress( businessQueryResults.getString("address") );
-			foundBusiness.setZip( businessQueryResults.getString( "zip" ) );
+			PreparedStatement businessQuery = connect.prepareStatement("SELECT * FROM Business WHERE bid = ?");
+			businessQuery.setLong( 1, bid );
+			ResultSet businessQueryResults = businessQuery.executeQuery();
+			foundBusiness = new Business();
+			if( businessQueryResults.first() )
+			{
+				foundBusiness.setBid( businessQueryResults.getInt( "bid" ) );
+				foundBusiness.setContactId( businessQueryResults.getInt( "contact_id" ) );
+				foundBusiness.setName( businessQueryResults.getString( "name" ) );
+				foundBusiness.setCoverId( businessQueryResults.getLong( "cover_photo_id" ) );
+				foundBusiness.setProfilePhotoId( businessQueryResults.getLong( "profile_photo_id" ) );
+				foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
+				foundBusiness.setLongSummary( businessQueryResults.getString("long_summary") );
+				foundBusiness.setAddress( businessQueryResults.getString("address") );
+				foundBusiness.setZip( businessQueryResults.getString( "zip" ) );
+			}
+		}
+		catch( SQLException e )
+		{
+			log.error( "Business code could not be queried", e );
+			e.printStackTrace();
 		}
 		return foundBusiness; 
 	}
@@ -467,8 +488,8 @@ public class MySQL
 	
 	/**
 	 * Checks to see if the email exist
-	 * @param aEmail
-	 * @return
+	 * @param aEmail Email to check
+	 * @return True if the email is in use, false otherwise
 	 */
 	public boolean checkIfEmailIsInUse( String aEmail )
 	{
@@ -546,6 +567,12 @@ public class MySQL
 		return null;
 	}
 
+	/**
+	 * Registers a Veteran profile with SoldierUp
+	 * @param uid UID of ther person registering the Veteran Profile
+	 * @param goal The goal that Veteran wants to accomplish through SoldierUp
+	 * @return
+	 */
 	public ResultSet registerVeteran( long uid, String goal )
 	{
 		String insertSql = "INSERT INTO veterans( id, Goal ) VALUES( ?, ? )";
@@ -567,6 +594,59 @@ public class MySQL
 		
 		return generatedKeys;
 	}
+	
+	/**
+	 * Updates a Veteran's profile
+	 * @param vid VID of the veteran to update
+	 * @param goal Goal to update the veteran profile with
+	 */
+	public void updateProfileVeteran( long vid, String goal )
+	{
+		try
+		{
+			String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ?";
+		
+			PreparedStatement updateVeteranPreparedStatement = getPreparedStatement( updateVeteranSQL );
+			updateVeteranPreparedStatement.setString( 1, goal );
+			updateVeteranPreparedStatement.setLong( 2, vid );
+			updateVeteranPreparedStatement.executeUpdate();
+		}
+		catch( SQLException e )
+		{
+			log.error ("Veteran could not be update", e);
+		}
+	}
+	
+	/**
+	 * Updates a business profile with the following parameters
+	 * @param aBusinessId
+	 * @param aBusinessProfileObjects
+	 */
+	public void updateProfileBusiness( long aBusinessId, Map<String,String> aBusinessProfileObjects)
+	{
+		
+	}
+	
+	/**
+	 * Changes who the primary contact of a business is
+	 * @param aBusinessId ID of the business to transfer to another User
+	 * @param aUserId ID of the user to be the primary contact 
+	 */
+	public void transferBusinessContact( long aUserId, long aBusinessId )
+	{
+		try
+		{
+			PreparedStatement businessTransferStatement = getPreparedStatement( "UPDATE Business SET contact_id = ? WHERE bid = ?" );
+			businessTransferStatement.setLong( 1, aUserId );
+			businessTransferStatement.setLong( 2, aBusinessId );
+			businessTransferStatement.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			log.error ("Business " + aBusinessId + " could not be transferred to " + aUserId, e );
+		}
+	}
+	
 	/**
 	 * Registers a business with SoldierUp
 	 * @param aContactID 	Contact ID of the primary business contact
@@ -609,8 +689,8 @@ public class MySQL
 		}
 		
 	}
-
-	/**
+	
+		/**
 	 * Checks to see if a given zip is in the database, and if not, insert it
 	 * and it's associated information
 	 * @param aZip ZIP code
@@ -674,6 +754,74 @@ public class MySQL
 		}
 		
 		return foundPhoto;
+	}
+	
+	/**
+	 * Inserts a photo into the database
+	 * @param bid ID of the business owning the photo
+	 * @param title Title of the photo
+	 * @param src SRC of the photo
+	 * @return The generated photo ID if the insertion is successful, null otherwise
+	 */
+	public ResultSet insertPhoto( long bid, String title, String src )
+	{
+		ResultSet photoKeys = null;
+		try
+		{
+			PreparedStatement insertPhoto = getPreparedStatement( "INSERT INTO Photos (bid, title, src) VALUES(?,?,?)" );
+			insertPhoto.setLong( 1, bid );
+			insertPhoto.setString( 2, title );
+			insertPhoto.setString( 3, src );
+			insertPhoto.executeUpdate();
+			photoKeys = insertPhoto.getGeneratedKeys();
+		}
+		catch(SQLException e)
+		{
+			
+		}
+		
+		return photoKeys;
+	}
+	
+	/**
+	 * Sets the photo for a given account id, photo type, and account type.
+	 * @param aOid Object ID for the object to set the photo for ( Veteran or Business ID )
+	 * @param aPhotoType Photo type we are setting for the account 
+	 * @param aAccountType Type of account that aOid corresponds to 
+	 * @param aSrc The src of the photo
+	 */
+	public void setAccountPhoto(
+			long aOid,
+			String aPhotoType,
+			String aAccountType,
+			String aSrc )
+	{
+		try 
+		{
+			PreparedStatement updateUser = null;
+			String updateProfilePhotoSql;
+			
+			String targetPhoto = aPhotoType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? "cover_src" : "profile_src";
+			
+			if( aPhotoType.equals( "veteran" ) )
+			{
+				updateProfilePhotoSql = "UPDATE veterans SET " + targetPhoto + " = ? WHERE vid = ?";
+			}
+			else
+			{
+				updateProfilePhotoSql = "UPDATE business SET " + targetPhoto + " = ? WHERE bid = ?";
+			}
+			
+			updateUser = getPreparedStatement( updateProfilePhotoSql );
+
+			updateUser.setString( 1, aSrc );
+			updateUser.setLong( 2, aOid );
+			updateUser.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -755,6 +903,10 @@ public class MySQL
 				foundVeteran = new Veteran();
 				foundVeteran.setVid( veteranQuery.getLong( "vid" ) );
 				foundVeteran.setGoal( veteranQuery.getString( "goal" ) );
+				foundVeteran.setUid( veteranQuery.getLong( "uid" ) );
+				foundVeteran.setProfileSrc( veteranQuery.getString( "profile_src" ) );
+				foundVeteran.setTempProfileSrc( veteranQuery.getString( "temp_profile_src" ) );
+				foundVeteran.setTempPictureUploadedDate( veteranQuery.getDate( "temp_photo_upload_date" ) );
 			}
 		}
 		catch( SQLException e)
@@ -765,6 +917,10 @@ public class MySQL
 		return foundVeteran;
 	}
 	
+	/**
+	 * Gets all the tags that exist in the database
+	 * @return All the tags that exist in the database
+	 */
 	public JSONObject getAllTags()
 	{
 		JSONObject tagsObject = new JSONObject();

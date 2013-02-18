@@ -1,14 +1,16 @@
 package org.soldieringup.servlets;
 
-import java.awt.BufferCapabilities;
+import hideftvads.proto.MimeType;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,46 +22,65 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.soldieringup.Business;
+import org.json.simple.JSONObject;
+import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
 
-import sun.awt.image.ToolkitImage;
-
-import com.sun.media.sound.Toolkit;
-
 /**
- * Servlet that takes in a Cover Photo, and adjusts it to an image of 880 by 300.
- * @author Jake LaCombe
+ * Servlet implementation class UploadImageRework
  */
-
 @WebServlet("/UploadImage")
-public class UploadImage extends HttpServlet 
+public class UploadImage extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static final int IMAGE_WIDTH = 880;
-	private static final int IMAGE_HEIGHT = 300;
+	// Target widths and heights for the different types
+	// of images that can be uploaded to the database.
+	private static final int TEMP_COVER_IMAGE_WIDTH = 880;
+	private static final int TEMP_COVER_IMAGE_HEIGHT = 300;
+	private static final int TEMP_PROFILE_IMAGE_WIDTH = 500;
+	private static final int TEMP_PROFILE_IMAGE_HEIGHT = 100;
        
     /**
-     * Constructor
+     * @see HttpServlet#HttpServlet()
      */
-    public UploadImage() 
+    public UploadImage()
     {
         super();
     }
 
 	/**
-	 * Get method of the photo servlet. It currently does nothing
+	 * Get method of the photo servlet. It returns the src's of any temporary profile they
+	 * user may have uploaded. 
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		// No-op. Only POST requests are used
+		PrintWriter out = response.getWriter();
+		JSONObject jsonOutput = new JSONObject();
+		Enumeration<String> keys = request.getSession().getAttributeNames();
+		System.out.println("Doing the get request");
+		while( keys.hasMoreElements() )
+		{
+			String key = keys.nextElement();
+			System.out.println("The keys is " + key + " " + request.getSession().getAttribute( key ).toString() );
+		}
+		
+		if( request.getSession().getAttribute( "temp_cover_src" ) != null )
+		{
+			jsonOutput.put( "temp_cover_src", request.getSession().getAttribute( "temp_cover_src" ).toString() );
+		}
+		
+		if( request.getSession().getAttribute( "temp_profile_src" ) != null )
+		{
+			jsonOutput.put( "temp_profile_src", request.getSession().getAttribute( "temp_profile_src" ).toString() );
+		}
+		
+		out.println( jsonOutput );
 	}
 
 	/**
@@ -68,205 +89,188 @@ public class UploadImage extends HttpServlet
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 * @return Outputs the URL stripped of it's path of the photo that is at least IMAGE_WIDTH by IMAGE_HEIGHT.   
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException 
+	{
+		boolean isMultiPart = ServletFileUpload.isMultipartContent(request);
+		
+		// Only process the servlet if the form contains an image
+		if( isMultiPart )
+		{
+			uploadPhoto( request, response );
+		}
+	}
+	
+	/**
+	 * Extracts a photo from the request and uploads it to the server based on the type of
+	 * image being uploaded.
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	private void uploadPhoto( HttpServletRequest request, HttpServletResponse response ) throws IOException
 	{
 		PrintWriter out = response.getWriter();
-		MySQL databaseConnection = MySQL.getInstance();
-
-		if( request.getSession().getAttribute("bid") == null && request.getSession().getAttribute( "bid" ) == "" )
+		
+		boolean veteranLoggedIn =  request.getSession().getAttribute("vid") != null && request.getSession().getAttribute( "vid" ) != "";
+		boolean businessLoggedIn =  request.getSession().getAttribute("bid") != null && request.getSession().getAttribute( "bid" ) != "";
+		
+		if( !( veteranLoggedIn || businessLoggedIn ) )
 		{
 			out.println("You must be logged in to process a photo");
 			return;
-		}
-
-		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-	
-		// Only process the image for multipart forms
-		if( isMultipart )
-		{   
-			// Get the disk file item factory from the Apache server
-			DiskFileItemFactory factory = new DiskFileItemFactory();
-			factory.setSizeThreshold(10000000);
-			factory.setRepository( new File( System.getProperty( "java.io.tmpdir" ) ) );
-			
-			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setFileSizeMax(10000000);
-			upload.setSizeMax(10000000);	
-			
-			// Actual path to the server
-			String uploadPath = getServletContext().getRealPath("") + File.separator + "files";
-			
-			// X and Y positions of the left hand corner of the photo. Only non-positive numbers are allowed
-			// for this value.
-			int coverPhotoXPosition = 1;
-			int coverPhotoYPosition = 1;
-			
-			try 
-			{
-				System.out.println("Business id: " + request.getSession().getAttribute( "bid" ) );
-
-				long bid = (int) request.getSession().getAttribute( "bid" );
-				System.out.println("Business id: " + bid );
-				Business processingBusiness = databaseConnection.getBusiness( bid );
-				System.out.println("Business id: " + processingBusiness.getBid() );
-
-				List formInputs = upload.parseRequest( request );
-				Iterator formInputIt = formInputs.iterator();
-				
-				// Iterate through all of the form inputs. If we have two valid coordinates, that means we are finding the
-				// position of the scaled photo. Otherwise, the user uploaded a photo, and we need to scale it.
-				while( formInputIt.hasNext() )
-				{
-					FileItem formItem = (FileItem) formInputIt.next();
-					
-					// Position of the photo
-					if( formItem.isFormField() )
-					{
-						if( formItem.getFieldName().equals( "cover_photo_x" ) && formItem.getString() != null )
-						{
-							coverPhotoXPosition = Integer.parseInt( formItem.getString() );
-						}
-						
-						if( formItem.getFieldName().equals( "cover_photo_y" ) && formItem.getString() != null)
-						{
-							coverPhotoYPosition = Integer.parseInt( formItem.getString() );
-						}	
-					}
-					// Photo scaling logic
-					else
-					{
-						BufferedImage sourceImage = ImageIO.read( formItem.getInputStream() );
-						
-						int thumbNailImageWidth = IMAGE_WIDTH;
-						int thumbNailImageHeight = sourceImage.getHeight();
-						
-						// Image must be IMAGE_WIDTH pixels long.
-						if( sourceImage.getWidth() != IMAGE_WIDTH )
-						{
-							double thumbNailScaleWidth = (double)( (double)IMAGE_WIDTH / sourceImage.getWidth() );
-							thumbNailImageHeight *= thumbNailScaleWidth;
-						}
-
-						// Image must be at least IMAGE_HEIGHT pixels wide; 
-						if( thumbNailImageHeight < IMAGE_HEIGHT )
-						{
-							double thumbNailScaleHeight = (double)( (double)IMAGE_HEIGHT / thumbNailImageHeight );
-							thumbNailImageWidth *= thumbNailScaleHeight;
-							thumbNailImageHeight *= thumbNailScaleHeight;
-						}						
-
-						BufferedImage resizeImage = new BufferedImage( thumbNailImageWidth, thumbNailImageHeight, sourceImage.getType() );
-						
-						// Create the newly resized image, and save it to the permanent location.
-						Graphics2D g = resizeImage.createGraphics();
-						g.drawImage(sourceImage, 0, 0, thumbNailImageWidth, thumbNailImageHeight, null);
-						g.dispose();
-						File newImage = new File("C:\\tomcat\\webapps\\soldieringup\\WebContent\\TempUploads" + File.separator+"JakeUpload.png");
-						ImageIO.write( resizeImage, "png", newImage );
-						
-						// Insert the cover photo into the database
-						PreparedStatement insertPhoto =
-								databaseConnection.getPreparedStatement("INSERT INTO Photos( bid, title, src) VALUES( ?, 'Cover Photo', ? )");						
-						insertPhoto.setLong( 1,  processingBusiness.getBid() );
-						insertPhoto.setString( 2, "JakeUpload.png");
-						insertPhoto.executeUpdate();
-						
-						ResultSet photoId = insertPhoto.getGeneratedKeys();
-						
-						// Now we update the cover_photo id associated with the business
-						if( photoId.first() )
-						{
-							PreparedStatement setCoverId =
-								databaseConnection.getPreparedStatement( "UPDATE Business set cover_photo_id = ? WHERE bid = ?" );
-						
-							setCoverId.setInt( 1, Integer.parseInt( photoId.getString(1) ));
-							setCoverId.setLong( 2, processingBusiness.getBid() );
-							setCoverId.executeUpdate();
-						}
-						
-						out.println("TempUploads/JakeUpload.png");
-						
-					}
-				}
-			}
-			catch (FileUploadException e) 
-			{
-				System.out.println("Errored on upload");
-			} 
-			catch (Exception e) 
-			{
-				System.out.println("Unknown error");
-			}
-			
-			if( coverPhotoXPosition <=0  && coverPhotoYPosition <= 0 )
-			{
-				try 
-				{
-					readjustCoverPhoto( (int)request.getSession().getAttribute( "bid" ), coverPhotoXPosition, coverPhotoYPosition, response.getWriter() );
-				} 
-				catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
-			}
-		}
-	}
-	
-	protected void readjustCoverPhoto( int id, int photoXPosition, int photoYPosition, PrintWriter out ) throws SQLException
-	{
-		MySQL databaseConnection = MySQL.getInstance();
+		}	
 		
-		// Find the cover id from the business to ensure security
-		PreparedStatement coverPhotoLookup = databaseConnection.getPreparedStatement(" SELECT cover_photo_id FROM Business WHERE bid = ? ");
-		coverPhotoLookup.setInt(1, id);
-		
-		ResultSet coverIDResult = coverPhotoLookup.executeQuery();
-		
-		if( coverIDResult.first() )
+		// Get the disk file item factory from the Apache server
+		DiskFileItemFactory factory = new DiskFileItemFactory();
+		factory.setSizeThreshold (10000000 );
+		factory.setRepository( new File( System.getProperty( "java.io.tmpdir" ) ) );
+
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		upload.setFileSizeMax(10000000);
+		upload.setSizeMax(10000000);	
+			
+		// Actual path to the server
+		String uploadPath = getServletContext().getRealPath("") + File.separator + "files";
+			
+		try 
 		{
-			int coverID = coverIDResult.getInt(1);
-			PreparedStatement coverSrcQuery = databaseConnection.getPreparedStatement( "SELECT src FROM Photos WHERE pid = ?" );
-			coverSrcQuery.setInt( 1, coverID );
-			
-			ResultSet coverSrcResult = coverSrcQuery.executeQuery();
-			if( coverSrcResult.first() )
-			{
-				String src = coverSrcResult.getString(1);
+			List formInputs = upload.parseRequest( request );
+			Iterator formInputIt = formInputs.iterator();
+			String uploadType = "";
+			String extension = "";
+			BufferedImage sourceImage = null;
 				
-				try {
-					// Upload the image from the temp directory.
-					System.out.println("C:\\tomcat\\webapps\\soldieringup\\WebContent\\TempUploads" + File.separator + src);
-					BufferedImage coverImage = ImageIO.read( new File("C:\\tomcat\\webapps\\soldieringup\\WebContent\\TempUploads" + File.separator + src) );
+			// Iterate through all of the form inputs. We should get a image type
+			// and an actual image in order to properly add the image to the
+			// database and server
+			while( formInputIt.hasNext() )
+			{
+				FileItem formItem = (FileItem) formInputIt.next();
 					
-					// Create the new image with the image type from the cover image.
-					BufferedImage repositionedCoverImage = new BufferedImage( IMAGE_WIDTH, IMAGE_HEIGHT, coverImage.getType() );
-					Graphics2D repositionedGraphics = repositionedCoverImage.createGraphics();
-
-					// Reposition the photo properly
-					if( photoXPosition > 0)
-					{
-						photoXPosition = 0;
-					}
-					
-					if( photoYPosition > 0 )
-					{
-						photoYPosition = 0;
-					}
-					else if( coverImage.getHeight() - photoYPosition *-1 < IMAGE_HEIGHT )
-					{
-						photoYPosition = IMAGE_HEIGHT - coverImage.getHeight();
-					}
-					
-					
-					repositionedGraphics.drawImage( coverImage, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, photoXPosition * - 1, photoYPosition * -1, photoXPosition * - 1 + IMAGE_WIDTH, IMAGE_HEIGHT + photoYPosition * -1, null );
-					ImageIO.write( repositionedCoverImage, "png", new File("C:\\tomcat\\webapps\\soldieringup\\WebContent\\Images" + File.separator + src) );
-					
-					out.println("TempUploads" + File.separator + src);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				// Get the type of photo we are uploading
+				if( formItem.isFormField() && formItem.getFieldName().equals( "type" ) )
+				{
+					uploadType = formItem.getString();
+				}
+				// Get the photo from the uploaded form
+				else if( formItem.getFieldName().equals ( "photo" ) )
+				{
+					sourceImage = ImageIO.read( formItem.getInputStream() );
+					extension = generateImageExtension( formItem.getContentType() );
 				}
 			}
+
+			if( sourceImage != null )
+			{
+				String fileName = null;
+				
+				long time = new Date().getTime();
+				
+				// Generate a random string for the src using the sha1 algorithm and the
+				// string of 100 times the user. This helps to keep uniqueness for profiles.
+				fileName = Utilities.sha1Output( time + "profile" ) + ( 100 * Long.valueOf( request.getSession().getAttribute( "id" ).toString() ) );
+				
+				int targetImageWidth =
+						uploadType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_WIDTH : TEMP_PROFILE_IMAGE_WIDTH; 
+				
+				int targetImageHeight =
+						uploadType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_HEIGHT : TEMP_PROFILE_IMAGE_HEIGHT;
+				
+				uploadTemporaryPhoto( sourceImage, fileName, extension, targetImageWidth, targetImageHeight );
+				request.getSession().setAttribute( "temp_"+uploadType+"_src", fileName+extension );
+			}
+		}
+		catch (FileUploadException e) 
+		{
+				
+		} 
+		catch (Exception e) 
+		{
+				
+		}
+
+	}
+	
+	/**
+	 * Uploads a temporary photo for accounts to use as their profile and cover photo.
+	 * 
+	 * If the photo uploaded is not IMAGE_WIDTH pixels in width, we scale the photo appropriately.
+	 * If the photo after the initial scaling is not at least IMAGE_HEIGHT pixels in height,
+	 * We rescale the photo again. Images resized with this method should not be used as an account's
+	 * photo. They need to be either cropped or reposition by the user before they can be used. Another
+	 * servlet ResizePhoto takes care of that. 
+	 * @param sourceImage The image we are trying to upload
+	 * @param fileNameWithOutExtension The name of the file without it's extension
+	 * @param extension The extension of the file
+	 * @param targetImageWidth The width to make the image. The outputted image may be wider
+	 * 		  if the image height is not at least minimumImageHeight pixels in height.
+	 * @param minimumImageHeight The smallest possible height the image can be. This number
+	 * 		  can possibly effect what the final width of the image is.
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 */
+	private void uploadTemporaryPhoto( BufferedImage sourceImage, 
+								   			String fileNameWithOutExtension,
+								   			String extension,
+								   			int targetImageWidth,
+								   			int minimumImageHeight ) throws NoSuchAlgorithmException, IOException
+	{
+		if( extension != null )
+		{
+			int coverImageWidth = targetImageWidth;
+			int coverImageHeight = sourceImage.getHeight();
+		
+			// Image must be targetImageWidth pixels long.
+			if( sourceImage.getWidth() != targetImageWidth )
+			{
+				double thumbNailScaleWidth = (double)( (double)targetImageWidth / sourceImage.getWidth() );
+				coverImageHeight *= thumbNailScaleWidth;
+			}
+
+			// Image must be at least targetImageHeight pixels wide; 
+			if( coverImageHeight < minimumImageHeight )
+			{
+				double thumbNailScaleHeight = (double)( (double)minimumImageHeight / coverImageHeight );
+				coverImageWidth *= thumbNailScaleHeight;
+				coverImageHeight *= thumbNailScaleHeight;
+			}						
+
+			BufferedImage resizeImage = new BufferedImage( coverImageWidth, coverImageHeight, sourceImage.getType() );
+			
+			// Create the newly resized image, and save it to the permanent location.
+			Graphics2D g = resizeImage.createGraphics();
+			g.drawImage(sourceImage, 0, 0, coverImageWidth, coverImageHeight, null);
+			g.dispose();
+
+			File newImage = new File("C:\\tomcat\\webapps\\soldieringup\\WebContent\\TempUploads" + File.separator + fileNameWithOutExtension + extension);
+			ImageIO.write( resizeImage, extension.substring( 1 ), newImage );
+			
+			return;
 		}
 	}
+	
+	/**
+	 * Generates the extension of the photo based on the given mime type.
+	 * 
+	 * The only extensions valid at the moment are ones related to
+	 * jpg and png files.
+	 * @param mimeType The mime type to check for an extension
+	 * @return The generate extensiion
+	 */
+	public String generateImageExtension( String mimeType )
+	{
+		String extension = null;
+	
+		if( MimeType.jpg.contentType.equals( mimeType ) )
+		{
+			extension = ".jpg";
+		}
+		else if( MimeType.png.contentType.equals( mimeType ) )
+		{
+			extension = ".png";
+		}
+		
+		return extension;
+	}
+
 }
