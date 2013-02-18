@@ -690,7 +690,54 @@ public class MySQL
 		
 	}
 	
-		/**
+	/**
+	 * Updates the business with the given objects
+	 * @param aBid ID of the business to update
+	 * @param aParameters The parameters to update the business with
+	 */
+	public void updateBusiness( long aBid, Map<String,Object> aParameters )
+	{
+		try
+		{
+			if( !aParameters.isEmpty() )
+			{
+				String updateBusinessSQL = "UPDATE Business SET ";
+				Iterator<String> parameterKeys = aParameters.keySet().iterator();
+				ArrayList<String> validKeys = new ArrayList<String>();
+		
+				// Create the SQL String statement, and store all of the keys so
+				// that we can loop through them after the statement is created.
+				while( parameterKeys.hasNext() )
+				{
+					String currentKey = parameterKeys.next();
+					updateBusinessSQL += currentKey + " = ?,";
+					validKeys.add( currentKey );
+				}
+		
+				//Eliminate the final comma, and append the rest of the SQL statement
+				updateBusinessSQL = updateBusinessSQL.substring(0, updateBusinessSQL.length() - 1 );
+				updateBusinessSQL += " WHERE bid = ?";
+			
+				PreparedStatement updateBusinessStatement = getPreparedStatement( updateBusinessSQL );
+				int currentPreparedStatementIndex;
+				
+				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
+				{
+					updateBusinessStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
+				}
+				
+				updateBusinessStatement.setLong( currentPreparedStatementIndex + 1, aBid );
+				System.out.println( updateBusinessSQL );
+				updateBusinessStatement.executeUpdate();
+			}
+		}
+		catch(SQLException e)
+		{
+			log.error ("Business "+aBid+" could not be registered", e);
+		}
+	}
+
+	/**
 	 * Checks to see if a given zip is in the database, and if not, insert it
 	 * and it's associated information
 	 * @param aZip ZIP code

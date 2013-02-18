@@ -1,5 +1,7 @@
 package org.soldieringup;
 
+import java.sql.Date;
+
 /**
  * Class to represent 
  * @author Jake
@@ -9,7 +11,9 @@ package org.soldieringup;
 public class Veteran 
 {
 	private long vid;
-	private String goal;
+	private String goal = null;
+	private long uid;
+	private String profile_src = null;
 	
 	/**
 	 * Constructor
@@ -38,6 +42,24 @@ public class Veteran
 	}
 	
 	/**
+	 * Gets the id of the user account associated with this veteran
+	 * @return The id associated with the user account of this veteran.
+	 */
+	public long getUid()
+	{
+		return uid;
+	}
+	
+	/**
+	 * Gets the src of the user profile picture
+	 * @return The src of the user profile picture
+	 */
+	public String getProfileSrc()
+	{
+		return profile_src;
+	}
+	
+	/**
 	 * Sets the id for this veteran
 	 * @param vid ID of the veteran
 	 */
@@ -53,5 +75,23 @@ public class Veteran
 	public void setGoal( String goal )
 	{
 		this.goal = goal;
+	}
+	
+	/**
+	 * Sets the user id associated with the veteran profile
+	 * @param uid User id of the account associated with this veteran profile
+	 */
+	public void setUid( long uid)
+	{
+		this.uid = uid;
+	}
+	
+	/**
+	 * Sets the src of the profile picture.
+	 * @param src Src of the profile file
+	 */
+	public void setProfileSrc( String src )
+	{
+		this.profile_src = src;
 	}
 }

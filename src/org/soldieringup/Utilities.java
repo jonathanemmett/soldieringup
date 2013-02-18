@@ -100,4 +100,23 @@ public class Utilities {
 		return value == null ? "" : value;
 	}
 	
+	/**
+-	 * Checks to see if a given element is in an array
+  	 * @param aElement Element to check
+  	 * @param aArray Array to search
+  	 * @return True if the given element exists in the given array,
+  	 * 		   false otherwise.  
+	 */
+	public static boolean isElementInArray( String aElement, String[] aArray )
+	{
+		for( int i = 0; i < aArray.length; ++i )
+		{
+			if( aArray[i].equals( aElement ) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

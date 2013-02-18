@@ -6,9 +6,25 @@ package org.soldieringup;
  *
  */
 public class Business {
+	
+	public static String databaseColumns[] =
+		{
+		"bid",
+		"contact_id",
+		"name",
+		"short_summary",
+		"long_summary",
+		"work_number",
+		"address",
+		"ZIP",
+		"cover_photo_id",
+		"profile_photo_id"
+		};
+	
 	private long bid;
 	private long contact_id;
-	private long cover_id;
+	private String cover_src;
+	private String profile_src;
 	private String name;
 	private String short_summary;
 	private String long_summary;
@@ -42,9 +58,14 @@ public class Business {
 		return contact_id;
 	}
 	
-	public long getCoverId()
+	public String getCoverSrc()
 	{
-		return cover_id;
+		return cover_src;
+	}
+	
+	public String getProfilePhotoSrc()
+	{
+		return profile_src;
 	}
 	
 	/**
@@ -120,12 +141,21 @@ public class Business {
 	}
 	
 	/**
-	 * Sets the id of the cover photo
-	 * @param cover_id Cover id of the business cover
+	 * Sets the src of the cover photo
+	 * @param cover_src Src of the business cover
 	 */
-	public void setCoverId( long cover_id )
+	public void setCoverSrc( String cover_src )
 	{
-		this.cover_id = cover_id;
+		this.cover_src = cover_src;
+	}
+	
+	/**
+	 * Sets the src of the business profile photo
+	 * @param profile_src Src of the business profile photo
+	 */
+	public void setProfilePhotoSrc( String profile_src )
+	{
+		this.profile_src = profile_src;
 	}
 	
 	/**
