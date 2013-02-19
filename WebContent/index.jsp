@@ -1,41 +1,29 @@
-<%@ page language="java" import="java.util.Map" %>
-<%@ page language="java" import="java.util.HashMap" %>
-<%@ page language="java" import="org.soldieringup.Roster" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-	Map<Object,Roster> r = (HashMap) request.getAttribute("roster");
-%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Soldier&#9733;Up</title>
-<link href="Styles/styles.css" rel="stylesheet" type="text/css"/>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Soldier Up - Entrepreneurs serving those who served us.</title>
+<link href="Styles/Styles.css" rel="stylesheet" />
+<!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]--> 
 </head>
-
 <body>
-<div id="wrapper">
-<div id="header">
-<p class="soldierFont">Soldier&#9733;Up</p>
-</div>
-<div id="content_area">
-        <h1>Here to help you</h1>
-        <table>
-            <c:forEach var="item" items="${roster}">
-                <tr>
-                    <td>
-                        <c:out value="${item.value._title}"/>
-                    </td>
-                </tr>
-                <tr>
-	                <td>
-	                    <c:out value="${item.value._description}"/>
-	                </td>
-                </tr>
-            </c:forEach>
-        </table>
-</div>
-</div>
+<p id="logo">
+Soldier&#9733;Up
+</p>
+<section>
+<img alt="Soldier Up Header" src="Images/banner.png" width="880" height="267">
+<article class="front_header enterprise">
+<a href="#">Enterprise</a>
+<p>Soldier up for those that made the sacrifice! You're here because of them. Now be there for them this time.</p>
+</article>
+<article class="front_header">
+<a href="#">Veterans</a>
+<p>Thanks for making the sacrifice! We have several companies ready to serve you!</p>
+</article>
+</section>
 </body>
 </html>
