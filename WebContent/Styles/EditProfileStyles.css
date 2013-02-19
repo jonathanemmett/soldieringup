@@ -1,0 +1,51 @@
+@CHARSET "ISO-8859-1";
+
+#edit_profile_section .edit_profile_sub_section_left_side,
+#edit_profile_section .edit_profile_sub_section_right_side
+{
+	display:inline-block;
+	vertical-align: top;
+}
+
+.edit_profile_sub_section
+{
+	margin-top:20px;
+	clear:both;
+}
+
+#edit_profile_section .edit_profile_sub_section_left_side
+{
+	width:200px;
+}
+
+#edit_profile_section .edit_profile_sub_section_right_side
+{
+	margin-left:10px;
+}
+
+#password_change_form label, 
+#password_change_form input[type="password"]
+{
+	width:25%;
+	display:inline-block;
+}
+
+.no_top_margin
+{
+	margin-top:0px;	
+}
+
+.no_bottom_margin
+{
+	margin-bottom:0px;	
+}
+
+#edit_profile_section h3:first-child
+{
+	margin-top:0px;
+}
+
+p>textarea
+{
+	margin-top:0px;
+}

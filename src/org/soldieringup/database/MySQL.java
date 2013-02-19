@@ -323,8 +323,8 @@ public class MySQL
 			Business nextBusiness = new Business();
 			nextBusiness.setBid( businessesResults.getLong( "bid" ) );
 			nextBusiness.setContactId( businessesResults.getLong( "contact_id" ) );
-			nextBusiness.setCoverId( businessesResults.getLong( "cover_photo_id" ) );
-			nextBusiness.setProfilePhotoId( businessesResults.getLong( "profile_photo_id") );
+			nextBusiness.setCoverSrc( businessesResults.getString( "cover_src" ) );
+			nextBusiness.setProfilePhotoSrc( businessesResults.getString( "profile_src") );
 			nextBusiness.setName( businessesResults.getString( "name" ) );
 			nextBusiness.setShortSummary( businessesResults.getString( "short_summary" ) );
 			nextBusiness.setLongSummary( businessesResults.getString("long_summary") );
@@ -356,8 +356,8 @@ public class MySQL
 				foundBusiness.setBid( businessQueryResults.getInt( "bid" ) );
 				foundBusiness.setContactId( businessQueryResults.getInt( "contact_id" ) );
 				foundBusiness.setName( businessQueryResults.getString( "name" ) );
-				foundBusiness.setCoverId( businessQueryResults.getLong( "cover_photo_id" ) );
-				foundBusiness.setProfilePhotoId( businessQueryResults.getLong( "profile_photo_id" ) );
+				foundBusiness.setCoverSrc( businessQueryResults.getString( "cover_src" ) );
+				foundBusiness.setProfilePhotoSrc( businessQueryResults.getString( "profile_src" ) );
 				foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
 				foundBusiness.setLongSummary( businessQueryResults.getString("long_summary") );
 				foundBusiness.setAddress( businessQueryResults.getString("address") );

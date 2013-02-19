@@ -1,0 +1,77 @@
+@charset "utf-8";
+/* CSS Document */
+
+#signup_form{
+	width:400px;
+	padding-right:5px;
+	overflow:auto;
+}
+.fields{
+	width:49%;
+	margin-right:1%;
+	float:left;
+	margin-bottom:10px;
+	position:relative;
+}
+
+form h1{
+	border-bottom:#000 solid 1px;
+	font-size:medium;
+	width:98%
+}
+
+.fields label{
+	display:block;
+	position:relative;
+}
+
+.fields input, .fields textarea, .fields select{
+	width:98%;
+}
+
+.full_length{
+	width:100%;
+	margin-right:0px;
+}
+
+.full_length label{
+	margin-right:1%;
+}
+
+.break{
+	clear: both;
+}
+
+.remove_fields
+{
+	style:inline-block;
+	width:20px;
+	height:20px;
+	color:#FFF;
+	position:absolute;
+	right:0;
+	top:0;
+	background-image:url(../Images/ExitIcon.png);
+	background-repeat:no-repeat;
+}
+
+.form_error
+{
+	font-size: xx-small;
+	color: #9E0004;
+	position:absolute;
+	right:0px;
+	bottom:0px;
+}
+
+/* Edit business page styles */
+#edit_business_form span
+{
+	margin-bottom:10px;
+}
+
+.description_submit
+{
+	float:right;
+	margin-top:0px;
+}
