@@ -83,7 +83,7 @@ public class Veteran
 	 */
 	public void setUid( long uid)
 	{
-		this.uid = uid;
+		this.uid = uid; 	
 	}
 	
 	/**

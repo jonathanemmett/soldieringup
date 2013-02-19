@@ -952,8 +952,6 @@ public class MySQL
 				foundVeteran.setGoal( veteranQuery.getString( "goal" ) );
 				foundVeteran.setUid( veteranQuery.getLong( "uid" ) );
 				foundVeteran.setProfileSrc( veteranQuery.getString( "profile_src" ) );
-				foundVeteran.setTempProfileSrc( veteranQuery.getString( "temp_profile_src" ) );
-				foundVeteran.setTempPictureUploadedDate( veteranQuery.getDate( "temp_photo_upload_date" ) );
 			}
 		}
 		catch( SQLException e)
