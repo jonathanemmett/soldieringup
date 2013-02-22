@@ -14,24 +14,6 @@ public class ZIP
 	private double latitude;
 	private double longtitude;
 	
-	public static void insertZip( String ZIP, String City, String State )
-	{
-		MySQL connection = MySQL.getInstance();
-		String query = "INSERT INTO ZIP VALUES( ZIP, City, State) ";
-		query += "VALUES(?,?,?)";
-		PreparedStatement stmt;
-		try {
-			stmt = connection.getPreparedStatement( query );
-			stmt.setString( 1, ZIP );
-			stmt.setString( 2, City );
-			stmt.setString( 3, State );
-			stmt.executeUpdate();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	public ZIP()
 	{
 		

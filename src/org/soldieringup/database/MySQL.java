@@ -566,6 +566,29 @@ public class MySQL
 		
 		return null;
 	}
+	
+	/**
+	 * Inserts a zip code into the database.
+	 * @param ZIP ZIP code to insert
+	 * @param City City associated to that zip code
+	 * @param State State associated to that zip code
+	 */
+	public void insertZip( String ZIP, String City, String State )
+	{
+		String query = "INSERT INTO ZIP VALUES( ZIP, City, State) ";
+		query += "VALUES(?,?,?)";
+		PreparedStatement stmt;
+		try {
+			stmt = getPreparedStatement( query );
+			stmt.setString( 1, ZIP );
+			stmt.setString( 2, City );
+			stmt.setString( 3, State );
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Registers a Veteran profile with SoldierUp
