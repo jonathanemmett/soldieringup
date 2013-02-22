@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.soldieringup.Engine;
 import org.soldieringup.Tag;
+import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class TagPublisher
@@ -56,7 +57,21 @@ public class TagPublisher extends HttpServlet
 	 */
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO Auto-generated method stub
+		if( request.getParameter( "tag") == null || request.getParameter( "tag" ).equals( "" ) ||
+			request.getSession().getAttribute( "bid" ) == null )
+		{
+			return;
+		}
+		
+		try
+		{
+			String command = request.getParameter( "cmd" );
+			long businessId = Long.parseLong( request.getParameter( "bid" ) );
+		}
+		catch( ClassCastException exception )
+		{
+			// Most likely the business id is not a valid number
+		}
 	}
 
 	private void ParseRequest (HttpServletRequest request, HttpServletResponse response)

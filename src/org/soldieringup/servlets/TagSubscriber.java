@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.soldieringup.Engine;
 import org.soldieringup.Tag;
+import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class TagSubscriber
@@ -59,7 +60,13 @@ public class TagSubscriber extends HttpServlet
 	 */
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		// TODO Auto-generated method stub
+		String command = request.getParameter( "cmd" );
+
+		if( command.equals( "query" ) )
+		{
+			MySQL databaseConnection = MySQL.getInstance();
+			response.getWriter().print( databaseConnection.getAllTags() );
+		}
 	}
 
 	private void ParseRequest (HttpServletRequest request, HttpServletResponse response)
