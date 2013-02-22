@@ -27,7 +27,7 @@ public class UserRegistration
 	 */
 	private static void checkForNullUserInputs( HttpServletRequest aRequest, Map<String,String> aRegistrationErrors )
 	{
-		String[] requiredKeys = { "first_name", "last_name", "password", "redo_password", "contact_address",
+		String[] requiredKeys = { "first_name", "last_name", "contact_address",
 				  "contact_state", "contact_city", "contact_email", "contact_ZIP", "contact_primary_number" };
 
 		// Check to make sure all the required keys are present in the request
@@ -59,12 +59,6 @@ public class UserRegistration
 		// Check to make sure that the passwords are equal to each other
 		if( registrationErrors.isEmpty() )
 		{	
-			// If the passwords do not match, send an error.
-			if( !request.getParameter("password").equals( request.getParameter("redo_password") ) )
-			{
-				registrationErrors.put("redo_password", "Password does not match");
-			}
-			
 			try
 			{
 				// Convert the phone number to a numeric string, and make sure that string is indeed numeric
@@ -97,6 +91,9 @@ public class UserRegistration
 		}
 		if( registrationErrors.isEmpty() )
 		{
+			// Generate a password for the user.
+			String generatedPassword = Utilities.generatePassword( 3, 8, 1 );
+			
 			// The secondary number is not a requirement for a new user
 			if( request.getParameter( "contact_secondary_number" ) != null )
 			{
@@ -122,11 +119,13 @@ public class UserRegistration
 						  	request.getParameter( "contact_address" ),
 						  	primaryContactNumber,
 						  	secondaryContactNumber,
-						  	request.getParameter( "password" ),
+						  	generatedPassword,
 						  	request.getParameter( "contact_ZIP" ),
 						  	request.getParameter( "contact_city" ),
 						  	request.getParameter( "contact_state" ),
 						  	registrationErrors );
+			
+			System.out.println( "Thank you for creating an account! Your password is " + generatedPassword );
 		}
 
 		return generatedId;

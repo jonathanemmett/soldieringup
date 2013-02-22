@@ -880,7 +880,7 @@ public class MySQL
 	{
 		try 
 		{
-			String insertSql = "INSERT INGORE INTO tags(tag) VALUES( ? )";
+			String insertSql = "INSERT IGNORE INTO tags(tag) VALUES( ? )";
 			PreparedStatement insertTagStmt = connect.prepareStatement( insertSql );
 			insertTagStmt.setString( 1, tag );
 			insertTagStmt.executeUpdate();

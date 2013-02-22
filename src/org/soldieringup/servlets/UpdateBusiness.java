@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.soldieringup.Business;
 import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
@@ -54,9 +55,8 @@ public class UpdateBusiness extends HttpServlet {
 			{
 				String currentKey = keysIterator.next();
 				
-				if( Utilities.isElementInArray( currentKey, Business.databaseColumns ) )
+				if( Business.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
 				{
-					System.out.println( "Inserting the key: " + currentKey );
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
@@ -65,5 +65,4 @@ public class UpdateBusiness extends HttpServlet {
 			request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 		}
 	}
-
 }

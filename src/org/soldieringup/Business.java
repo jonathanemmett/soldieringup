@@ -1,5 +1,7 @@
 package org.soldieringup;
 
+import org.apache.commons.validator.routines.EmailValidator;
+
 /**
  * Class represents a registered business 
  * @author Jake
@@ -7,7 +9,33 @@ package org.soldieringup;
  */
 public class Business {
 	
-	public static String databaseColumns[] =
+	public static enum BusinessDatabaseColumns
+	{
+		BID (0),
+		CONTACT_ID (1),
+		NAME (2),
+		SHORT_SUMMARY (3),
+		LONG_SUMMARY (4),
+		WORK_NUMBER (5),
+		ADDRESS (6),
+		ZIP (7),
+		PROFILE_SRC (8),
+		COVER_SRC (9);
+		
+		int mDatabaseTableIndex;
+		
+		private BusinessDatabaseColumns( int aDatabaseTableIndex )
+		{
+			this.mDatabaseTableIndex = aDatabaseTableIndex;
+		}
+		
+		public int getDatabaseColumnIndex()
+		{
+			return mDatabaseTableIndex;
+		}
+	}
+	
+	public static String BusinessDatabaseColumnsStrings[] =
 		{
 		"bid",
 		"contact_id",
@@ -17,8 +45,8 @@ public class Business {
 		"work_number",
 		"address",
 		"ZIP",
-		"cover_photo_id",
-		"profile_photo_id"
+		"profile_src",
+		"cover_src"
 		};
 	
 	private long bid;
@@ -206,5 +234,29 @@ public class Business {
 	public void setZip( String zip )
 	{
 		this.zip = zip;
+	}
+	
+	/**
+	 * Makes that a given key and it's associated value are valid inputs
+	 * for the database
+	 * @param aKey Key to check
+	 * @param aValue Value associated to the key
+	 * @return True if the input is valid for the database, false otherwise
+	 */
+	public static boolean isValidDatabaseInput( String aKey, String aValue )
+	{
+		if( Utilities.isElementInArray( aKey, BusinessDatabaseColumnsStrings) )
+		{
+			if( aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.ZIP.getDatabaseColumnIndex()] ||
+				aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumnIndex()] )
+			{
+				return Utilities.stringIsNumeric( aValue );
+			}
+			else
+			{
+				return aValue != null;
+			}
+		}
+		return false;
 	}
 }
