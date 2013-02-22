@@ -106,8 +106,7 @@ public class BusinessRegistration extends HttpServlet {
 						
 						if( registeredBusiness.first() )
 						{
-							request.setAttribute("bid", registeredBusiness.getLong( 0 ) );
-							request.getRequestDispatcher("/editBusiness.jsp").forward( request, response );
+							request.getRequestDispatcher( "/accountCreationSuccess.jsp" ).forward( request, response );
 							return;
 						}
 					}

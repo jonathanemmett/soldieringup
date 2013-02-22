@@ -70,9 +70,7 @@ public class VeteranRegistration extends HttpServlet
 
 					if( vetId != null && vetId.first() )
 					{
-						request.getSession().setAttribute( "id" , getUserInfo.getLong( 1 ) );
-						request.getSession().setAttribute( "vid" , vetId.getLong( 1 ) );
-						request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
+						request.getRequestDispatcher( "/accountCreationSuccess.jsp" ).forward( request, response );
 					}
 				}
 			}

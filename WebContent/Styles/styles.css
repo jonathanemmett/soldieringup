@@ -106,3 +106,9 @@ background-image: -webkit-gradient(
 	left:10px;
 	bottom:10px;
 }
+
+/* Registration complete page styles */
+.complete_registration_info
+{
+	font-family:steamer, Arial, Helvetica, sans-serif;
+}
