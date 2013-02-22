@@ -119,4 +119,53 @@ public class Utilities {
 
 		return false;
 	}
+
+	/**
+	 * Generates a password from a given set of inputs.
+	 * 
+	 * This password returns a generated string in clear text. Make sure to encrypt 
+	 * the password before inserting it into the database.  
+	 * @param numberOfDigits The number of digits the password must have
+	 * @param numberOfAlphabeticalCharacters The number of alphabetical characters the password must have
+	 * @param numberOfSpecialCharacters The number of special characters the password must have. Special characters
+	 * 		  are characters such as @,!,$,%.
+	 * @return The generated characters.
+	 */
+	public static String generatePassword( int numberOfDigits, int numberOfAlphabeticalCharacters, int numberOfSpecialCharacters)
+	{
+		int passwordLength = numberOfDigits + numberOfAlphabeticalCharacters + numberOfSpecialCharacters;
+		char password[] = new char[passwordLength];
+		int currentPasswordIndex = 0;
+		
+		String letters = "abcdefghijklmnopqrstuvwxyz";
+		String digits = "0123456789";
+		String specialCharacters = "!@#$%^&&*()_+='\"{}\\";
+		
+		for( int i = 0; i < numberOfDigits; ++i )
+		{
+			password[currentPasswordIndex++] = digits.charAt( (int)( Math.random() * digits.length() ) );
+		}
+		
+		for( int i = 0; i < numberOfAlphabeticalCharacters; ++i )
+		{
+			password[currentPasswordIndex++] = letters.charAt( (int)( Math.random() * letters.length() ) );
+		}
+		
+		for( int i = 0; i < numberOfSpecialCharacters; ++i )
+		{
+			password[currentPasswordIndex++] = specialCharacters.charAt( (int)( Math.random() * specialCharacters.length() ) );
+		}
+		
+		// Scramble the password
+		for( int i = 0; i < password.length; ++i )
+		{
+			int randIndex = (int)( Math.random() * password.length );
+			
+			char tempChar = password[i];
+			password[i] = password[randIndex];
+			password[randIndex] = tempChar;
+		}
+		
+		return new String( password );
+	}
 }
