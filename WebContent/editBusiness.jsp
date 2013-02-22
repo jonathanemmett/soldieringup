@@ -19,8 +19,6 @@
 	MySQL databaseConnection = MySQL.getInstance();
 	Business foundBusiness = databaseConnection.getBusiness( bid );
 	ZIP businessZIP = databaseConnection.getZIP( foundBusiness.getZip() );
-	Photo coverPhoto = databaseConnection.getPhotoFromId( foundBusiness.getCoverId() );
-	Photo profilePhoto = databaseConnection.getPhotoFromId( foundBusiness.getProfilePhotoId() );
 	User contactUser = databaseConnection.getUserFromId( foundBusiness.getContactId() );
 %>  
 <!DOCTYPE html>
@@ -52,7 +50,7 @@ Soldier&#9733;Up<%=businessZIP.getState()+" "+foundBusiness.getZip()%>
 <section id="edit_profile_section" style="margin-bottom:10px;">
 <% if( foundBusiness.getBusinessName() != null){ %>
 <div id="cover_banner" style="border:#000 solid 1px; height:300px; position:relative; overflow:hidden;">
-	<% if( coverPhoto != null){ out.println("<img id=\"cover_photo_display\" src=\"Images/"+ coverPhoto.getSrc()+"\"/>");} %>
+	<% if( foundBusiness.getCoverSrc() != null){ out.println("<img id=\"cover_photo_display\" src=\"Images/"+ foundBusiness.getCoverSrc()+"\"/>");} %>
 	<form id="upload_cover_image_form" method="post" action="UploadImage" enctype="multipart/form-data">
 		<input type="hidden" name="type" value="cover"/>
 		<input type="file" id="upload_cover_photo_input" name="photo" style="visibility:hidden;" />
@@ -68,7 +66,7 @@ Soldier&#9733;Up<%=businessZIP.getState()+" "+foundBusiness.getZip()%>
 		<form id="upload_profile_pic_form" action="UploadImage" method="post">
 			<input type="hidden" name="type" value="profile"/>
 			<span id="profile_pic_display" style="display:inline-block; position:relative; width:100px; height:100px; border:#000 solid 1px;">
-				<% if( profilePhoto != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ profilePhoto.getSrc()+"\"/>");} %>
+				<% if( foundBusiness.getProfilePhotoSrc() != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ foundBusiness.getProfilePhotoSrc()+"\"/>");} %>
 				<span id="upload_profile_pic" style="width:20px; height:20px; background:#eee; position: absolute; right: 5px; bottom: 5px">
 				</span>
 			</span>

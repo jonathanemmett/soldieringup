@@ -17,7 +17,12 @@
 form h1{
 	border-bottom:#000 solid 1px;
 	font-size:medium;
-	width:98%
+	width:100%;
+	clear:both;
+}
+
+.extra_header_top_padding{
+	padding-top:10px;
 }
 
 .fields label{
