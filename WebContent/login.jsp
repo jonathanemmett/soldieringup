@@ -72,14 +72,13 @@
 <script src="Scripts/jquery.form.js" type="text/javascript"></script>
 </head>
 <body>
-<p id="logo">
-Soldier&#9733;Up
-</p>
+<jsp:include page="Includes/header.jsp"></jsp:include>
 <section>
-	<form action="login.jsp" method="post">
+	<h1 style="border-bottom:#000 solid 1px; font-size: medium; margin-top: 0px;">Login to get started</h1>
+	<form id="login_form" action="login.jsp" method="post" style="text-align: center;">
 		<p>
-			<label>Email:</label>
-			<input id="email" type="email" name="email"/>
+			<label style="display:inline-block;width:100px; text-align:right;">Email:</label>
+			<input id="login_email" type="email" name="email"/>
 			<% if( loginResults.containsKey("missing_email") )
 			   {							
 					out.println("<span class=\"error\"> "+ loginResults.get("missing_email")  +" </span>");
@@ -87,7 +86,7 @@ Soldier&#9733;Up
 			%>
 		</p>
 		<p>
-			<label>Password:</label>
+			<label style="display:inline-block;width:100px;text-align:right;">Password:</label>
 			<input type="password" name="password" />
 			<% if( loginResults.containsKey("missing_password") )
 			   {							
@@ -96,22 +95,23 @@ Soldier&#9733;Up
 			%>
 		</p>
 		<p>
-			<input type="submit" name="login" value="Login"/>
+			<input type="submit" style="margin-left:130px;" name="login" value="Login"/>
 			<% if( loginResults.containsKey("final") )
 			   {							
 					out.println("<span class=\"error\"> "+ loginResults.get("final")  +" </span>");
 			   }
 			%>
+			<a href="#">Forgot Password?</a>
 		</p>
-	</form>
+		</form>
 </section>
 <script type="text/javascript">
 
 $( document ).ready( function(){
 	
-	$( "#email" ).blur( function(){
+	$( "#login_email" ).blur( function(){
 		$.post( "UniqueEmail", 
-							{ request:'email', email: $("#email").val() }, 
+							{ request:'email', email: $("#login_email").val() }, 
 							function( data ){
 								//alert( data );
 							} );

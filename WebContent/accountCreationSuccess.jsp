@@ -11,9 +11,7 @@
     <![endif]--> 
 </head>
 <body>
-<p id="logo">
-Soldier&#9733;Up
-</p>
+<jsp:include page="Includes/header.jsp"></jsp:include>
 <section>
 <h1 class="complete_registration_info">Thank you for Registering!</h1>
 <p>A login link has been sent your way. Use this link to edit your profile.</p>

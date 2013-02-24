@@ -11,9 +11,7 @@
     <![endif]--> 
 </head>
 <body>
-<p id="logo">
-Soldier&#9733;Up
-</p>
+<jsp:include page="Includes/header.jsp"></jsp:include>
 <section>
 <img alt="Soldier Up Header" src="Images/banner.png" width="880" height="267">
 <article class="front_header enterprise">

@@ -15,9 +15,7 @@
 <script src="Scripts/CropPhoto.js" type="text/javascript"></script>
 </head>
 <body>
-<p id="logo">
-Soldier&#9733;Up
-</p>
+<jsp:include page="Includes/header.jsp"></jsp:include>
 <section>
 <img src="Images/JakeUpload.png" id="profile_pic" />
 <form id="photo_rectangle" method="post">

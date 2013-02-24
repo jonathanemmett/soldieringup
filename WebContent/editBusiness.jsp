@@ -44,9 +44,7 @@
 <script src="Scripts/CropPhoto.js" type="text/javascript"></script>
 </head>
 <body>
-<p id="logo">
-Soldier&#9733;Up<%=businessZIP.getState()+" "+foundBusiness.getZip()%>
-</p>
+<jsp:include page="Includes/header.jsp"></jsp:include>
 <section id="edit_profile_section" style="margin-bottom:10px;">
 <% if( foundBusiness.getBusinessName() != null){ %>
 <div id="cover_banner" style="border:#000 solid 1px; height:300px; position:relative; overflow:hidden;">
