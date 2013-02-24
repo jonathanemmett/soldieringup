@@ -10,6 +10,34 @@ import java.sql.Date;
 
 public class Veteran 
 {
+	public static enum VeteranDatabaseColumns
+	{
+		UID (0),
+		GOAL (1),
+		VID (2),
+		PROFILE_SRC (3);
+		
+		int mDatabaseTableIndex;
+		
+		private VeteranDatabaseColumns( int aDatabaseTableIndex )
+		{
+			this.mDatabaseTableIndex = aDatabaseTableIndex;
+		}
+		
+		public int getDatabaseColumnIndex()
+		{
+			return mDatabaseTableIndex;
+		}
+	}
+	
+	public static String VeteranDatabaseColumnsStrings[] =
+		{
+		"uid",
+		"Goal",
+		"vid",
+		"profile_src"
+		};
+	
 	private long vid;
 	private String goal = null;
 	private long uid;
