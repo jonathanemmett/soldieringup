@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.catalina.tribes.util.Arrays;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -759,6 +761,56 @@ public class MySQL
 			log.error ("Business "+aBid+" could not be registered", e);
 		}
 	}
+	
+	/**
+	 * Updates the user with the given objects
+	 * @param aBid ID of the user to update
+	 * @param aParameters The parameters to update the user with
+	 */
+	public void updateUser( long aUid, Map<String,Object> aParameters )
+	{
+		try
+		{
+			if( !aParameters.isEmpty() )
+			{
+				String updateBusinessSQL = "UPDATE Users SET ";
+				Iterator<String> parameterKeys = aParameters.keySet().iterator();
+				ArrayList<String> validKeys = new ArrayList<String>();
+		
+				// Create the SQL String statement, and store all of the keys so
+				// that we can loop through them after the statement is created.
+				while( parameterKeys.hasNext() )
+				{
+					String currentKey = parameterKeys.next();
+					if( User.isValidDatabaseInput( currentKey, (String) aParameters.get( currentKey ) ) )
+					{
+						updateBusinessSQL += currentKey + " = ?,";
+						validKeys.add( currentKey );
+					}
+				}
+		
+				//Eliminate the final comma, and append the rest of the SQL statement
+				updateBusinessSQL = updateBusinessSQL.substring( 0, updateBusinessSQL.length() - 1 );
+				updateBusinessSQL += " WHERE id = ?";
+			
+				PreparedStatement updateBusinessStatement = getPreparedStatement( updateBusinessSQL );
+				int currentPreparedStatementIndex;
+				
+				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
+				{
+					updateBusinessStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
+				}
+				
+				updateBusinessStatement.setLong( currentPreparedStatementIndex + 1, aUid );
+				System.out.println( updateBusinessSQL );
+				updateBusinessStatement.executeUpdate();
+			}
+		}
+		catch(SQLException e)
+		{
+			log.error ("User "+aUid+" could not be registered", e);
+		}
+	}
 
 	/**
 	 * Checks to see if a given zip is in the database, and if not, insert it
@@ -899,19 +951,19 @@ public class MySQL
 	 * @param tag Tag to insert into the database
 	 * @return The id if the insertion tag was successful, 0 otherwise
 	 */
-	public long insertTag( String tag)
+	public long insertTag( String tag )
 	{
 		try 
 		{
 			String insertSql = "INSERT IGNORE INTO tags(tag) VALUES( ? )";
-			PreparedStatement insertTagStmt = connect.prepareStatement( insertSql );
+			PreparedStatement insertTagStmt = getPreparedStatement( insertSql );
 			insertTagStmt.setString( 1, tag );
 			insertTagStmt.executeUpdate();
 			ResultSet insertTagId = insertTagStmt.getGeneratedKeys();
 			
 			if( insertTagId.first() )
 			{
-				return insertTagId.getLong( 0 );
+				return insertTagId.getLong( 1 );
 			}
 			else
 			{
@@ -930,30 +982,152 @@ public class MySQL
 	}
 	
 	/**
-	 * Attaches a tag to a given business
-	 * @param tag Tag to attach to business
-	 * @param bid Business id of business to attach tag to
+	 * Gets the id associated to a given tag.
+	 * 
+	 * In the case that a tag is not found, this function also inserts
+	 * the tag into the database
+ 	 * @param aTag Tag to get the id for 
+	 * @return The tag id
+	 * @throws SQLException 
 	 */
-	public void attachTagToBusiness( String tag, long bid )
+	public long getTagId( String aTag ) throws SQLException
 	{
+		String getTagIdSql = "SELECT id FROM Tags WHERE tag = ?";
+		
+		PreparedStatement getTagIdStmt = getPreparedStatement( getTagIdSql );
+		getTagIdStmt.setString( 1, aTag );
+		ResultSet getTagIdResult = getTagIdStmt.executeQuery();
+		
+		if( getTagIdResult.first() )
+		{
+			return getTagIdResult.getLong( "id" );
+		}
+		else
+		{
+			System.out.println( "SELECT id FROM Tags WHERE tag = '"+aTag+"'" );
+			System.out.println( "Tag " + aTag + " was not found.");
+			return insertTag( aTag );	
+		}
+	}
+
+	/**
+	 * Attaches a tag to the signed in account for the current session
+	 * @param aTag Tag to attach to business
+	 * @param aRequest Request to search for an account for
+	 * @param aHoursRequested The number of hours that the object requests for a given tag
+	 * @return The ID of the tag to insert into the logged in user 
+	 */
+	public long attachTagToAccount( String aTag, HttpServletRequest aRequest, Long aHoursRequested )
+	{
+		long tagId = -1;
+
+		System.out.println( "Attempting to tag" );
 		try
 		{
-			long insertResult = insertTag( tag );
+			tagId = getTagId( aTag );
 			
-			if( insertResult > 0)
+			if( tagId > 0)
 			{
-				String attachTagToBusinessSql = "INSERT IGNORE INTO business_tags VALUE(?, ?)";
-				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToBusinessSql );
-				attachTagStmt.setLong( 1, insertResult );
-				attachTagStmt.setLong( 2, bid );
+				long oid;
+				String attachTagToUserSql;
+
+				if( aRequest.getSession().getAttribute( "bid" ) != null )
+				{
+					oid = Long.valueOf( aRequest.getSession().getAttribute( "bid" ).toString() );
+					attachTagToUserSql  = "INSERT IGNORE INTO business_tags (bid, tid, hours_requested)";
+					attachTagToUserSql += " VALUE(?, ?, ?)";
+				}
+				else
+				{
+					oid = Long.valueOf( aRequest.getSession().getAttribute( "vid" ).toString() );
+					attachTagToUserSql  = "INSERT IGNORE INTO veteran_tags (vid, tid, hours_requested)";
+					attachTagToUserSql += "VALUE(?, ?, ?)";
+				}
+
+				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
+				attachTagStmt.setLong( 1, oid );
+				attachTagStmt.setLong( 2, tagId );
+				attachTagStmt.setLong( 3, aHoursRequested );
+				attachTagStmt.executeUpdate();
 			}
 		}
 		catch( SQLException e)
 		{
-			log.error ("Errors occured while trying to attach a tag to a business", e);
+			e.printStackTrace();
+			log.error ("Errors occured while trying to attach a tag to an account", e);
+		}
+		
+		return tagId;
+	}
+	
+	/**
+	 * Detaches a tag from the signed in account for the current session
+	 * @param aTag Tag to detach from signed in account
+	 * @param aRequest Request to search for an account for
+	 */
+	public void detachTagFromAccount( long aTagId, HttpServletRequest aRequest )
+	{
+		try
+		{	
+			long oid;
+			String attachTagToUserSql;
+
+			if( aRequest.getSession().getAttribute( "bid" ) != null )
+			{
+				oid = Long.valueOf( aRequest.getSession().getAttribute( "bid" ).toString() );
+				attachTagToUserSql = "DELETE FROM business_tags WHERE tid = ? AND bid = ?";
+			}
+			else
+			{
+				oid = Long.valueOf( aRequest.getSession().getAttribute( "vid" ).toString() );
+				attachTagToUserSql = "DELETE FROM veteran_tags WHERE tid = ? AND vid = ?";
+			}
+
+			PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
+			attachTagStmt.setLong( 1, aTagId );
+			attachTagStmt.setLong( 2, oid );
+			attachTagStmt.executeUpdate();
+		}
+		catch( SQLException e)
+		{
+			e.printStackTrace();
+			log.error ("Errors occured while trying to detach a tag from an account", e);
 		}
 	}
 	
+	/**
+	 * Finds all the tags associated to a business
+	 * @param aBid ID of the business to query for
+	 * @return The tags associated to a business
+	 */
+	public ArrayList<Tag> getTagsFromBusiness( long aBid )
+	{
+		ArrayList<Tag> tags = new ArrayList<Tag>();
+		
+		try
+		{
+			String tagsQuerySql = "SELECT * FROM TAGS WHERE id in ( SELECT tid FROM business_tags WHERE bid = ? )";
+			PreparedStatement tagsQueryStmt = getPreparedStatement( tagsQuerySql );
+			tagsQueryStmt.setLong( 1, aBid );
+			ResultSet tagsResult = tagsQueryStmt.executeQuery();
+
+			while( tagsResult.next() )
+			{ 
+				Tag businessTag = new Tag();
+				businessTag.set_id( tagsResult.getInt( "id" ) );
+				businessTag.set_name( tagsResult.getString( "tag" ) );
+				tags.add( businessTag );
+			}
+		}
+		catch(SQLException e)
+		{
+			// TODO Auto-generated catch block
+			log.error ("Errors occured while searching for business tags", e);
+		}
+		
+		return tags;
+	}
+
 	/**
 	 * Gets a veteran from a user id
 	 * @param uid The user id of the user
@@ -966,7 +1140,7 @@ public class MySQL
 		{
 			PreparedStatement veteranSql = connect.prepareStatement( "SELECT * FROM veterans WHERE uid = ?" );
 			veteranSql.setLong( 1, uid );
-			
+
 			ResultSet veteranQuery = veteranSql.executeQuery();
 			if( veteranQuery.first() )
 			{
@@ -984,32 +1158,50 @@ public class MySQL
 		
 		return foundVeteran;
 	}
-	
+
 	/**
-	 * Gets all the tags that exist in the database
-	 * @return All the tags that exist in the database
+	 * Returns all the tags that are similar to a given tag and that
+	 * also do not exist in the account of the logged in user.
+	 * @param aTagToSearch Tag name to find similar tags for
+	 * @return The tags found from a keyword
 	 */
-	public JSONObject getAllTags()
+	public JSONArray getSimiliarTags( String aTagToSearch, HttpServletRequest aRequest )
 	{
-		JSONObject tagsObject = new JSONObject();
+		//JSONObject tagsObject = new JSONObject();
 		JSONArray arrayOfTags = new JSONArray();
 		
 		try
 		{
-			PreparedStatement stmt = connect.prepareStatement( "SELECT * FROM tags" );
+			long oid;
+			String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? AND id NOT in";
+			
+			if( aRequest.getSession().getAttribute( "bid" ) != null )
+			{
+				oid = Long.valueOf( aRequest.getSession().getAttribute( "bid" ).toString() );
+				getTagsSql += " (SELECT tid FROM business_tags WHERE bid = ?)";
+			}
+			else
+			{
+				oid = Long.valueOf( aRequest.getSession().getAttribute( "vid" ).toString() );
+				getTagsSql += " (SELECT tid FROM veteran_tags WHERE vid = ?)";
+			}
+
+			System.out.println( "SELECT * FROM tags WHERE tag LIKE %" + aTagToSearch + "% AND id NOT in  (SELECT tid FROM business_tags WHERE bid = "+oid+")" );
+			PreparedStatement stmt = connect.prepareStatement( getTagsSql );
+			stmt.setString( 1, "%"+aTagToSearch+"%" );
+			stmt.setLong( 2, oid );
 			ResultSet tags = stmt.executeQuery();
+
 			while( tags.next() )
 			{
 				arrayOfTags.add( tags.getString( "tag" ) );
 			}
-			
-			tagsObject.put( "tags", arrayOfTags );
 		}
 		catch(SQLException e)
 		{
 			
 		}
 		
-		return tagsObject;
+		return arrayOfTags;
 	}
 }
