@@ -37,7 +37,7 @@ public class Welcome extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		log.debug ("Loading Welcome Servlet");
 		retrieveRoster (request, response);
-		request.getRequestDispatcher ("index.jsp").include (request, response);
+		request.getRequestDispatcher ("/Index.jsp").include (request, response);
 	}
 
 	/**
