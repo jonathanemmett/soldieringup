@@ -42,6 +42,7 @@
 				{
 					List<Integer> businessIDs = new ArrayList<Integer>( ownedBusinesses.keySet() );
 					session.setAttribute( "bid", businessIDs.get( 0 ) );
+					session.removeAttribute( "vid" );
 					response.sendRedirect( "editBusiness.jsp" );
 				}
 
@@ -49,6 +50,7 @@
 				if( foundVeteran != null )
 				{
 					session.setAttribute( "vid", foundVeteran.getVid() );
+					session.removeAttribute( "bid" );
 					response.sendRedirect( "editVeteranProfile.jsp" );
 				}	
 			}
