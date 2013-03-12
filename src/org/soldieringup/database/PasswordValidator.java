@@ -4,18 +4,16 @@ import java.util.ArrayList;
 
 /**
  * Class that makes sure a password satisfies certain requirements. For this class, requirements
- * include minimum password length, minimum number of required digits, minimum number of alphabetical
- * characters, and whether the password contains mixed case. To set these, just call the 
- * appropriate setter function with the desired value.
+ * include minimum number of required digits, minimum number of alphabetical characters, and 
+ * whether the password contains mixed case. To set these, just call the appropriate setter
+ * function with the desired value.
  * @author Jake
  *
  */
 public class PasswordValidator
 {
-	private int mRequiredMinimumPasswordLength = 0;
 	private int mRequiredNumberOfDigits = 0;
 	private int mRequiredNumberOfAlphabeticalCharacters = 0;
-	private int mRequiredNumberOfSpecialCharacters = 0;
 	private boolean mMixedCaseAlphabetRequired = false;
 	private ArrayList<String> mPasswordValidationErrors;
 	
@@ -28,21 +26,12 @@ public class PasswordValidator
 	}
 	
 	/**
-	 * Sets the minimum length the password needs to be
-	 * @param aRequiredMinimumPasswordLength Minimum length the password needs to be
-	 */
-	public void setRequiredMinimumPasswordLength( int aRequiredMinimumPasswordLength )
-	{
-		mRequiredMinimumPasswordLength = aRequiredMinimumPasswordLength;
-	}
-	
-	/**
 	 * Sets the minimun number of required digits in the password
 	 * @param aRequiredNumberOfDigits Minimun number of required digits in the password
 	 */
 	public void setNumberOfRequiredDigits( int aRequiredNumberOfDigits)
 	{
-		mRequiredNumberOfDigits = aRequiredNumberOfDigits;
+		this.mRequiredNumberOfDigits = aRequiredNumberOfDigits;
 	}
 
 	/**
@@ -51,17 +40,7 @@ public class PasswordValidator
 	 */
 	public void setNumberOfRequiredAlphabeticalCharacters( int aRequiredNumberOfAlphabeticalCharacters )
 	{
-		mRequiredNumberOfAlphabeticalCharacters = aRequiredNumberOfAlphabeticalCharacters;
-	}
-	
-	/**
-	 * Sets the minimun number of required special characters in the password. Specia characters include characters
-	 * such as ?, @, ", and &.
-	 * @param aRequiredNumberOfSpecialCharacters Minimun number of required special characters in the password
-	 */
-	public void setNumberOfRequiredSpecialCharacters( int aRequiredNumberOfSpecialCharacters )
-	{
-		mRequiredNumberOfSpecialCharacters = aRequiredNumberOfSpecialCharacters;
+		this.mRequiredNumberOfAlphabeticalCharacters = aRequiredNumberOfAlphabeticalCharacters;
 	}
 	
 	/**
@@ -70,7 +49,7 @@ public class PasswordValidator
 	 */
 	public void setMixedCaseAlphabetRequired( boolean aMixedCaseAlphabetRequired )
 	{
-		mMixedCaseAlphabetRequired = aMixedCaseAlphabetRequired;
+		this.mMixedCaseAlphabetRequired = aMixedCaseAlphabetRequired;
 	}
 	
 	/**
@@ -83,37 +62,67 @@ public class PasswordValidator
 		// Clear the errors before checking for any
 		mPasswordValidationErrors.clear();
 		
-		//Check to make sure the password is of the correct size.
-		if( aPassword.length() < mRequiredMinimumPasswordLength )
-		{
-			mPasswordValidationErrors.add( "The password must be at least " + mRequiredMinimumPasswordLength + " characters long." );
-		}
 		
 		// Check to make sure we have the required amount of digits.
-		if( aPassword.matches( "[0-9]{" + mRequiredNumberOfDigits + "}" ) )
+		if( !hasRequiredNumberOfDigits( aPassword ) )
 		{
 			mPasswordValidationErrors.add( "The password must contain at least " + mRequiredNumberOfDigits + " digits." );
 		}
-		
+
 		// Check to make sure the password has the required amount of alphabetical characters.
-		if( aPassword.matches( "[a-zA-Z]{"+mRequiredNumberOfAlphabeticalCharacters+"}" ) )
+		if( !hasRequiredNumberOfAlphabeticalCharacters( aPassword ) )
 		{
 			mPasswordValidationErrors.add( "The password must contain at least " + mRequiredNumberOfAlphabeticalCharacters + " alphabetical characters.");
 		}
-		
-		// Check to make sure the password has the required amount of special characters.
-		if( aPassword.matches( "[!@#$%^&&*()_+='\"{}\\]{" + mRequiredNumberOfSpecialCharacters + "}" ) )
-		{
-			mPasswordValidationErrors.add( "The password must contain at least " + mRequiredNumberOfSpecialCharacters + " special characters.");
-		}
-		
+
 		// Check to make sure the password is has mixed case if it's a password requirement.
-		if( mMixedCaseAlphabetRequired && aPassword.toUpperCase().equals( aPassword ) )
+		if( mMixedCaseAlphabetRequired && aPassword.toUpperCase().equals( aPassword ) && aPassword.toLowerCase().equals( aPassword ) )
 		{
-			mPasswordValidationErrors.add( "The password must contain both upper and lower case characters" );
+			mPasswordValidationErrors.add( "The password must contain both upper and low case characters " + aPassword );
+		}
+	
+		return mPasswordValidationErrors.isEmpty();
+	}
+
+	/**
+	 * Determines if a given password has the required minimum number of alphabetical characters  
+	 * @param aPassword The password to check
+	 * @return True if the password has the required minimum number of alphabetical
+	 * 		   characters, false otherwise. 
+	 */
+	private boolean hasRequiredNumberOfAlphabeticalCharacters( String aPassword )
+	{
+		int numberOfAlphabeticalCharacters = 0;
+		
+		for( int i = 0; i < aPassword.length(); ++i )
+		{
+			if( Character.isAlphabetic( aPassword.charAt( i ) ) )
+			{
+				numberOfAlphabeticalCharacters++;
+			}
 		}
 		
-		return mPasswordValidationErrors.isEmpty();
+		return numberOfAlphabeticalCharacters >= this.mRequiredNumberOfAlphabeticalCharacters; 
+	}
+	
+	/**
+	 * Determines if a given password has the required minimum number of digits  
+	 * @param aPassword The password to check
+	 * @return True if the password has the required minimum number of digits, false otherwise. 
+	 */
+	private boolean hasRequiredNumberOfDigits( String aPassword )
+	{
+		int numberOfDigits = 0;
+		
+		for( int i = 0; i < aPassword.length(); ++i )
+		{
+			if( Character.isDefined( aPassword.charAt( i ) ) )
+			{
+				numberOfDigits++;
+			}
+		}
+		
+		return numberOfDigits >= this.mRequiredNumberOfDigits;
 	}
 	
 	/**
