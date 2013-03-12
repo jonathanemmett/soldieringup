@@ -65,7 +65,16 @@ public class TagSubscriber extends HttpServlet
 		if( command.equals( "query" ) )
 		{
 			MySQL databaseConnection = MySQL.getInstance();
-			response.getWriter().print( databaseConnection.getAllTags() );
+			String tagSearchTerm = request.getParameter( "tag_to_search" );
+			
+			if( tagSearchTerm != null )
+			{
+				response.getWriter().println( databaseConnection.getSimiliarTags( tagSearchTerm, request ) );
+			}
+			else
+			{
+				
+			}
 		}
 	}
 
