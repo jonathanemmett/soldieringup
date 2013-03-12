@@ -71,6 +71,7 @@ public class VeteranRegistration extends HttpServlet
 					if( vetId != null && vetId.first() )
 					{
 						request.getRequestDispatcher( "/accountCreationSuccess.jsp" ).forward( request, response );
+						return;
 					}
 				}
 			}
@@ -83,5 +84,8 @@ public class VeteranRegistration extends HttpServlet
 		{
 			response.getWriter().print( Arrays.toString( registrationErrors.keySet().toArray() ) );
 		}
+		
+		request.setAttribute( "registration_errors", registrationErrors );
+		request.getRequestDispatcher("/NewVeteran.jsp").forward( request, response );
 	}
 }

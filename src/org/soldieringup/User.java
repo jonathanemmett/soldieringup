@@ -1,13 +1,11 @@
 package org.soldieringup;
 
-import org.soldieringup.Business.BusinessDatabaseColumns;
-
 /**
  * Class represents a user in the database 
  * @author Jake
  *
  */
-public class User 
+public class User
 {
 	public static enum UserDatabaseColumns
 	{

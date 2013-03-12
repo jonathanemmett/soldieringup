@@ -62,7 +62,7 @@ public class UpdateUserProfile extends HttpServlet {
 			
 			MySQL.getInstance().updateUser( bid, updateParameters );
 			
-			if( request.getSession().getAttribute( "id" ) != null )
+			if( request.getSession().getAttribute( "bid" ) != null )
 			{
 				request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 			}

@@ -1,7 +1,5 @@
 package org.soldieringup;
 
-import java.sql.Date;
-
 /**
  * Class to represent 
  * @author Jake
@@ -33,7 +31,7 @@ public class Veteran
 	public static String VeteranDatabaseColumnsStrings[] =
 		{
 		"uid",
-		"Goal",
+		"goal",
 		"vid",
 		"profile_src"
 		};
@@ -121,5 +119,22 @@ public class Veteran
 	public void setProfileSrc( String src )
 	{
 		this.profile_src = src;
+	}
+	
+	/**
+	 * Makes that a given key and it's associated value are valid inputs
+	 * for the database
+	 * @param aKey Key to check
+	 * @param aValue Value associated to the key
+	 * @return True if the input is valid for the database, false otherwise
+	 */
+	public static boolean isValidDatabaseInput( String aKey, String aValue )
+	{
+		if( Utilities.isElementInArray( aKey, VeteranDatabaseColumnsStrings) )
+		{	
+			return aValue != null;	
+		}
+		
+		return false;
 	}
 }
