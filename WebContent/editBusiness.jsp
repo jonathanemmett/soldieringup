@@ -14,7 +14,7 @@
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 	
-	session.setAttribute( "editing_account_type" , "veteran" );
+	session.setAttribute( "editing_account_type" , "business" );
 
 	long bid = Long.valueOf( session.getAttribute( "bid" ).toString() );
 	
@@ -86,13 +86,13 @@
 	</div>
 	<div class="edit_profile_sub_section_right_side">
 		<h3>Password <span style="font-size:small">  (must be at least 8 characters long and contain at least 2 digits).</span></h3>
-		<form id="password_change_form" method="post" action="Password">
+		<form id="password_change_form" method="post" action="UpdatePassword">
 			<p class="no_bottom_margin">
-				<label for="change_password_new_password">Password</label>
+				<label for=change_password_new_password>Password</label>
 				<label for="change_password_confirm_new_password">Confirm</label>
 			</p>
-			<input id="change_password_new_password" type="password"/>
-			<input id="change_password_comfirm_new_password" type="password"/>
+			<input id="change_password_new_password" name="password" type="password"/>
+			<input id="change_password_confirm_new_password" name="confirm_password" type="password"/>
 			<input id="change_password_submit" type="submit"/>
 		</form>
 	</div>
@@ -177,11 +177,14 @@
 			<p class="no_bottom_margin">Enter the skill you are willing to help with, and how long you can help for</p>
 			<input type="hidden" name="cmd" value="attachTagToAccount" />
 			<input id="tag_search_input" name="tag"/>
-			<select id="hours" name="hours_requested"><option value="1">1</option></select>
+			<select id="hours" name="hours_requested">
+				<option value="1">1</option>
+				<option value="4">4</option>
+				<option value="8">8</option>
+			</select>
 			<input type="submit"/>
-			<div>
 				<%
-					ArrayList<Tag> businessTags = databaseConnection.getTagsFromBusiness( bid );
+					ArrayList<Tag> businessTags = databaseConnection.getTagsFromBusiness( bid, "business" );
 					Iterator<Tag> tagIt = businessTags.iterator();
 					
 					while( tagIt.hasNext() )
@@ -195,7 +198,6 @@
 						<%
 					}
 				%>
-			</div>
 		</form>
 	</div>
 </div>
@@ -205,6 +207,24 @@
 </section>
 <div style="height:10px;"></div>
 <script>
+
+$( window ).load( function(){
+	
+	var ajaxPasswordChangeOptions = {
+		dataType: 'text',
+		type: 'post',
+		success: passwordChangeComplete
+	};
+	
+	$( "#password_change_form" ).submit( function(){
+		$( this ).ajaxSubmit( ajaxPasswordChangeOptions );
+		return false;
+	});
+	
+	function passwordChangeComplete( responseText, statusText, xhr, $form ){
+		alert( responseText );
+	}
+});
 /**
  * Function that prevents the user from scrolling the page. This allows us to display
  * a LightBox without worrying about the user scrolling through the page.
