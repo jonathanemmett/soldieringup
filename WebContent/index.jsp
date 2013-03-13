@@ -15,11 +15,11 @@
 <section>
 <img alt="Soldier Up Header" src="Images/banner.png" width="880" height="267">
 <article class="front_header enterprise">
-<a href="#">Enterprise</a>
+<a href="NewBusiness.jsp">Enterprise</a>
 <p>Soldier up for those that made the sacrifice! You're here because of them. Now be there for them this time.</p>
 </article>
 <article class="front_header">
-<a href="#">Veterans</a>
+<a href="NewVeteran.jsp">Veterans</a>
 <p>Thanks for making the sacrifice! We have several companies ready to serve you!</p>
 </article>
 </section>
