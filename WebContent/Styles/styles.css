@@ -128,3 +128,9 @@ body section
 {
 	font-family:steamer, Arial, Helvetica, sans-serif;
 }
+
+.login_error
+{
+	color:#9E0004;
+	font-size:xx-small;
+}
