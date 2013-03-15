@@ -8,20 +8,27 @@
 <%@ page import="org.soldieringup.database.MySQL" %> 
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
-	if( session.getAttribute( "bid" ) == null ||
-		session.getAttribute( "bid" ) == "" )
+	session.setAttribute( "uid", 39 );
+	session.setAttribute( "aid", 14 );
+	session.setAttribute( "editing_account_type" , "business" );
+
+	if( session.getAttribute( "aid" ) == null ||
+		session.getAttribute( "aid" ) == "" ||
+		session.getAttribute( "editing_account_type" ) == null ||
+		session.getAttribute( "editing_account_type" ) != "business"
+		)
 	{
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 	
 	session.setAttribute( "editing_account_type" , "business" );
 
-	long bid = Long.valueOf( session.getAttribute( "bid" ).toString() );
+	long bid = Long.valueOf( session.getAttribute( "aid" ).toString() );
 	
 	MySQL databaseConnection = MySQL.getInstance();
 	Business foundBusiness = databaseConnection.getBusiness( bid );
 	ZIP businessZIP = databaseConnection.getZIP( foundBusiness.getZip() );
-	User contactUser = databaseConnection.getUserFromId( foundBusiness.getContactId() );
+	User contactUser = databaseConnection.getUserFromId( foundBusiness.getUid() );
 %>  
 <!DOCTYPE html>
 <html>
@@ -77,7 +84,7 @@
 		<form id="upload_profile_pic_form" action="UploadImage" method="post">
 			<input type="hidden" name="type" value="profile"/>
 			<span id="profile_pic_display" style="display:inline-block; position:relative; width:100px; height:100px; border:#000 solid 1px;">
-				<% if( foundBusiness.getProfilePhotoSrc() != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ foundBusiness.getProfilePhotoSrc()+"\"/>");} %>
+				<% if( foundBusiness.getProfileSrc() != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ foundBusiness.getProfileSrc()+"\"/>");} %>
 				<span id="upload_profile_pic" style="width:20px; height:20px; background:#eee; position: absolute; right: 5px; bottom: 5px">
 				</span>
 			</span>
@@ -184,7 +191,7 @@
 			</select>
 			<input type="submit"/>
 				<%
-					ArrayList<Tag> businessTags = databaseConnection.getTagsFromBusiness( bid, "business" );
+					ArrayList<Tag> businessTags = databaseConnection.getTagsFromAccount( bid );
 					Iterator<Tag> tagIt = businessTags.iterator();
 					
 					while( tagIt.hasNext() )

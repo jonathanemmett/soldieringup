@@ -21,6 +21,10 @@ form h1{
 	clear:both;
 }
 
+form h1:first-child{
+	margin-top:0px;
+}
+
 .extra_header_top_padding{
 	padding-top:10px;
 }
@@ -79,4 +83,24 @@ form h1{
 {
 	float:right;
 	margin-top:0px;
+}
+
+/* Main login form styles */
+#main-login-form label
+{
+	display:inline-block;
+	margin-left:30%;
+	width:10%;
+	text-align:right;
+}
+
+#main-login-form .align_end_of_label
+{
+	margin-left:40%;
+}
+
+
+#forget_password
+{
+	font-size:x-small;
 }

@@ -14,33 +14,19 @@
 <% 
 Map<String, String> inputErrors = (Map<String, String>)request.getAttribute( "registration_errors" );
 
-Map<String,String> loginResults = new HashMap<String,String>();
 MySQL databaseConnection = MySQL.getInstance();
-if( request.getParameter("login") != null )
-{
-	String email = request.getParameter("email");
-	String password = request.getParameter("password");
-	if( email != null && password != null )
-	{
-		User user = MySQL.getInstance().validateUser( email, password );
-		session.setAttribute( "id", user.getId() );
-		Map<Integer, Business> ownedBusinesses = databaseConnection.getBusinessesFromOwner( user.getId() );
-		if( ownedBusinesses.size() > 0 )
-		{
-			List<Integer> businessIDs = new ArrayList<Integer>( ownedBusinesses.keySet() );
-			session.setAttribute( "bid", businessIDs.get( 0 ) );
-			session.removeAttribute( "vid" );
-			response.sendRedirect( "editBusiness.jsp" );
-		}
 
-		Veteran foundVeteran = databaseConnection.getVeteran( user.getId() );
-		if( foundVeteran != null )
-		{
-			session.setAttribute( "vid", foundVeteran.getVid() );
-			session.removeAttribute( "bid" );
-			response.sendRedirect( "editVeteranProfile.jsp" );
-		}	
-	}
+session.setAttribute( "login_page", request.getRequestURI() );
+
+Map<String,String> loginErrors;
+try
+{
+	loginErrors = session.getAttribute( "login_errors" ) != null ?
+		(Map<String,String>) session.getAttribute( "login_errors" ) : null;
+}
+catch( ClassCastException e)
+{
+	loginErrors = null;
 }
 
 %>
@@ -69,8 +55,8 @@ if( request.getParameter("login") != null )
 			<li>Receive your own profile page for others to see what help you provide!</li>
 		</ul>
 		<h1 style="border-bottom:#000 solid 1px; font-size: medium; margin-top: 20px;">Registered? Login!</h1>
-		<form id="login_form" action="NewBusiness.jsp" method="post">
-			<% if( loginResults.isEmpty()) {%><p class="login_error">Email or password is invalid </p><%} %>
+		<form id="login_form" action="Login" method="post">
+			<% if( loginErrors != null && !loginErrors.isEmpty()) {%><p class="login_error">Email or password is invalid </p><%} %>
 			<p>
 				<label style="display:inline-block;width:100px; text-align:left;">Email:</label>
 				<input id="login_email" type="email" name="email"/>
@@ -273,4 +259,5 @@ function maskNumbers(){
 
 </script>
 </body>
+<% session.removeAttribute( "login_errors" ); %>
 </html>

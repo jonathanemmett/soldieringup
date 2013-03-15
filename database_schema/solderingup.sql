@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 18, 2013 at 12:02 AM
+-- Generation Time: Mar 15, 2013 at 12:54 AM
 -- Server version: 5.5.28
 -- PHP Version: 5.2.17
 
@@ -27,22 +27,24 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `accounts` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `fname` varchar(255) DEFAULT NULL,
-  `lname` varchar(255) DEFAULT NULL,
-  `company` varchar(45) DEFAULT NULL,
-  `cellphone` varchar(45) DEFAULT NULL,
-  `homephone` varchar(45) DEFAULT NULL,
-  `businessphone` varchar(45) DEFAULT NULL,
-  `address` varchar(45) DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
-  `state` int(11) DEFAULT NULL,
-  `zip` varchar(11) DEFAULT NULL,
-  `password` blob,
-  `email` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+  `aid` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `profile_src` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`aid`),
+  KEY `uid` (`uid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
+
+--
+-- Dumping data for table `accounts`
+--
+
+INSERT INTO `accounts` (`aid`, `uid`, `profile_src`) VALUES
+(9, 38, '1db79bce5a83a3ee13640d3d38565a9917d02fb23800.jpg'),
+(10, 23, 'ca7bab2b37b734c4ca7485b204e1f03b612333d42300.png'),
+(11, 24, NULL),
+(12, 25, NULL),
+(13, 26, NULL),
+(14, 39, '4905b548163a7efd97c6c83c7aea248a21bdf1b13900.jpg');
 
 -- --------------------------------------------------------
 
@@ -52,32 +54,26 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 
 CREATE TABLE IF NOT EXISTS `business` (
   `bid` int(11) NOT NULL AUTO_INCREMENT,
-  `contact_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `short_summary` varchar(1000) NOT NULL,
   `long_summary` varchar(5000) NOT NULL,
   `work_number` varchar(20) NOT NULL,
   `address` varchar(100) NOT NULL,
   `ZIP` varchar(15) NOT NULL,
-  `cover_photo_id` int(11) DEFAULT NULL,
-  `profile_photo_id` int(11) DEFAULT NULL,
-  `profile_src` varchar(60) DEFAULT NULL,
   `cover_src` varchar(60) DEFAULT NULL,
-  PRIMARY KEY (`bid`),
-  KEY `contact_id` (`contact_id`),
-  KEY `cover_photo_ibfk_1` (`cover_photo_id`),
-  KEY `profile_photo_ibfk_1` (`profile_photo_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+  PRIMARY KEY (`bid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
 
 --
 -- Dumping data for table `business`
 --
 
-INSERT INTO `business` (`bid`, `contact_id`, `name`, `short_summary`, `long_summary`, `work_number`, `address`, `ZIP`, `cover_photo_id`, `profile_photo_id`, `profile_src`, `cover_src`) VALUES
-(1, 23, 'Serenity Mansion', 'The best of Japanese food in Lee''s Summit! I''m not kidding about it eighter!', 'We have some of the best Japanese food in the city at this place! We use nothing but the freshness ingredients for out customers! For our services, we are willing to teach our fellow service men how to prepare fine Japanese dishes! Restaurants are a great field to get in, as they make for great work luncheons and fun weekend getaways. Our training is individualized for all different skill levels. Whether you are the family chef or a master with the George Foreman, you are bound to get something out of our lessons!', '1231231234', '810 everywhere', '64063', 118, 124, '5a56c4bf267b127308d7f0d2e02bc9c7d91deae32300.jpg', 'c4f6f9588e2d998da92f59f971b429bfcfde42a42300.jpg'),
-(2, 24, 'asdf', 'asdfdsafsafsadf', 'asdfsadfdsafsafdsafsadfdsafsasdf', '3233231234', 'asdsdfdsfsadfsafsa', '33231', NULL, NULL, NULL, NULL),
-(3, 25, 'asdf', 'asdfdsafsafsadf', 'asdfsadfdsafsafdsafsadfdsafsasdf', '3233231234', 'asdsdfdsfsadfsafsa', '33231', NULL, NULL, NULL, NULL),
-(4, 26, 'Serenity Palace', 'The best of Japanese food in Lee''s Summit!', 'We have some of the best Japanese food in the city at this place! We use nothing but the freshness ingredients for out customers! For our services, we are willing to teach our fellow service men how to prepare fine Japanese dishes! Restaurants are a great field to get in, as they make for great work luncheons and fun weekend getaways. Our training is individualized for all different skill levels. Whether you are the family chef or a master with the George Foreman, you are bound to get something out of our lessons!', '8165256058', '142 Main St.', '64063', NULL, NULL, NULL, NULL);
+INSERT INTO `business` (`bid`, `name`, `short_summary`, `long_summary`, `work_number`, `address`, `ZIP`, `cover_src`) VALUES
+(10, 'Serenity Mansion', 'The best of Japanese food in Lee''s Summit! I''m not kidding about it eighter!', 'Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?Ever wonder what it would be like to take Children and place the in a fighting arena?', '1231231234', '810 everywhere', '64063', '810d32543a28bd87ebe845cd6c62fb428c2b2256100.png'),
+(11, 'asdf', 'asdfdsafsafsadf', 'asdfsadfdsafsafdsafsadfdsafsasdf', '3233231234', 'asdsdfdsfsadfsafsa', '33231', NULL),
+(12, 'asdf', 'asdfdsafsafsadf', 'asdfsadfdsafsafdsafsadfdsafsasdf', '3233231234', 'asdsdfdsfsadfsafsa', '33231', NULL),
+(13, 'Serenity Palace', 'The best of Japanese food in Lee''s Summit!', 'We have some of the best Japanese food in the city at this place! We use nothing but the freshness ingredients for out customers! For our services, we are willing to teach our fellow service men how to prepare fine Japanese dishes! Restaurants are a great field to get in, as they make for great work luncheons and fun weekend getaways. Our training is individualized for all different skill levels. Whether you are the family chef or a master with the George Foreman, you are bound to get something out of our lessons!', '8165256058', '142 Main St.', '64063', NULL),
+(14, 'Jacks of all trades', 'Trading card company to fit all of your needs!', 'Checkout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardCheckout our exhilirardv', '1231233212', '910 8th street', '66062', '9d105738bfad373bf7eaa7b36e0c456718e3cc403900.jpg');
 
 -- --------------------------------------------------------
 
@@ -86,11 +82,26 @@ INSERT INTO `business` (`bid`, `contact_id`, `name`, `short_summary`, `long_summ
 --
 
 CREATE TABLE IF NOT EXISTS `business_tags` (
-  `tid` int(11) NOT NULL,
   `bid` int(11) NOT NULL,
-  PRIMARY KEY (`tid`,`bid`),
-  KEY `bid` (`bid`)
+  `tid` int(11) NOT NULL,
+  `hours_requested` int(11) DEFAULT NULL,
+  PRIMARY KEY (`bid`,`tid`),
+  KEY `tid` (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `business_tags`
+--
+
+INSERT INTO `business_tags` (`bid`, `tid`, `hours_requested`) VALUES
+(10, 36, 1),
+(10, 37, 1),
+(10, 38, 1),
+(10, 39, 1),
+(10, 41, 1),
+(10, 42, 1),
+(14, 41, 1),
+(14, 42, 1);
 
 -- --------------------------------------------------------
 
@@ -294,13 +305,21 @@ INSERT INTO `photos` (`pid`, `bid`, `title`, `src`) VALUES
 
 CREATE TABLE IF NOT EXISTS `questions` (
   `qid` int(11) NOT NULL AUTO_INCREMENT,
-  `Question` varchar(5000) NOT NULL,
-  `Type` varchar(200) NOT NULL,
-  `Availability` varchar(100) NOT NULL,
+  `question_title` varchar(100) NOT NULL,
+  `availability` varchar(200) NOT NULL,
+  `question_detailed_description` varchar(5000) NOT NULL,
   `vid` int(11) NOT NULL,
   PRIMARY KEY (`qid`),
   KEY `vid` (`vid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+
+--
+-- Dumping data for table `questions`
+--
+
+INSERT INTO `questions` (`qid`, `question_title`, `availability`, `question_detailed_description`, `vid`) VALUES
+(1, 'Help with Android Game Programming', 'Anytime throughout the week', 'I have the great idea for a 2D android game. While I can''t go into specific details, it''s gonna be a game that combines elements from Contra and Super Mario Bros. I''ve been working hard to get assets for Images and Sounds, but I''m not sure of the best way to put these together. Would someone be able to help me with creating an Android Game? I would prefer someone with experience with the AndEngine, but I''m open to any tools that will help get the job done.\r\n\r\nMuch thanks!', 9),
+(3, 'Let''s get this going!', 'Let''s get this going!', ';ljkasdflasdffffffffffffffffffffffffffffff', 9);
 
 -- --------------------------------------------------------
 
@@ -341,42 +360,22 @@ CREATE TABLE IF NOT EXISTS `soldierexperience` (
 CREATE TABLE IF NOT EXISTS `tags` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID of the tag',
   `tag` varchar(50) NOT NULL COMMENT 'Name of tag',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=29 ;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tag_UNIQUE` (`tag`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=43 ;
 
 --
 -- Dumping data for table `tags`
 --
 
 INSERT INTO `tags` (`id`, `tag`) VALUES
-(1, 'Web Development\r'),
-(2, 'Web Design\r'),
-(3, 'Adobe\r'),
-(4, 'Programming\r'),
-(5, 'Games\r'),
-(6, 'video games\r'),
-(7, 'gifts\r'),
-(8, 'cooking\r'),
-(9, 'food\r'),
-(10, 'office\r'),
-(11, 'microsoft\r'),
-(12, 'windows\r'),
-(13, 'apple\r'),
-(14, 'ipod\r'),
-(15, 'ipad\r'),
-(16, 'lawn\r'),
-(17, 'gifts\r'),
-(18, 'books\r'),
-(19, 'marketing\r'),
-(20, 'design\r'),
-(21, 'graphics\r'),
-(22, 'html\r'),
-(23, 'php\r'),
-(24, 'skills\r'),
-(25, 'outdoors\r'),
-(26, 'hunting\r'),
-(27, 'shipping\r'),
-(28, 'receiving\r');
+(38, 'Adobe'),
+(42, 'Android Development'),
+(39, 'Game Development'),
+(41, 'Graphic Design'),
+(36, 'iOS Development'),
+(37, 'Web Design'),
+(40, 'Web Development');
 
 -- --------------------------------------------------------
 
@@ -444,18 +443,19 @@ CREATE TABLE IF NOT EXISTS `users` (
   `zip` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `zip` (`zip`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=39 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=40 ;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `address`, `primary_number`, `secondary_number`, `password`, `salt`, `zip`) VALUES
-(23, 'Jake', 'LaCombe', 'twistedhawk@kc.rr.com', '410 NW Frances RD', '(123) 123-1234', '(432) 432-4321', '8073f5f2581b26156a208adb46c413151180cb9b', 1358230117935, '66062'),
+(23, 'Jakeasdf', 'LaCombeasdfasfd', 'twistedhawk@kc.rr.com', '410 NW Frances RD', '(123) 123-1234', '(432) 432-4321', '1560828df4cc3925d068736275f8e48176f01d4c', 1358230117935, '66062'),
 (24, 'Jake', 'LaCombe', 'twistedhawk@kc.rr.com', '432 asdf asdf asdf', '(323) 323-1234', '(333) 222-1111', '204ef16dba52e3305826f7ece0696b38a2d5e9a3', 1358232308434, '66062'),
 (25, 'Jake', 'LaCombe', 'twistedhawk@kc.rr.com', '432 asdf asdf asdf', '(323) 323-1234', '(333) 222-1111', '22d1c52b8b3f7ccd11ce541c4524ff32219362a1', 1358232408979, '66062'),
 (26, 'Jarett', 'Homann', 'jake.lacombe2@gmail.com', '410 NW Frances RD', '8165256058', '8162108253', 'ae69bb3236d16bef1777d1eeb82da7ead173ef53', 1358739758936, '64063'),
-(38, 'asd', 'afsdsadfdas', 'deer@man.com', '3432rasdfasdf', '1231232321', '1231235321', '2db4643fe44e2d2b987fe11c7f30aaa0abced121', 1359014369519, '34321');
+(38, 'Jake', 'LaCombe', 'deer@man.com', '3432rasdfasdf', '1231232321', '1231235321', '2db4643fe44e2d2b987fe11c7f30aaa0abced121', 1359014369519, '34321'),
+(39, 'Elmo', 'My Llelmo', 'jake.lacombe2@gmail.com', '938 West Virginia Ave.', '1231233212', '8881113214', 'cc97a22660b111549a6138263b7c6e140da8e590', 1362339332556, '64063');
 
 -- --------------------------------------------------------
 
@@ -468,8 +468,6 @@ CREATE TABLE IF NOT EXISTS `veterans` (
   `Goal` varchar(200) DEFAULT NULL,
   `vid` int(11) NOT NULL AUTO_INCREMENT,
   `profile_src` varchar(100) DEFAULT NULL,
-  `temp_profile_src` varchar(100) DEFAULT NULL,
-  `temp_photo_upload_date` datetime DEFAULT NULL,
   PRIMARY KEY (`vid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
@@ -477,8 +475,8 @@ CREATE TABLE IF NOT EXISTS `veterans` (
 -- Dumping data for table `veterans`
 --
 
-INSERT INTO `veterans` (`uid`, `Goal`, `vid`, `profile_src`, `temp_profile_src`, `temp_photo_upload_date`) VALUES
-(38, 'I want t', 9, NULL, '3ea1e62b03d7c14a005961369acf434495ccec283800.jpg', '2013-02-08 01:02:00');
+INSERT INTO `veterans` (`uid`, `Goal`, `vid`, `profile_src`) VALUES
+(38, 'I''m looking to start a video game business. I love video games, and have a lot of great ideas!', 9, '1db79bce5a83a3ee13640d3d38565a9917d02fb23800.jpg');
 
 -- --------------------------------------------------------
 
@@ -489,10 +487,20 @@ INSERT INTO `veterans` (`uid`, `Goal`, `vid`, `profile_src`, `temp_profile_src`,
 CREATE TABLE IF NOT EXISTS `veteran_tags` (
   `vid` int(11) NOT NULL,
   `tid` int(11) NOT NULL,
+  `hours_requested` int(11) DEFAULT NULL,
   PRIMARY KEY (`vid`,`tid`),
   KEY `tid` (`tid`),
   KEY `veteran_users_ibfk_2` (`vid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `veteran_tags`
+--
+
+INSERT INTO `veteran_tags` (`vid`, `tid`, `hours_requested`) VALUES
+(9, 36, 1),
+(9, 41, 1),
+(9, 42, 1);
 
 -- --------------------------------------------------------
 
@@ -43752,19 +43760,17 @@ INSERT INTO `zip` (`zip`, `city`, `state`, `latitude`, `longitude`) VALUES
 --
 
 --
--- Constraints for table `business`
+-- Constraints for table `accounts`
 --
-ALTER TABLE `business`
-  ADD CONSTRAINT `business_ibfk_1` FOREIGN KEY (`contact_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `cover_photo_ibfk_1` FOREIGN KEY (`cover_photo_id`) REFERENCES `photos` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `profile_photo_ibfk_1` FOREIGN KEY (`profile_photo_id`) REFERENCES `photos` (`pid`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `accounts`
+  ADD CONSTRAINT `accounts_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `business_tags`
 --
 ALTER TABLE `business_tags`
-  ADD CONSTRAINT `business_tags_ibfk_1` FOREIGN KEY (`tid`) REFERENCES `tags` (`id`),
-  ADD CONSTRAINT `business_tags_ibfk_2` FOREIGN KEY (`bid`) REFERENCES `business` (`bid`);
+  ADD CONSTRAINT `business_tags_ibfk_1` FOREIGN KEY (`bid`) REFERENCES `business` (`bid`),
+  ADD CONSTRAINT `business_tags_ibfk_2` FOREIGN KEY (`tid`) REFERENCES `tags` (`id`);
 
 --
 -- Constraints for table `experience`
@@ -43802,7 +43808,7 @@ ALTER TABLE `tempuploads`
 --
 ALTER TABLE `veteran_tags`
   ADD CONSTRAINT `veteran_tags_ibfk_2` FOREIGN KEY (`tid`) REFERENCES `tags` (`id`),
-  ADD CONSTRAINT `veteran_users_ibfk_2` FOREIGN KEY (`vid`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `veteran_users_ibfk_2` FOREIGN KEY (`vid`) REFERENCES `veterans` (`vid`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

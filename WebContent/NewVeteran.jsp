@@ -24,45 +24,20 @@
 
 <body>
 <%
-Map<String,String> loginResults = new HashMap<String,String>();
-MySQL databaseConnection = MySQL.getInstance();
-if( request.getParameter("login") != null )
-{
-	String email = request.getParameter("email");
-	String password = request.getParameter("password");
-	if( email != null && password != null )
-	{
-		User user = MySQL.getInstance().validateUser( email, password );
-		if( user != null )
-		{
-			session.setAttribute( "id", user.getId() );
-			Map<Integer, Business> ownedBusinesses = databaseConnection.getBusinessesFromOwner( user.getId() );
-			if( ownedBusinesses.size() > 0 )
-			{
-				List<Integer> businessIDs = new ArrayList<Integer>( ownedBusinesses.keySet() );
-				session.setAttribute( "bid", businessIDs.get( 0 ) );
-				session.removeAttribute( "vid" );
-				response.sendRedirect( "editBusiness.jsp" );
-			}
+session.setAttribute( "login_page", request.getRequestURI() );
 
-			Veteran foundVeteran = databaseConnection.getVeteran( user.getId() );
-			if( foundVeteran != null )
-			{
-				session.setAttribute( "vid", foundVeteran.getVid() );
-				session.removeAttribute( "bid" );
-				response.sendRedirect( "editVeteranProfile.jsp" );
-			}
-		}
-		else
-		{
-			loginResults.put( "results", "failed" );
-		}
-	}
-	else
-	{
-		loginResults.put( "results", "failed" );
-	}
+Map<String,String> loginErrors;
+try
+{
+	loginErrors = session.getAttribute( "login_errors" ) != null ?
+		(Map<String,String>) session.getAttribute( "login_errors" ) : null;
 }
+catch( ClassCastException e)
+{
+	loginErrors = null;
+}
+
+MySQL databaseConnection = MySQL.getInstance();
  %>
 <jsp:include page="Includes/header.jsp"></jsp:include>
 <section>
@@ -75,8 +50,8 @@ if( request.getParameter("login") != null )
 			<li>You've Soldiered Up for us! Now let us Soldier Up for you!</li>
 		</ul>
 		<h1 style="border-bottom:#000 solid 1px; font-size: medium; margin-top: 20px;">Registered? Login!</h1>
-		<form id="login_form" action="NewVeteran.jsp" method="post">
-			<% if( !loginResults.isEmpty()) {%><p class="login_error">Email or password is invalid </p><%} %>
+		<form id="login_form" action="Login" method="post">
+			<% if( loginErrors != null && !loginErrors.isEmpty()) {%><p class="login_error">Email or password is invalid </p><%} %>
 			<p>
 				<label style="display:inline-block;width:100px; text-align:left;">Email:</label>
 				<input id="login_email" type="email" name="email"/>
@@ -201,8 +176,8 @@ if( request.getParameter("login") != null )
 	</div>
 </section>
 <script type="text/javascript" >
-var addElement = document.getElementById("add_position");
-addElement.addEventListener("mousedown", addPosition, true);
+/*var addElement = document.getElementById("add_position");
+  addElement.addEventListener("mousedown", addPosition, true);*/
 
 window.onload = function( event ){
 	maskNumbers();
@@ -338,4 +313,5 @@ function disableClickRemove( deleteButton, parent, division, position, startDate
 
 </script>
 </body>
+<% session.removeAttribute( "login_errors" ); %>
 </html>

@@ -1,126 +1,83 @@
 package org.soldieringup;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
- * Class to represent 
+ * Class to represent
  * @author Jake
  *
  */
 
-public class Veteran 
+public class Veteran extends SoldierUpAccount
 {
 	public static enum VeteranDatabaseColumns
 	{
-		UID (0),
-		GOAL (1),
-		VID (2),
-		PROFILE_SRC (3);
-		
+		GOAL (0);
+
 		int mDatabaseTableIndex;
-		
+
 		private VeteranDatabaseColumns( int aDatabaseTableIndex )
 		{
 			this.mDatabaseTableIndex = aDatabaseTableIndex;
 		}
-		
+
 		public int getDatabaseColumnIndex()
 		{
 			return mDatabaseTableIndex;
 		}
+
+		public String getDatabaseColumn()
+		{
+			return VeteranDatabaseColumnsStrings[mDatabaseTableIndex];
+		}
 	}
-	
+
 	public static String VeteranDatabaseColumnsStrings[] =
 		{
-		"uid",
-		"goal",
-		"vid",
-		"profile_src"
+		"goal"
 		};
-	
-	private long vid;
-	private String goal = null;
-	private long uid;
-	private String profile_src = null;
-	
+
+	private String mGoal = null;
+
 	/**
 	 * Constructor
 	 */
 	public Veteran()
 	{
-		
+
 	}
-	
+
 	/**
-	 * Gets the id of the veteran
-	 * @return Veteran id
+	 * Initializes the Veteran with the given SQL result set
+	 * @param aVeteranResultSet The result set to initialize the veteran with
 	 */
-	public long getVid()
+	@Override
+	public void init( ResultSet aVeteranResultSet ) throws SQLException
 	{
-		return vid;
+		super.init( aVeteranResultSet );
+
+		mGoal = aVeteranResultSet.getString( VeteranDatabaseColumns.GOAL.getDatabaseColumn() );
 	}
-	
+
 	/**
 	 * Gets the veteran's goal
 	 * @return The goal of the veteran
 	 */
 	public String getGoal()
 	{
-		return goal;
+		return mGoal;
 	}
-	
-	/**
-	 * Gets the id of the user account associated with this veteran
-	 * @return The id associated with the user account of this veteran.
-	 */
-	public long getUid()
-	{
-		return uid;
-	}
-	
-	/**
-	 * Gets the src of the user profile picture
-	 * @return The src of the user profile picture
-	 */
-	public String getProfileSrc()
-	{
-		return profile_src;
-	}
-	
-	/**
-	 * Sets the id for this veteran
-	 * @param vid ID of the veteran
-	 */
-	public void setVid( long vid )
-	{
-		this.vid = vid;
-	}
-	
+
 	/**
 	 * Sets the veteran's goal
-	 * @param goal Goal for the veteran
+	 * @param aGoal Goal for the veteran
 	 */
-	public void setGoal( String goal )
+	public void setGoal( String aGoal )
 	{
-		this.goal = goal;
+		this.mGoal = aGoal;
 	}
-	
-	/**
-	 * Sets the user id associated with the veteran profile
-	 * @param uid User id of the account associated with this veteran profile
-	 */
-	public void setUid( long uid)
-	{
-		this.uid = uid; 	
-	}
-	
-	/**
-	 * Sets the src of the profile picture.
-	 * @param src Src of the profile file
-	 */
-	public void setProfileSrc( String src )
-	{
-		this.profile_src = src;
-	}
-	
+
 	/**
 	 * Makes that a given key and it's associated value are valid inputs
 	 * for the database
@@ -131,10 +88,10 @@ public class Veteran
 	public static boolean isValidDatabaseInput( String aKey, String aValue )
 	{
 		if( Utilities.isElementInArray( aKey, VeteranDatabaseColumnsStrings) )
-		{	
-			return aValue != null;	
+		{
+			return aValue != null;
 		}
-		
+
 		return false;
 	}
 }
