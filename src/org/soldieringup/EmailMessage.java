@@ -98,7 +98,10 @@ public class EmailMessage
 	        message.setText( aMessage );
 
 	        // Send message
-	        Transport.send( message );
+	        Transport transport = session.getTransport( "smtp" );
+	        transport.connect( host, CURRENT_SOLDIERUP_EMAIL, CURRENT_SOLDIERUP_PASSWORD );
+	        transport.sendMessage( message, message.getAllRecipients() );
+	        transport.close();
 	   }
 	   catch (MessagingException mex)
 	   {
