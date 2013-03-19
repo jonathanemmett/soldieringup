@@ -1,0 +1,14 @@
+@CHARSET "ISO-8859-1";
+
+label{
+	display:inline-block;
+	width:200px;
+	vertical-align:top;
+}
+
+input[type="text"]{
+	display:inline-block;
+	margin-left:0px;
+	padding:0px;
+}
+
