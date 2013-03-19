@@ -30,7 +30,7 @@ $(window).load(function() {
 		// Create the paragraph tag which has the name of the tag
 		var tagNameParagraph = $( "<p>" );
 		tagNameParagraph.append( $( "#tag_search_input" ).val() );
-		newDiv.append( tagNameParagraph );
+		tagDiv.append( tagNameParagraph );
 		
 		// Create the span showing the hours for the tag
 		var hoursSpan = $( "<span>" );
