@@ -51,7 +51,7 @@
 <script src="Scripts/jquery-1.8.3.min.js" type="text/javascript"></script>
 <script src="Scripts/jquery.dform-1.0.1.js" type="text/javascript"></script>
 <script src="Scripts/jquery.inputmask.js" type="text/javascript"></script>
-<script src="Scripts/jquery.inpu	tmask.date.extensions.js" type="text/javascript"></script>
+<script src="Scripts/jquery.inputmask.date.extensions.js" type="text/javascript"></script>
 <script src="Scripts/jquery.form.js" type="text/javascript"></script>
 <script src="Scripts/jquery.Jcrop.min.js" type="text/javascript"></script>
 <!--
