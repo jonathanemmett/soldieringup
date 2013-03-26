@@ -1,6 +1,7 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +23,7 @@ import org.soldieringup.database.MySQL;
 @WebServlet("/UpdateVeteranQuestion")
 public class UpdateVeteranQuestion extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -34,6 +35,7 @@ public class UpdateVeteranQuestion extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		String command = request.getParameter( "command" );
@@ -57,10 +59,11 @@ public class UpdateVeteranQuestion extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
 	{
 		HttpSession currentSession = request.getSession();
-		
+
 		if( currentSession.getAttribute( "question_form_request_type" ) == null )
 			return;
 
@@ -68,11 +71,10 @@ public class UpdateVeteranQuestion extends HttpServlet {
 		Map<String,String> inputErrors = new HashMap<String,String>();
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		Map<String,Object> whereParameters = new HashMap<String,Object>();
-		
+
 		String command = currentSession.getAttribute( "question_form_request_type" ).toString();
 
 		getValidationErrors( request, response, inputErrors, parameters );
-		System.out.println( "Parameters size: " + parameters.size() );
 		if( inputErrors.isEmpty() )
 		{
 			if( command.equals( "insert" ) )
@@ -83,10 +85,23 @@ public class UpdateVeteranQuestion extends HttpServlet {
 			{
 				try
 				{
-					whereParameters.put( "vid", request.getSession().getAttribute( "vid" ) );
+					long qid =  Long.valueOf( request.getSession().getAttribute( "question_form_update_question_id" ).toString() );
+					whereParameters.put( "vid", request.getSession().getAttribute( "aid" ) );
 					whereParameters.put( "qid", request.getSession().getAttribute( "question_form_update_question_id" ) );
 					MySQL.getInstance().updateTable( "questions", parameters, whereParameters );
-				} 
+					MySQL.getInstance().removeTagsFromQuestion( qid );
+					if( request.getParameterValues( "tag" ) != null )
+					{
+						String[] tags = request.getParameterValues( "tag" );
+						for( int i = 0; i < tags.length; ++i )
+						{
+							if( !tags[i].equals("") )
+							{
+								MySQL.getInstance().attachTagsToQuestion( tags[i], qid );
+							}
+						}
+					}
+				}
 				catch (SQLException e)
 				{
 					e.printStackTrace();
@@ -101,22 +116,39 @@ public class UpdateVeteranQuestion extends HttpServlet {
 			{
 				redirectUrl += "?qid="+request.getSession().getAttribute( "question_form_update_question_id" );
 			}
-			
+
 			request.getRequestDispatcher( redirectUrl ).forward( request, response );
 		}
 	}
-	
+
 	private void insertQuestion( HttpServletRequest request, HttpServletResponse response )
 	{
-		MySQL.getInstance().insertVeteranQuestion(
+		ResultSet generatedQuestionId = MySQL.getInstance().insertVeteranQuestion(
 				request.getParameter( "question_title" ),
 				request.getParameter( "availability" ),
-				request.getParameter( "question_detailed_description" ), 
-				Long.valueOf( request.getSession().getAttribute( "vid" ).toString() ) );	
+				request.getParameter( "question_detailed_description" ),
+				Long.valueOf( request.getSession().getAttribute( "aid" ).toString() ) );
+
+		try
+		{
+			if( generatedQuestionId.next() && request.getParameterValues( "tag" ) != null )
+			{
+				long qid = generatedQuestionId.getLong( 1 );
+				String[] tags = request.getParameterValues( "tag" );
+				for( int i = 0; i < tags.length; ++i )
+				{
+					MySQL.getInstance().attachTagsToQuestion( tags[i], qid );
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
-	
+
 	public void getValidationErrors
-			( 
+			(
 			HttpServletRequest request,
 			HttpServletResponse response,
 			Map<String,String> inputErrors,
@@ -137,10 +169,10 @@ public class UpdateVeteranQuestion extends HttpServlet {
 			}
 			else
 			{
-				parametersForQuery.put( requiredStrings[i], request.getParameter( requiredStrings[i] ) );				
+				parametersForQuery.put( requiredStrings[i], request.getParameter( requiredStrings[i] ) );
 			}
 		}
-		
+
 		System.out.println( "Parameters size: " + parametersForQuery.size() );
 	}
 }

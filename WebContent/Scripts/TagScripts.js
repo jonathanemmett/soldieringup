@@ -1,5 +1,5 @@
 $(window).load(function() { 
-	$('#tag_search_input').autocomplete({source:'QueryTags'});
+	$('#tag_search_input').autocomplete({source:'QueryTags?type=account&'});
 
 	var elements = $('.account_tag');
 

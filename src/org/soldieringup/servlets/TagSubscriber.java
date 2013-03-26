@@ -25,7 +25,7 @@ public class TagSubscriber extends HttpServlet
 	private static final Logger	log			= Logger.getLogger (TagSubscriber.class.getName ());
 	private static final String	_cmd			= "cmd";
 	private HashMap<String, String> values = new HashMap <String, String> ();
-	
+
 	private static final String _regex_fname = "^[a-zA-Z0-9]*$";
 
 	/**
@@ -40,6 +40,7 @@ public class TagSubscriber extends HttpServlet
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		String cmd = request.getParameter (_cmd);
@@ -58,6 +59,7 @@ public class TagSubscriber extends HttpServlet
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		String command = request.getParameter( "cmd" );
@@ -66,14 +68,14 @@ public class TagSubscriber extends HttpServlet
 		{
 			MySQL databaseConnection = MySQL.getInstance();
 			String tagSearchTerm = request.getParameter( "tag_to_search" );
-			
+
 			if( tagSearchTerm != null )
 			{
-				response.getWriter().println( databaseConnection.getSimiliarTags( tagSearchTerm, request ) );
+				response.getWriter().println( databaseConnection.getSimiliarTagsNotInAccount( tagSearchTerm, request ) );
 			}
 			else
 			{
-				
+
 			}
 		}
 	}
@@ -84,7 +86,7 @@ public class TagSubscriber extends HttpServlet
 		values.put ("name", request.getParameter ("fname"));
 		if (values.get ("name").matches (_regex_fname) == false)
 			valid_form = false;
-		
+
 		Engine engine = new Engine ();
 		try {
 			if (valid_form)

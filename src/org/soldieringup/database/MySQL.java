@@ -1191,6 +1191,42 @@ public class MySQL
 	}
 
 	/**
+	 * Gets the tags from the given question
+	 * @param aQid Question to get the tags for
+	 * @return The tags for the given question
+	 */
+	public ArrayList<Tag> getTagsFromQuestion( long aQid )
+	{
+		ArrayList<Tag> questionTags = new ArrayList<Tag>();
+
+		try
+		{
+			String questionTagsSql = "SELECT * FROM Tags WHERE id in ( SELECT tid FROM question_tags WHERE qid = ? )";
+			PreparedStatement questionTagsStmt = getPreparedStatement( questionTagsSql );
+			questionTagsStmt.setLong( 1, aQid );
+			ResultSet questionTagsResult = questionTagsStmt.executeQuery();
+
+			System.out.println( questionTagsSql );
+			while( questionTagsResult.next() )
+			{
+				Tag businessTag = new Tag();
+				businessTag.set_id( questionTagsResult.getInt( "id" ) );
+				businessTag.set_name( questionTagsResult.getString( "tag" ) );
+				System.out.println( "Tag: " + businessTag.get_name() + " " + businessTag.get_id() );
+				questionTags.add( businessTag );
+			}
+
+			System.out.println("Count: " + questionTags.size() );
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return questionTags;
+	}
+
+	/**
 	 * Finds all the tags associated to a business
 	 * @param aOid ID of the business to query for
 	 * @return The tags associated to a business
@@ -1260,7 +1296,38 @@ public class MySQL
 	 * @param aTagToSearch Tag name to find similar tags for
 	 * @return The tags found from a keyword
 	 */
-	public JSONArray getSimiliarTags( String aTagToSearch, HttpServletRequest aRequest )
+	public JSONArray getSimiliarTags( String aTagToSearch )
+	{
+		JSONArray arrayOfTags = new JSONArray();
+
+		try
+		{
+			String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? ";
+
+			PreparedStatement stmt = connect.prepareStatement( getTagsSql );
+			stmt.setString( 1, "%"+aTagToSearch+"%" );
+			ResultSet tags = stmt.executeQuery();
+
+			while( tags.next() )
+			{
+				arrayOfTags.add( tags.getString( "tag" ) );
+			}
+		}
+		catch(SQLException e)
+		{
+
+		}
+
+		return arrayOfTags;
+	}
+
+	/**
+	 * Returns all the tags that are similar to a given tag and that
+	 * also do not exist in the account of the logged in user.
+	 * @param aTagToSearch Tag name to find similar tags for
+	 * @return The tags found from a keyword
+	 */
+	public JSONArray getSimiliarTagsNotInAccount( String aTagToSearch, HttpServletRequest aRequest )
 	{
 		JSONArray arrayOfTags = new JSONArray();
 
@@ -1323,6 +1390,55 @@ public class MySQL
 		}
 
 		return generatedQuestionID;
+	}
+
+	/**
+	 * Removes tags from the question associated to the given id.
+	 * @param aQid ID of question to remove tags from
+	 */
+	public void removeTagsFromQuestion( long aQid )
+	{
+		try
+		{
+			String removeTagsSql = "DELETE FROM question_tags WHERE qid = ?";
+			PreparedStatement removeTagsStmt = getPreparedStatement( removeTagsSql );
+			removeTagsStmt.setLong( 1, aQid );
+			removeTagsStmt.executeUpdate();
+		}
+		catch (SQLException e )
+		{
+			log.error ("Failed to delete tags from question", e);
+		}
+	}
+	/**
+	 * Attaches the given tags to the question with the given id
+	 */
+	public long attachTagsToQuestion( String aTag, long aQid )
+	{
+		long tagId = -1;
+		try
+		{
+			tagId = getTagId( aTag );
+
+			if( tagId > 0)
+			{
+				String attachTagToQuestionSql;
+				attachTagToQuestionSql  = "INSERT IGNORE INTO question_tags (qid, tid )";
+				attachTagToQuestionSql += "VALUE(?, ? )";
+
+				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToQuestionSql );
+				attachTagStmt.setLong( 1, aQid );
+				attachTagStmt.setLong( 2, tagId );
+				attachTagStmt.executeUpdate();
+			}
+		}
+		catch( SQLException e)
+		{
+			e.printStackTrace();
+			log.error ("Errors occured while trying to attach a tag to an account", e);
+		}
+
+		return tagId;
 	}
 
 	/**
