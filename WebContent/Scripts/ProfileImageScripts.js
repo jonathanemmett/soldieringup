@@ -35,8 +35,9 @@ $(window).load(function(){
 				image.onload = function( event ){
 					
 					// Create a new LightBox to place the ImageCropper on
-					var box = new LightBox( image );
-					
+					var box = new LightBox();
+					box.appendElement( image );
+
 					var body = document.getElementsByTagName( "body" )[0];
 					body.appendChild( box.retrieveDiv() );
 					
