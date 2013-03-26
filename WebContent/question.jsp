@@ -5,6 +5,9 @@
 <%@ page import="org.soldieringup.Veteran" %>
 <%@ page import="org.soldieringup.database.MySQL" %>
 <%
+	session.setAttribute( "uid", 39 );
+	session.setAttribute( "aid", 14 );
+	session.setAttribute( "editing_account_type" , "business" );
 	long questionIndex;
 
 	if( request.getParameter( "qid" ) != null )
@@ -42,9 +45,28 @@
 	padding-bottom:3000px;	
 }
 
+#left_question_section h3
+{
+
+	margin-top:0px;
+	margin-bottom:10px;
+	border-bottom:#000 solid 1px;
+}
+
+#left_question_section .under_header
+{
+	margin-top:0px;
+	margin-bottom:30px;
+}
+
+#question_description
+{
+	margin-top:30px;
+}
+
 #right_question_section
 {
-	width:30%;
+	width:35%;
 	float:right;
 	margin-bottom:-3000px;
 	padding-bottom:3000px;
@@ -56,7 +78,30 @@
 	font-size: medium;
 	margin-bottom:0px;
 }
+
+#contact_form
+{
+	text-align:left;
+}
+
+#contact_form label
+{
+	width:100px;
+	vertical-align:top;
+	display: inline-block;
+}
+
+#contact_form .no_label_line
+{
+	margin-left:100px;
+}
+
 </style> 
+<link href="Styles/formStyles.css" rel="stylesheet" />
+<script src="Scripts/LightBox.js" type="text/javascript"></script>
+<script src="Scripts/jquery-1.9.js" type="text/javascript"></script>
+<script src="Scripts/jquery.dform-1.0.1.js" type="text/javascript"></script>
+<script src="Scripts/jquery.form.js" type="text/javascript"></script>
 </head>
 <body>
 <jsp:include page="Includes/header.jsp"></jsp:include>
@@ -64,8 +109,8 @@
 <%
 if( queriedQuestion != null)
 {
-	Veteran veteranFromQuestion = databaseConnection.getVeteran( queriedQuestion.getVid() );
-	User associatedUser = databaseConnection.getUserFromId( veteranFromQuestion.getUid() );
+	Veteran veteranFromQuestion = databaseConnection.getVeteran( 38 );
+	User associatedUser = databaseConnection.getUserFromId( 38 );
 %>
 <section id="right_question_section">
 <img src="Images/<%=veteranFromQuestion.getProfileSrc()%>"/>
@@ -74,10 +119,12 @@ if( queriedQuestion != null)
 <p style="margin-top:5px; padding-top:0px;"><%=veteranFromQuestion.getGoal()%></p>
 </section>
 <section id="left_question_section">
-<p><%=queriedQuestion.getQuestionTitle()%></p>
-<p><%=queriedQuestion.getAvailability()%></p>
-<p><%=queriedQuestion.getDetailedDescription()%></p>
-<div style="background-color:"></div>
+<h3>Help Needed</h3>
+<p class="under_header"><%=queriedQuestion.getQuestionTitle()%></p>
+<h3>Availability</h3>
+<p class="under_header"><%=queriedQuestion.getAvailability()%></p>
+<p id="question_description"><%=queriedQuestion.getDetailedDescription()%></p>
+<div id="meeting_request_button" style="border-radius:25px;background-image:url('Images/SoldierUpBackgroundButton.png');font-family:steamer; color:#FFF; text-align:center; vertical-align:middle; font-size:2.5em;padding:25px;">SoldierUp For <%=associatedUser.getFirstName()%></div>
 </section>
 <%
 }
@@ -87,6 +134,120 @@ else
 }
 %>
 </section>
+<script>
 
+var currentQuestionId = <%=questionIndex+";"%>
+$( "#meeting_request_button" ).click(function(){
+	var lightBox = new LightBox();
+
+	var form = document.createElement( "form" );
+	form.setAttribute( "id", "contact_form" );
+	lightBox.appendElement( form );
+
+	var body = document.getElementsByTagName( "body" ).item(0);
+	body.appendChild( lightBox.retrieveDiv() );
+	
+	var exitSpan = document.createElement( "span" );
+	exitSpan.setAttribute( 'class', 'remove_fields' );
+	lightBox.appendElement( exitSpan );
+
+	$( exitSpan ).click(function(){
+		body.removeChild( lightBox.retrieveDiv() );
+	});
+	
+	$( "#contact_form" ).dform({
+		"action":"MeetingRequests",
+		"method":"post",
+		"html" :
+		[
+		 	{
+		 		"type" : "h1",
+		 		"html" : "RSVP Request"
+		 	},
+		 	{
+		 		"type" : "hidden",
+		 		"name" : "qid",
+		 		"value"  : currentQuestionId
+		 	},
+		 	{
+		 		"type"  : "hidden",
+		 		"name"  : "cmd",
+		 		"value" : "insert"
+		 	},
+		 	{
+		 		"type" : "p",
+		 		"html" :
+		 			[
+						{
+							"type" : "label",
+							"html" : "Event Date"
+						},
+						{
+							"id" : "event_date",
+							"name" : "day",
+							"type" : "text"
+						}
+					]
+		 	},
+		 	{
+		 		"type" : "p",
+		 		"html" :
+		 			[
+						{
+							"type" : "label",
+							"html" : "Event Time"
+						},
+						{
+							"id" : "event_time",
+							"name" : "time",
+							"type" : "text"
+						}
+					]
+		 	},
+		 	{
+		 		"type" : "p",
+		 		"html" :
+		 			[
+						{
+							"type" : "label",
+							"html" : "Location"
+						},
+						{
+							"id" : "meeting_location",
+							"name" : "location",
+							"type" : "textarea",
+							"cols" : "30",
+							"rows" : "15"
+						}
+					]
+		 	},
+		 	{
+		 		"type" : "p",
+		 		"html" :
+		 			[
+						{
+							"id" : "send_meeting_request",
+							"name" : "send_meeting_request",
+							"class" : "no_label_line",
+							"type" : "submit"
+						}
+					]
+		 	}
+		]
+	});
+	
+	$( "#contact_form" ).submit( function(){
+		alert( "submitting" );
+		$( this ).ajaxSubmit({
+			success: function(responseText){
+				$( "#contact_form" ).html("<p>Request successfully sent. Way to SoldierUp!</p>");
+			}
+		});
+		alert("leaving");
+		return false;
+	});
+	
+});
+</script>
 </body>
 </html>

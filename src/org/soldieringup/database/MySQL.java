@@ -44,6 +44,7 @@ import org.json.simple.JSONObject;
 
 import org.soldieringup.Account;
 import org.soldieringup.Business;
+import org.soldieringup.MeetingRequest;
 import org.soldieringup.Photo;
 import org.soldieringup.Question;
 import org.soldieringup.Roster;
@@ -1163,7 +1164,7 @@ public class MySQL
 
 			//Remove the last OR statement
 			tagIdQuery = tagIdQuery.substring( 0, tagIdQuery.length() - 4 );
-			String query = "SELECT * FROM business WHERE bid in ( SELECT aid FROM account_tags WHERE tid IN ( ";
+			String query = "SELECT * FROM business JOIN accounts on aid = bid WHERE bid in ( SELECT aid FROM account_tags WHERE tid IN ( ";
 			query += tagIdQuery + " ) )";
 
 			PreparedStatement businessQueryStatement = getPreparedStatement( query );
@@ -1178,6 +1179,7 @@ public class MySQL
 			{
 				Business nextBusiness = new Business();
 				nextBusiness.init( foundBusinesses );
+				businesses.add( nextBusiness );
 			}
 		}
 		catch(SQLException e)
@@ -1227,14 +1229,14 @@ public class MySQL
 	 * @param uid The user id of the user
 	 * @return The Veteran object if found, false otherwise
 	 */
-	public Veteran getVeteran( long vid )
+	public Veteran getVeteran( long uid )
 	{
 		Veteran foundVeteran = null;
 		try
 		{
 			String selectSql = "SELECT * FROM accounts JOIN veterans ON veterans.vid = accounts.aid WHERE uid = ?";
 			PreparedStatement veteranSql = connect.prepareStatement( selectSql );
-			veteranSql.setLong( 1, vid );
+			veteranSql.setLong( 1, uid );
 
 			ResultSet veteranQuery = veteranSql.executeQuery();
 			if( veteranQuery.first() )
@@ -1293,12 +1295,14 @@ public class MySQL
 	 * @param aQuestionDetailedDescription Detailed description of the question
 	 * @param aVid Id of the veteran asking the question
 	 */
-	public void insertVeteranQuestion(
+	public ResultSet insertVeteranQuestion(
 			String aQuestionTitle,
 			String aAvailability,
 			String aQuestionDetailedDescription,
 			long aVid )
 	{
+		ResultSet generatedQuestionID = null;
+
 		try
 		{
 			String insertQuestionSQL = "INSERT INTO questions (question_title, availability, question_detailed_description, vid) ";
@@ -1310,12 +1314,15 @@ public class MySQL
 			insertQuestionStatement.setString( 3, aQuestionDetailedDescription );
 			insertQuestionStatement.setLong( 4, aVid );
 			insertQuestionStatement.executeUpdate();
+			generatedQuestionID = insertQuestionStatement.getGeneratedKeys();
 		}
 		catch( SQLException e )
 		{
 			e.printStackTrace();
 			log.error ("Failed to insert a question into the database", e);
 		}
+
+		return generatedQuestionID;
 	}
 
 	/**
@@ -1380,6 +1387,103 @@ public class MySQL
 		}
 
 		return veteranQuestions;
+	}
+
+	/**
+	 * Gets the meeting request for a given question and business
+	 * @param aQid ID of the question the meeting request is for
+	 * @param aBid ID of the business who sent the request
+	 * @return The Meeting Request if found, NULL otherwise
+	 */
+	public MeetingRequest getMeetingRequestFromQIDAndBID( long aQid, long aBid )
+	{
+		MeetingRequest foundMeetingRequest = null;
+
+		try
+		{
+			String findMeetingRequestSQL = "SELECT * From MeetingRequests WHERE qid = ? and bid = ?";
+			PreparedStatement findMeetingRequestStmt = getPreparedStatement( findMeetingRequestSQL );
+			findMeetingRequestStmt.setLong( 1, aQid );
+			findMeetingRequestStmt.setLong( 2, aBid );
+			ResultSet findMeetingRequestResults = findMeetingRequestStmt.executeQuery();
+
+			if( findMeetingRequestResults.next() )
+			{
+				foundMeetingRequest = new MeetingRequest();
+				foundMeetingRequest.init( findMeetingRequestResults );
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return foundMeetingRequest;
+	}
+
+	/**
+	 * Gets the meeting request for a given question id
+	 * @param aQid The question ID to retrieve the meeting requests for
+	 */
+	public ArrayList<MeetingRequest> getMeetingRequestsForQuestion( long aQid )
+	{
+		ArrayList<MeetingRequest> meetingRequests = new ArrayList<MeetingRequest>();
+
+		try
+		{
+			String getMeetingRequestsSQL = "SELECT * FROM MeetingRequests WHERE qid = ?";
+			PreparedStatement getMeetingRequestsStmt;
+			getMeetingRequestsStmt = getPreparedStatement( getMeetingRequestsSQL );
+			getMeetingRequestsStmt.setLong( 1, aQid );
+			ResultSet getMeetingRequestsResults = getMeetingRequestsStmt.executeQuery();
+
+			while( getMeetingRequestsResults.next() )
+			{
+				MeetingRequest nextMeetingRequest = new MeetingRequest();
+				nextMeetingRequest.init( getMeetingRequestsResults );
+				meetingRequests.add( nextMeetingRequest );
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return meetingRequests;
+	}
+
+	/**
+	 * Inserts the a row into the given table with the given column names and values
+	 * @param aTable Table to insert a new row into
+	 * @param aInsertParameters Parameters to use for the new row
+\	 * @throws SQLException
+	 */
+	public void insertIntoTable( String aTable, Map<String,Object> aInsertParameters ) throws SQLException
+	{
+		String insertTableSQL = "INSERT INTO " + aTable + " (";
+		String valuesSQL = " VALUES(";
+		Object[] objectsToInsert = new Object[aInsertParameters.size()];
+		int currentObjectArrayIndex = 0;
+
+		Iterator<String> tableColumns = aInsertParameters.keySet().iterator();
+		while( tableColumns.hasNext() )
+		{
+			String currentKey = tableColumns.next();
+			insertTableSQL += currentKey + ",";
+			valuesSQL += "?,";
+			objectsToInsert[currentObjectArrayIndex++] = aInsertParameters.get( currentKey );
+		}
+
+		insertTableSQL = insertTableSQL.substring( 0, insertTableSQL.length() - 1 ) + ")";
+		valuesSQL = valuesSQL.substring( 0, valuesSQL.length() - 1 ) + ")";
+		PreparedStatement insertRowStmt = getPreparedStatement( insertTableSQL + valuesSQL );
+
+		for( int i = 0; i < objectsToInsert.length; ++i )
+		{
+			insertRowStmt.setObject( i + 1, objectsToInsert[i] );
+		}
+
+		insertRowStmt.executeUpdate();
 	}
 
 	/**
