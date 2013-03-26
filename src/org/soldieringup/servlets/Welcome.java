@@ -22,7 +22,7 @@ import org.soldieringup.Roster;
 public class Welcome extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Logger log = Logger.getLogger (Welcome.class.getName ());
-       
+
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -34,35 +34,37 @@ public class Welcome extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		log.debug ("Loading Welcome Servlet");
 		retrieveRoster (request, response);
-		request.getRequestDispatcher ("/Index.jsp").include (request, response);
+		request.getRequestDispatcher ("/index.jsp").include (request, response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		retrieveRoster (request, response);
 		request.getRequestDispatcher ("index.jsp").include (request, response);
 	}
-	
+
 	private void retrieveRoster (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
 		Engine engine = new Engine ();
 		Map<Object, Roster> hm = engine.retrieveRoster ();
-		// Get a set of the entries 
-		Set set = hm.entrySet(); 
-		// Get an iterator 
-		Iterator i = set.iterator(); 
-		
-		while(i.hasNext()) { 
-			Map.Entry me = (Map.Entry)i.next(); 
-			log.debug ("Key:" + me.getKey() + ": "); 
-			log.debug ("Value:" + ((Roster)me.getValue()).get_title()); 
+		// Get a set of the entries
+		Set set = hm.entrySet();
+		// Get an iterator
+		Iterator i = set.iterator();
+
+		while(i.hasNext()) {
+			Map.Entry me = (Map.Entry)i.next();
+			log.debug ("Key:" + me.getKey() + ": ");
+			log.debug ("Value:" + ((Roster)me.getValue()).get_title());
 			}
-		
+
 		req.setAttribute ("roster", engine.retrieveRoster ());
 	}
 }
