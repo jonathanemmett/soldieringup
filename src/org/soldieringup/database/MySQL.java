@@ -16,8 +16,6 @@
 
 package org.soldieringup.database;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -32,15 +30,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.catalina.tribes.util.Arrays;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import org.soldieringup.Account;
 import org.soldieringup.Business;
@@ -191,29 +186,29 @@ public class MySQL
 	{
 		try {
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO `solderingup`.`accounts`" +
-										"(`fname`,"+
-										"`lname`,"+
-										"`company`,"+
-										"`cellphone`,"+
-										"`homephone`,"+
-										"`businessphone`,"+
-										"`address`,"+
-										"`city`,"+
-										"`state`,"+
-										"`zip`,"+
-										"`email`)"+
-										"VALUES"+
-										"(?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?)");
+					"(`fname`,"+
+					"`lname`,"+
+					"`company`,"+
+					"`cellphone`,"+
+					"`homephone`,"+
+					"`businessphone`,"+
+					"`address`,"+
+					"`city`,"+
+					"`state`,"+
+					"`zip`,"+
+					"`email`)"+
+					"VALUES"+
+					"(?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?)");
 			ps.setString (1, values.get ("fname"));
 			ps.setString (2, values.get ("lname"));
 			ps.setString (3, values.get ("company"));
@@ -228,11 +223,11 @@ public class MySQL
 			log.debug (ps.toString ());
 			int result = ps.executeUpdate();
 			if (result == 0) {
-		        	log.error (ps.getWarnings ());
-		        	throw new SQLException("Failed, no rows affected.");
-		        } else {
-		        	log.debug ("Successfully added " + result + " account to the database");
-		        }
+				log.error (ps.getWarnings ());
+				throw new SQLException("Failed, no rows affected.");
+			} else {
+				log.debug ("Successfully added " + result + " account to the database");
+			}
 
 		} catch (Exception e) {
 			log.error ("Failed to add account", e);
@@ -268,13 +263,13 @@ public class MySQL
 
 	public void addTags (HashMap<String, String> mp)
 	{
-		    Iterator<?> it = mp.entrySet().iterator();
-		    while (it.hasNext()) {
-		        @SuppressWarnings("rawtypes")
+		Iterator<?> it = mp.entrySet().iterator();
+		while (it.hasNext()) {
+			@SuppressWarnings("rawtypes")
 			Map.Entry pairs = (Map.Entry)it.next();
-		        addTag (pairs.getValue());
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }
+			addTag (pairs.getValue());
+			it.remove(); // avoids a ConcurrentModificationException
+		}
 
 	}
 
@@ -286,26 +281,15 @@ public class MySQL
 			log.debug (ps.toString ());
 			int result = ps.executeUpdate();
 			if (result == 0) {
-		        	log.error (ps.getWarnings ());
-		        	throw new SQLException("Failed, no rows affected.");
-		        } else {
-		        	log.debug ("Successfully added " + result + " to the tag database");
-		        }
+				log.error (ps.getWarnings ());
+				throw new SQLException("Failed, no rows affected.");
+			} else {
+				log.debug ("Successfully added " + result + " to the tag database");
+			}
 
 		} catch (Exception e) {
 			log.error ("Failed to add tag", e);
 		}
-	}
-
-	/**
-	 * Creates a prepared statement that allows for the return of generated primary keys
-	 * @param sql SQL statement to initialize the PreparedStatement with
-	 * @return The generated PreparedStatement
-	 * @throws SQLException
-	 */
-	public PreparedStatement getPreparedStatement(String sql) throws SQLException
-	{
-		return connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 	}
 
 	/**
@@ -314,9 +298,9 @@ public class MySQL
 	 * @return All the businesses associated with the given account
 	 * @throws SQLException Database could not be queried
 	 */
-	public Map<Integer,Business> getBusinessesFromOwner( long oid ) throws SQLException
+	public ArrayList<Business> getBusinessesFromOwner( long oid ) throws SQLException
 	{
-		Map<Integer,Business> businessesOwnerHas = new HashMap<Integer,Business>();
+		ArrayList<Business> businessesOwnerHas = new ArrayList<Business>();
 
 		String businessSelectSQL = "SELECT * FROM business JOIN accounts ON business.bid = accounts.aid WHERE uid = ?";
 		PreparedStatement businessesQuery = connect.prepareStatement( businessSelectSQL );
@@ -327,6 +311,7 @@ public class MySQL
 		{
 			Business nextBusiness = new Business();
 			nextBusiness.init( businessesResults );
+			businessesOwnerHas.add( nextBusiness );
 		}
 
 		return businessesOwnerHas;
@@ -368,14 +353,12 @@ public class MySQL
 	 */
 	public ZIP getZIP( String aZip )
 	{
-		MySQL connection = MySQL.getInstance();
-
 		ZIP queriedZip = new ZIP();
 		PreparedStatement stmt;
 
 		try
 		{
-			stmt = connection.getPreparedStatement("SELECT * FROM zip WHERE zip = ?");
+			stmt = connect.prepareStatement( "SELECT * FROM zip WHERE zip = ?" );
 
 			stmt.setString( 1, aZip );
 			ResultSet rs = stmt.executeQuery();
@@ -428,11 +411,12 @@ public class MySQL
 				newUser.setEmail(  userQueryResults.getString( "email" ) );
 				newUser.setZip( userQueryResults.getString( "zip" ) );
 			}
+
 		}
 		catch (SQLException e)
 		{
-			// Database could not be queried
 			log.log(Level.ERROR, null, e);
+			e.printStackTrace();
 		}
 
 		return newUser;
@@ -511,33 +495,34 @@ public class MySQL
 	 * @return					The result set containing the user's id
 	 */
 	public ResultSet registerUser( String aFirstName, String aLastName, String aEmail,
-								   String aAddress, String aPrimaryNumber, String aSecondaryNumber,
-								   String aPassword, String aZip, String aCity,
-								   String aState, Map<String, String> aErrors )
+			String aAddress, String aPrimaryNumber, String aSecondaryNumber,
+			String aPassword, String aZip, String aCity,
+			String aState, Map<String, String> aErrors )
 	{
-		MySQL databaseConnection = MySQL.getInstance();
 		try
 		{
 			verityZipInDatabase( aZip, aCity, aState );
-			PreparedStatement businessSQLInsert =
-					databaseConnection.getPreparedStatement("INSERT INTO Users( first_name, last_name, " +
-					"email, address, primary_number, secondary_number, password, salt, zip ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+			String businessInsertSQL  = "INSERT INTO Users( first_name, last_name, ";
+			businessInsertSQL		 +=	"email, address, primary_number, secondary_number, password, salt, zip ) ";
+			businessInsertSQL		 +=	"VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+			PreparedStatement businessInsertStmt = connect.prepareStatement( businessInsertSQL, Statement.RETURN_GENERATED_KEYS );
 
 			// The salt for the user will be the time that they registered
 			long salt = new Date().getTime();
 
-			businessSQLInsert.setString(1, aFirstName);
-			businessSQLInsert.setString(2, aLastName);
-			businessSQLInsert.setString(3, aEmail);
-			businessSQLInsert.setString(4, aAddress);
-			businessSQLInsert.setString(5, aPrimaryNumber);
-			businessSQLInsert.setString(6, aSecondaryNumber == null ? "" : aSecondaryNumber);
-			businessSQLInsert.setString(7, Utilities.sha1Output( salt + aPassword) );
-			businessSQLInsert.setLong( 8, salt );
-			businessSQLInsert.setString( 9, aZip );
+			businessInsertStmt.setString(1, aFirstName);
+			businessInsertStmt.setString(2, aLastName);
+			businessInsertStmt.setString(3, aEmail);
+			businessInsertStmt.setString(4, aAddress);
+			businessInsertStmt.setString(5, aPrimaryNumber);
+			businessInsertStmt.setString(6, aSecondaryNumber == null ? "" : aSecondaryNumber);
+			businessInsertStmt.setString(7, Utilities.sha1Output( salt + aPassword) );
+			businessInsertStmt.setLong( 8, salt );
+			businessInsertStmt.setString( 9, aZip );
 
-			businessSQLInsert.executeUpdate();
-			return businessSQLInsert.getGeneratedKeys();
+			businessInsertStmt.executeUpdate();
+			return businessInsertStmt.getGeneratedKeys();
 		}
 		catch (SQLException e)
 		{
@@ -567,14 +552,17 @@ public class MySQL
 		String query = "INSERT INTO ZIP VALUES( ZIP, City, State) ";
 		query += "VALUES(?,?,?)";
 		PreparedStatement stmt;
-		try {
-			stmt = getPreparedStatement( query );
+
+		try
+		{
+			stmt = connect.prepareStatement( query );
 			stmt.setString( 1, ZIP );
 			stmt.setString( 2, City );
 			stmt.setString( 3, State );
 			stmt.executeUpdate();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		}
+		catch (SQLException e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -591,7 +579,7 @@ public class MySQL
 		try
 		{
 			String newAccountSQL = "INSERT INTO accounts ( uid ) VALUES (?)";
-			PreparedStatement newAccountStmt = getPreparedStatement( newAccountSQL );
+			PreparedStatement newAccountStmt = connect.prepareStatement( newAccountSQL, Statement.RETURN_GENERATED_KEYS );
 			newAccountStmt.setLong( 1, aUid );
 			newAccountStmt.executeUpdate();
 			generatedKeys = newAccountStmt.getGeneratedKeys();
@@ -605,7 +593,7 @@ public class MySQL
 	}
 	/**
 	 * Registers a Veteran profile with SoldierUp
-	 * @param uid UID of ther person registering the Veteran Profile
+	 * @param uid UID of the person registering the Veteran Profile
 	 * @param goal The goal that Veteran wants to accomplish through SoldierUp
 	 * @return
 	 */
@@ -622,14 +610,13 @@ public class MySQL
 
 		try
 		{
-			PreparedStatement insertStmt = getPreparedStatement( insertSql );
+			PreparedStatement insertStmt = connect.prepareStatement( insertSql, Statement.RETURN_GENERATED_KEYS );
 			generatedUserID.next();
 
 			insertStmt.setLong( 1, generatedUserID.getLong( 1 ) );
 			insertStmt.setString( 2, goal );
 			insertStmt.executeUpdate();
 			generatedKeys = insertStmt.getGeneratedKeys();
-			System.out.println( "Generated keys: " + (generatedKeys == null ) );
 		}
 		catch (SQLException e)
 		{
@@ -650,7 +637,7 @@ public class MySQL
 		{
 			String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ?";
 
-			PreparedStatement updateVeteranPreparedStatement = getPreparedStatement( updateVeteranSQL );
+			PreparedStatement updateVeteranPreparedStatement = connect.prepareStatement( updateVeteranSQL );
 			updateVeteranPreparedStatement.setString( 1, goal );
 			updateVeteranPreparedStatement.setLong( 2, vid );
 			updateVeteranPreparedStatement.executeUpdate();
@@ -670,7 +657,7 @@ public class MySQL
 	{
 		try
 		{
-			PreparedStatement businessTransferStatement = getPreparedStatement( "UPDATE accounts SET uid = ? WHERE aid = ?" );
+			PreparedStatement businessTransferStatement = connect.prepareStatement( "UPDATE accounts SET uid = ? WHERE aid = ?" );
 			businessTransferStatement.setLong( 1, aUserId );
 			businessTransferStatement.setLong( 2, aBusinessId );
 			businessTransferStatement.executeUpdate();
@@ -693,8 +680,8 @@ public class MySQL
 	 * @return				The result set containing the new businesses id
 	 */
 	public ResultSet registerBusiness( int aContactID, String aBusinessName, String aShortSummary,
-								  	String aLongSummary, String aWorkNumber, String aAddress,
-								    String aCity, String aState, String aZip )
+			String aLongSummary, String aWorkNumber, String aAddress,
+			String aCity, String aState, String aZip )
 	{
 		ResultSet generatedUserID = addAccountToUser( aContactID );
 		if( generatedUserID == null )
@@ -706,11 +693,10 @@ public class MySQL
 		{
 			verityZipInDatabase( aZip, aCity, aState );
 
-			MySQL databaseConnection = MySQL.getInstance();
 			String businessInsertQuery = "INSERT INTO BUSINESS ";
 			businessInsertQuery += "(bid,name,short_summary,long_summary,work_number,address,ZIP)";
 			businessInsertQuery += "VALUES(?,?,?,?,?,?,?)";
-			PreparedStatement businessSQLInsert = databaseConnection.getPreparedStatement(businessInsertQuery);
+			PreparedStatement businessSQLInsert = connect.prepareStatement( businessInsertQuery, Statement.RETURN_GENERATED_KEYS );
 			businessSQLInsert.setLong( 1, generatedUserID.getLong( "aid" ) );
 			businessSQLInsert.setString( 2, aBusinessName );
 			businessSQLInsert.setString( 3, aShortSummary );
@@ -727,7 +713,6 @@ public class MySQL
 			log.error ("Business could not be registered", e);
 			return null;
 		}
-
 	}
 
 	/**
@@ -758,7 +743,7 @@ public class MySQL
 				updateVeteranSQL = updateVeteranSQL.substring(0, updateVeteranSQL.length() - 1 );
 				updateVeteranSQL += " WHERE vid = ?";
 
-				PreparedStatement updateVeteranStatement = getPreparedStatement( updateVeteranSQL );
+				PreparedStatement updateVeteranStatement = connect.prepareStatement( updateVeteranSQL );
 				int currentPreparedStatementIndex;
 
 				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
@@ -805,7 +790,7 @@ public class MySQL
 				updateBusinessSQL = updateBusinessSQL.substring(0, updateBusinessSQL.length() - 1 );
 				updateBusinessSQL += " WHERE bid = ?";
 
-				PreparedStatement updateBusinessStatement = getPreparedStatement( updateBusinessSQL );
+				PreparedStatement updateBusinessStatement = connect.prepareStatement( updateBusinessSQL );
 				int currentPreparedStatementIndex;
 
 				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
@@ -864,9 +849,9 @@ public class MySQL
 				updateBusinessSQL = updateBusinessSQL.substring( 0, updateBusinessSQL.length() - 1 );
 				updateBusinessSQL += " WHERE id = ?";
 
-				System.out.println( updateBusinessSQL );
+				System.out.println( updateBusinessSQL + " " + aUid );
 
-				PreparedStatement updateBusinessStatement = getPreparedStatement( updateBusinessSQL );
+				PreparedStatement updateBusinessStatement = connect.prepareStatement( updateBusinessSQL );
 				int currentPreparedStatementIndex;
 
 				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
@@ -876,6 +861,7 @@ public class MySQL
 
 				updateBusinessStatement.setLong( currentPreparedStatementIndex + 1, aUid );
 				updateBusinessStatement.executeUpdate();
+				System.out.println( "Update successful" );
 			}
 		}
 		catch(SQLException e)
@@ -963,7 +949,11 @@ public class MySQL
 		ResultSet photoKeys = null;
 		try
 		{
-			PreparedStatement insertPhoto = getPreparedStatement( "INSERT INTO Photos (bid, title, src) VALUES(?,?,?)" );
+			PreparedStatement insertPhoto = connect.prepareStatement(
+					"INSERT INTO Photos (bid, title, src) VALUES(?,?,?)",
+					Statement.RETURN_GENERATED_KEYS
+					);
+
 			insertPhoto.setLong( 1, bid );
 			insertPhoto.setString( 2, title );
 			insertPhoto.setString( 3, src );
@@ -1008,7 +998,7 @@ public class MySQL
 				updateProfilePhotoSql = "UPDATE business SET cover_src = ? WHERE bid = ?";
 			}
 
-			updateUser = getPreparedStatement( updateProfilePhotoSql );
+			updateUser = connect.prepareStatement( updateProfilePhotoSql );
 
 			updateUser.setString( 1, aSrc );
 			updateUser.setLong( 2, aOid );
@@ -1030,7 +1020,7 @@ public class MySQL
 		try
 		{
 			String insertSql = "INSERT IGNORE INTO tags(tag) VALUES( ? )";
-			PreparedStatement insertTagStmt = getPreparedStatement( insertSql );
+			PreparedStatement insertTagStmt = connect.prepareStatement( insertSql, Statement.RETURN_GENERATED_KEYS );
 			insertTagStmt.setString( 1, tag );
 			insertTagStmt.executeUpdate();
 			ResultSet insertTagId = insertTagStmt.getGeneratedKeys();
@@ -1060,7 +1050,7 @@ public class MySQL
 	 *
 	 * In the case that a tag is not found, this function also inserts
 	 * the tag into the database
- 	 * @param aTag Tag to get the id for
+	 * @param aTag Tag to get the id for
 	 * @return The tag id
 	 * @throws SQLException
 	 */
@@ -1068,7 +1058,7 @@ public class MySQL
 	{
 		String getTagIdSql = "SELECT id FROM Tags WHERE tag = ?";
 
-		PreparedStatement getTagIdStmt = getPreparedStatement( getTagIdSql );
+		PreparedStatement getTagIdStmt = connect.prepareStatement( getTagIdSql );
 		getTagIdStmt.setString( 1, aTag );
 		ResultSet getTagIdResult = getTagIdStmt.executeQuery();
 
@@ -1167,7 +1157,7 @@ public class MySQL
 			String query = "SELECT * FROM business JOIN accounts on aid = bid WHERE bid in ( SELECT aid FROM account_tags WHERE tid IN ( ";
 			query += tagIdQuery + " ) )";
 
-			PreparedStatement businessQueryStatement = getPreparedStatement( query );
+			PreparedStatement businessQueryStatement = connect.prepareStatement( query );
 			for( int i = 0; i < aTags.length; ++i )
 			{
 				businessQueryStatement.setString( i+1, "%"+aTags[i]+"%" );
@@ -1202,7 +1192,7 @@ public class MySQL
 		try
 		{
 			String questionTagsSql = "SELECT * FROM Tags WHERE id in ( SELECT tid FROM question_tags WHERE qid = ? )";
-			PreparedStatement questionTagsStmt = getPreparedStatement( questionTagsSql );
+			PreparedStatement questionTagsStmt = connect.prepareStatement( questionTagsSql );
 			questionTagsStmt.setLong( 1, aQid );
 			ResultSet questionTagsResult = questionTagsStmt.executeQuery();
 
@@ -1239,7 +1229,7 @@ public class MySQL
 		{
 			String tagsQuerySql = "SELECT * FROM TAGS WHERE id in ( SELECT tid FROM account_tags WHERE aid = ? )";
 
-			PreparedStatement tagsQueryStmt = getPreparedStatement( tagsQuerySql );
+			PreparedStatement tagsQueryStmt = connect.prepareStatement( tagsQuerySql );
 			tagsQueryStmt.setLong( 1, aOid );
 			ResultSet tagsResult = tagsQueryStmt.executeQuery();
 
@@ -1253,7 +1243,6 @@ public class MySQL
 		}
 		catch(SQLException e)
 		{
-			// TODO Auto-generated catch block
 			log.error ("Errors occured while searching for business tags", e);
 		}
 
@@ -1375,7 +1364,7 @@ public class MySQL
 			String insertQuestionSQL = "INSERT INTO questions (question_title, availability, question_detailed_description, vid) ";
 			insertQuestionSQL 		+= "VALUES( ?, ?, ?, ? )";
 
-			PreparedStatement insertQuestionStatement = getPreparedStatement( insertQuestionSQL );
+			PreparedStatement insertQuestionStatement = connect.prepareStatement( insertQuestionSQL, Statement.RETURN_GENERATED_KEYS );
 			insertQuestionStatement.setString( 1, aQuestionTitle );
 			insertQuestionStatement.setString( 2, aAvailability );
 			insertQuestionStatement.setString( 3, aQuestionDetailedDescription );
@@ -1385,7 +1374,6 @@ public class MySQL
 		}
 		catch( SQLException e )
 		{
-			e.printStackTrace();
 			log.error ("Failed to insert a question into the database", e);
 		}
 
@@ -1401,7 +1389,7 @@ public class MySQL
 		try
 		{
 			String removeTagsSql = "DELETE FROM question_tags WHERE qid = ?";
-			PreparedStatement removeTagsStmt = getPreparedStatement( removeTagsSql );
+			PreparedStatement removeTagsStmt = connect.prepareStatement( removeTagsSql );
 			removeTagsStmt.setLong( 1, aQid );
 			removeTagsStmt.executeUpdate();
 		}
@@ -1426,7 +1414,9 @@ public class MySQL
 				attachTagToQuestionSql  = "INSERT IGNORE INTO question_tags (qid, tid )";
 				attachTagToQuestionSql += "VALUE(?, ? )";
 
-				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToQuestionSql );
+				PreparedStatement attachTagStmt = connect.prepareStatement(
+						attachTagToQuestionSql );
+
 				attachTagStmt.setLong( 1, aQid );
 				attachTagStmt.setLong( 2, tagId );
 				attachTagStmt.executeUpdate();
@@ -1453,7 +1443,7 @@ public class MySQL
 		{
 			String getQuestionsSQL = "SELECT * FROM questions WHERE qid = ?";
 
-			PreparedStatement getQuestionsStatement = getPreparedStatement( getQuestionsSQL );
+			PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
 			getQuestionsStatement.setLong( 1, aQid );
 
 			ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
@@ -1485,7 +1475,7 @@ public class MySQL
 		{
 			String getQuestionsSQL = "SELECT * FROM questions WHERE vid = ?";
 
-			PreparedStatement getQuestionsStatement = getPreparedStatement( getQuestionsSQL );
+			PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
 			getQuestionsStatement.setLong( 1, aVid );
 
 			ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
@@ -1518,7 +1508,7 @@ public class MySQL
 		try
 		{
 			String findMeetingRequestSQL = "SELECT * From MeetingRequests WHERE qid = ? and bid = ?";
-			PreparedStatement findMeetingRequestStmt = getPreparedStatement( findMeetingRequestSQL );
+			PreparedStatement findMeetingRequestStmt = connect.prepareStatement( findMeetingRequestSQL );
 			findMeetingRequestStmt.setLong( 1, aQid );
 			findMeetingRequestStmt.setLong( 2, aBid );
 			ResultSet findMeetingRequestResults = findMeetingRequestStmt.executeQuery();
@@ -1549,7 +1539,7 @@ public class MySQL
 		{
 			String getMeetingRequestsSQL = "SELECT * FROM MeetingRequests WHERE qid = ?";
 			PreparedStatement getMeetingRequestsStmt;
-			getMeetingRequestsStmt = getPreparedStatement( getMeetingRequestsSQL );
+			getMeetingRequestsStmt = connect.prepareStatement( getMeetingRequestsSQL );
 			getMeetingRequestsStmt.setLong( 1, aQid );
 			ResultSet getMeetingRequestsResults = getMeetingRequestsStmt.executeQuery();
 
@@ -1592,7 +1582,10 @@ public class MySQL
 
 		insertTableSQL = insertTableSQL.substring( 0, insertTableSQL.length() - 1 ) + ")";
 		valuesSQL = valuesSQL.substring( 0, valuesSQL.length() - 1 ) + ")";
-		PreparedStatement insertRowStmt = getPreparedStatement( insertTableSQL + valuesSQL );
+		PreparedStatement insertRowStmt = connect.prepareStatement(
+				insertTableSQL + valuesSQL,
+				Statement.RETURN_GENERATED_KEYS
+				);
 
 		for( int i = 0; i < objectsToInsert.length; ++i )
 		{
@@ -1626,7 +1619,7 @@ public class MySQL
 		updateSQL += prepareWhereClause( aWhereParameters, parameters, currentParameterIndex );
 
 		System.out.println( updateSQL );
-		PreparedStatement updateStatement = getPreparedStatement( updateSQL );
+		PreparedStatement updateStatement = connect.prepareStatement( updateSQL );
 		bindParametersToStatement(parameters, updateStatement);
 
 		updateStatement.executeUpdate();
@@ -1682,7 +1675,7 @@ public class MySQL
 		deleteSQL += prepareWhereClause(aWhereParameters, parameterObjects, 0 );
 
 		System.out.println( deleteSQL );
-		PreparedStatement deleteStatement = getPreparedStatement( deleteSQL );
+		PreparedStatement deleteStatement = connect.prepareStatement( deleteSQL );
 		bindParametersToStatement( parameterObjects, deleteStatement );
 		deleteStatement.executeUpdate();
 	}
