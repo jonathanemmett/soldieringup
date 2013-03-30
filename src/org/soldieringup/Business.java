@@ -2,7 +2,9 @@ package org.soldieringup;
 
 import java.sql.ResultSet;
 
-import org.apache.commons.validator.routines.EmailValidator;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+
 
 /**
  * Class represents a registered business
@@ -39,6 +41,9 @@ public class Business extends SoldierUpAccount {
 			return BusinessDatabaseColumnsStrings[mDatabaseTableIndex];
 		}
 	}
+
+	@Id private ObjectId id;
+
 
 	public static String BusinessDatabaseColumnsStrings[] =
 		{
@@ -236,7 +241,7 @@ public class Business extends SoldierUpAccount {
 		if( Utilities.isElementInArray( aKey, BusinessDatabaseColumnsStrings) )
 		{
 			if( aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.ZIP.getDatabaseColumnIndex()] ||
-				aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumnIndex()] )
+					aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumnIndex()] )
 			{
 				return Utilities.stringIsNumeric( aValue );
 			}
@@ -246,5 +251,10 @@ public class Business extends SoldierUpAccount {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "Business [id=" + id + ", name=" + name + ", address=" + address + ", zip=" + zip + "]";
 	}
 }
