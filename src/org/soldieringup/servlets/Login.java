@@ -151,6 +151,7 @@ public class Login extends HttpServlet
 		if( ownedBusinesses.size() > 0 )
 		{
 			currentSession.setAttribute( "aid", ownedBusinesses.get( 0 ).getAid() );
+			currentSession.setAttribute( "editing_account_type", "business" );
 			request.getRequestDispatcher( "/editBusiness.jsp" ).forward( request, response );
 		}
 
@@ -158,6 +159,7 @@ public class Login extends HttpServlet
 		if( foundVeteran != null )
 		{
 			currentSession.setAttribute( "aid", foundVeteran.getAid() );
+			currentSession.setAttribute( "editing_account_type", "veteran" );
 			request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
 		}
 	}
