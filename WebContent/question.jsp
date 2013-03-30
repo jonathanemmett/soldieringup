@@ -5,11 +5,12 @@
 <%@ page import="org.soldieringup.Veteran" %>
 <%@ page import="org.soldieringup.database.MySQL" %>
 <%
-	session.setAttribute( "uid", 39 );
-	session.setAttribute( "aid", 14 );
-	session.setAttribute( "editing_account_type" , "business" );
-	long questionIndex;
+	if( session.getAttribute( "aid" ) == null )
+	{
+		%><jsp:forward page="/login.jsp"/><%
+	}
 
+	long questionIndex;
 	if( request.getParameter( "qid" ) != null )
 	{
 		questionIndex = Long.valueOf( request.getParameter( "qid" ).toString() );
@@ -18,9 +19,15 @@
 	{
 		questionIndex = 1;
 	}
-	
+
+	long accountId = Long.valueOf( session.getAttribute( "aid" ).toString() );
 	MySQL databaseConnection = MySQL.getInstance();
 	Question queriedQuestion = databaseConnection.getQuestionFromId( questionIndex );
+	
+	if( session.getAttribute( "editing_account_type" ).equals( "veteran" ) && accountId != queriedQuestion.getVid() )
+	{
+		%><jsp:forward page="/login.jsp"/><%
+	}
 %>
 <!DOCTYPE html>
 <html>
