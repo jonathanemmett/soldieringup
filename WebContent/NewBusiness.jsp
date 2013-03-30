@@ -3,7 +3,6 @@
 <%@ page import="java.util.*"%>
 <%@ page import="org.soldieringup.database.MySQL"%>
 <%@ page import="org.soldieringup.Business"%>
-<%@ page import="org.soldieringup.Divisions"%>
 <%@ page import="org.soldieringup.User"%>
 <%@ page import="org.soldieringup.ZIP"%>
 <%@ page import="org.soldieringup.Utilities"%>
@@ -32,7 +31,7 @@ catch( ClassCastException e)
 %>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Register</title>
-<link href="Styles/Styles.css" rel="stylesheet" />
+<link href="Styles/styles.css" rel="stylesheet" />
 <link href="Styles/formStyles.css" rel="stylesheet" />
 <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
