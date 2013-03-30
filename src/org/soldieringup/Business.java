@@ -1,7 +1,5 @@
 package org.soldieringup;
 
-import java.sql.ResultSet;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 
@@ -13,50 +11,7 @@ import org.springframework.data.annotation.Id;
  */
 public class Business extends SoldierUpAccount {
 
-	public static enum BusinessDatabaseColumns
-	{
-		BID (0),
-		NAME (1),
-		SHORT_SUMMARY (2),
-		LONG_SUMMARY (3),
-		WORK_NUMBER (4),
-		ADDRESS (5),
-		ZIP (6),
-		COVER_SRC (7);
-
-		int mDatabaseTableIndex;
-
-		private BusinessDatabaseColumns( int aDatabaseTableIndex )
-		{
-			this.mDatabaseTableIndex = aDatabaseTableIndex;
-		}
-
-		public int getDatabaseColumnIndex()
-		{
-			return mDatabaseTableIndex;
-		}
-
-		public String getDatabaseColumn()
-		{
-			return BusinessDatabaseColumnsStrings[mDatabaseTableIndex];
-		}
-	}
-
 	@Id private ObjectId id;
-
-
-	public static String BusinessDatabaseColumnsStrings[] =
-		{
-		"bid",
-		"name",
-		"short_summary",
-		"long_summary",
-		"work_number",
-		"address",
-		"ZIP",
-		"cover_src"
-		};
-
 	private long bid;
 	private String cover_src;
 	private String name;
@@ -72,21 +27,6 @@ public class Business extends SoldierUpAccount {
 	public Business( )
 	{
 
-	}
-
-	@Override
-	public void init( ResultSet aBusinessResultSet ) throws java.sql.SQLException
-	{
-		super.init( aBusinessResultSet );
-
-		bid = aBusinessResultSet.getLong( BusinessDatabaseColumns.BID.getDatabaseColumn() );
-		cover_src = aBusinessResultSet.getString( BusinessDatabaseColumns.COVER_SRC.getDatabaseColumn() );
-		name = aBusinessResultSet.getString( BusinessDatabaseColumns.NAME.getDatabaseColumn() );
-		short_summary = aBusinessResultSet.getString( BusinessDatabaseColumns.SHORT_SUMMARY.getDatabaseColumn() );
-		long_summary = aBusinessResultSet.getString( BusinessDatabaseColumns.LONG_SUMMARY.getDatabaseColumn() );
-		work_number = aBusinessResultSet.getString( BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumn() );
-		address = aBusinessResultSet.getString( BusinessDatabaseColumns.ADDRESS.getDatabaseColumn() );
-		zip = aBusinessResultSet.getString( BusinessDatabaseColumns.ZIP.getDatabaseColumn() );
 	}
 
 	/**
@@ -238,18 +178,6 @@ public class Business extends SoldierUpAccount {
 	 */
 	public static boolean isValidDatabaseInput( String aKey, String aValue )
 	{
-		if( Utilities.isElementInArray( aKey, BusinessDatabaseColumnsStrings) )
-		{
-			if( aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.ZIP.getDatabaseColumnIndex()] ||
-					aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumnIndex()] )
-			{
-				return Utilities.stringIsNumeric( aValue );
-			}
-			else
-			{
-				return aValue != null;
-			}
-		}
 		return false;
 	}
 

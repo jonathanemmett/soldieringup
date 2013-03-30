@@ -54,10 +54,8 @@ public class BusinessRepository
 		return mongoOperations.findAll(Business.class);
 	}
 
-	public List<Business> findBusiness (Business business)
+	public List<Business> findBusiness (String fieldName, Object fieldValue)
 	{
-		return mongoOperations.find (
-				new Query(Criteria.where("name").is(business.getBusinessName ())),
-				Business.class);
+		return mongoOperations.find (new Query(Criteria.where(fieldName).is(fieldValue)),Business.class);
 	}
 }

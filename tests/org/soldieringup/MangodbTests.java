@@ -73,7 +73,7 @@ public class MangodbTests
 		bus2.setZip ("1231231");
 		businessRepository.insert (bus2);
 
-		List<Business> results = businessRepository.findBusiness (bus);
+		List<Business> results = businessRepository.findBusiness ("name", "ZEDCM");
 		Business result = results.get (0);
 		System.out.println (results);
 		assertTrue (result.getZip ().equals (bus.getZip ()));
