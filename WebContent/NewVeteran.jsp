@@ -175,8 +175,6 @@ MySQL databaseConnection = MySQL.getInstance();
 	</div>
 </section>
 <script type="text/javascript" >
-/*var addElement = document.getElementById("add_position");
-  addElement.addEventListener("mousedown", addPosition, true);*/
 
 window.onload = function( event ){
 	maskNumbers();
