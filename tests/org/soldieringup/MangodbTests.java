@@ -10,16 +10,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.soldieringup.database.BusinessRepository;
+import org.soldieringup.database.UserRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.mongodb.DBCollection;
 
 public class MangodbTests
 {
 	ConfigurableApplicationContext context;
-	BusinessRepository businessRepository;
+	UserRepository userRepository;
 
 	@BeforeClass
 	public static void setUpBeforeClass () throws Exception
@@ -30,53 +28,38 @@ public class MangodbTests
 	{}
 
 	@After
-	public void tearDOwn () throws Exception
+	public void tearDown () throws Exception
 	{
 		// so our tests are clean each time
-		DBCollection collection = businessRepository.getCollection ();
-		collection.drop ();
+		userRepository.dropCollection ();
 	}
 
 	@Before
 	public void setUp () throws Exception
 	{
 		context = new ClassPathXmlApplicationContext("org/soldieringup/mongo-config.xml");
-		businessRepository = context.getBean(BusinessRepository.class);
+		userRepository = context.getBean(UserRepository.class);
 	}
 
 	@Test
-	public void testInsert ()
+	public void testUserInsert ()
 	{
+		User user = new User ();
+		user.setFirstName ("John");
+		user.setLastName ("Doe");
+		user.setZip ("65301");
 		Business bus = new Business ();
 		bus.setAddress ("Oak Grove");
 		bus.setName ("ZEDCM");
 		bus.setZip ("64075");
-		businessRepository.insert (bus);
-		List<Business> results = businessRepository.findAll ();
-		Business result = results.get (0);
+		user.setBusiness (bus);
+
+		userRepository.insert (user);
+		List<User> results = userRepository.find ("first_name", "John");
+		User result = results.get (0);
+		System.out.println ("Total Matches:" + results.size ());
 		System.out.println (results);
-		assertTrue (result.getZip ().equals (bus.getZip ()));
+		assertTrue (result.getZip ().equals (user.getZip ()));
+		assertTrue (result.getBusiness ().getName ().equals (bus.getName ()));
 	}
-
-	@Test
-	public void testFindBusinessName ()
-	{
-		Business bus = new Business ();
-		bus.setAddress ("Oak Grove");
-		bus.setName ("ZEDCM");
-		bus.setZip ("64075");
-		businessRepository.insert (bus);
-
-		Business bus2 = new Business ();
-		bus2.setAddress ("Oak Grove");
-		bus2.setName ("Ninja-Tools");
-		bus2.setZip ("1231231");
-		businessRepository.insert (bus2);
-
-		List<Business> results = businessRepository.findBusiness ("name", "ZEDCM");
-		Business result = results.get (0);
-		System.out.println (results);
-		assertTrue (result.getZip ().equals (bus.getZip ()));
-	}
-
 }
