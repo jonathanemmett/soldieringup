@@ -33,13 +33,13 @@ public class Login extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Login() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public Login() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * This doGet method removes any login errors, and redirects the user to the login page.
@@ -144,22 +144,23 @@ public class Login extends HttpServlet
 		MySQL databaseConnection = MySQL.getInstance();
 		HttpSession currentSession = request.getSession();
 		currentSession.setAttribute( "uid", aLoggedInUser.getId() );
-		Map<Integer, Business> ownedBusinesses;
+		ArrayList<Business> ownedBusinesses;
 
 		ownedBusinesses = databaseConnection.getBusinessesFromOwner( aLoggedInUser.getId() );
 
 		if( ownedBusinesses.size() > 0 )
 		{
-			List<Integer> businessIDs = new ArrayList<Integer>( ownedBusinesses.keySet() );
-			currentSession.setAttribute( "aid", businessIDs.get( 0 ) );
-			request.getRequestDispatcher( "editBusiness.jsp" ).forward( request, response );
+			currentSession.setAttribute( "aid", ownedBusinesses.get( 0 ).getAid() );
+			currentSession.setAttribute( "editing_account_type", "business" );
+			request.getRequestDispatcher( "/editBusiness.jsp" ).forward( request, response );
 		}
 
 		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getId() );
 		if( foundVeteran != null )
 		{
 			currentSession.setAttribute( "aid", foundVeteran.getAid() );
-			request.getRequestDispatcher( "editVeteranProfile.jsp" ).forward( request, response );
+			currentSession.setAttribute( "editing_account_type", "veteran" );
+			request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
 		}
 	}
 }

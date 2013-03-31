@@ -22,18 +22,19 @@ import org.soldieringup.database.MySQL;
 @WebServlet("/UpdateUserProfile")
 public class UpdateUserProfile extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateUserProfile() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UpdateUserProfile() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
@@ -41,28 +42,29 @@ public class UpdateUserProfile extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if( request.getSession().getAttribute( "id" ) != null )
+		if( request.getSession().getAttribute( "uid" ) != null )
 		{
-			long bid = Long.valueOf( request.getSession().getAttribute( "id" ).toString() );
+			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
-			
+
 			while( keysIterator.hasNext() )
 			{
 				String currentKey = keysIterator.next();
-				
+
 				if( User.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
-			
-			MySQL.getInstance().updateUser( bid, updateParameters );
-			
-			if( request.getSession().getAttribute( "bid" ) != null )
+
+			MySQL.getInstance().updateUser( uid, updateParameters );
+
+			if( request.getSession().getAttribute( "editing_account_type" ).equals( "business" ) )
 			{
 				request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 			}
