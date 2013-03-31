@@ -1,4 +1,4 @@
-package org.soldieringup.database;
+package org.soldieringup.utils;
 
 import java.util.ArrayList;
 

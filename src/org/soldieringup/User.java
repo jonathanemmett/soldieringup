@@ -1,5 +1,9 @@
 package org.soldieringup;
 
+import java.util.List;
+
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 /**
  * Class represents a user in the database
  * @author Jake
@@ -11,6 +15,10 @@ public class User extends SoldierUpAccount
 	private String last_name;
 	private Business business;
 	private Veteran veteran;
+	@DBRef
+	private War war;
+	@DBRef
+	private List<Tag> tag;
 
 	public String getFirstName()
 	{
@@ -54,6 +62,38 @@ public class User extends SoldierUpAccount
 	public Veteran getVeteran ()
 	{
 		return veteran;
+	}
+
+	/**
+	 * @return the war
+	 */
+	public War getWar ()
+	{
+		return war;
+	}
+
+	/**
+	 * @param war the war to set
+	 */
+	public void setWar (War war)
+	{
+		this.war = war;
+	}
+
+	/**
+	 * @return the tag
+	 */
+	public List<Tag> getTag ()
+	{
+		return tag;
+	}
+
+	/**
+	 * @param tag the tag to set
+	 */
+	public void setTag (List<Tag> tag)
+	{
+		this.tag = tag;
 	}
 
 	/**

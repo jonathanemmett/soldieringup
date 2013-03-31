@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Abstract Class that all accounts inherit from
  *
  */
+@Document
 public abstract class SoldierUpAccount
 {
 	@Id
@@ -20,7 +23,6 @@ public abstract class SoldierUpAccount
 	protected Photo profilePhoto;
 	protected List<Photo> photos;
 	protected String cover_src;
-	protected String name;
 	protected String short_summary;
 	protected String long_summary;
 	protected String work_number;
@@ -28,6 +30,7 @@ public abstract class SoldierUpAccount
 	protected String zip;
 	protected String primary_number;
 	protected String secondary_number;
+	@Indexed
 	protected String email;
 
 	/**
@@ -108,16 +111,6 @@ public abstract class SoldierUpAccount
 		return mProfileSrc;
 	}
 
-
-	/**
-	 * Gets the name
-	 * @return The name
-	 */
-	public String getName ()
-	{
-		return name;
-	}
-
 	/**
 	 * Gets the short summary
 	 * @return The short summary
@@ -179,15 +172,6 @@ public abstract class SoldierUpAccount
 	public void setCoverSrc( String cover_src )
 	{
 		this.cover_src = cover_src;
-	}
-
-	/**
-	 * Sets the name
-	 * @param name Name
-	 */
-	public void setName ( String name )
-	{
-		this.name = name;
 	}
 
 	/**

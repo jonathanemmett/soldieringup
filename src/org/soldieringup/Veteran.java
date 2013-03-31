@@ -2,17 +2,23 @@ package org.soldieringup;
 
 import java.util.GregorianCalendar;
 
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 /**
  * Class to represent
  * @author Jake
  *
  */
-
-public class Veteran extends SoldierUpAccount
+public class Veteran
 {
+	@Id
+	protected ObjectId id;
 	private String mGoal = null;
 	private GregorianCalendar start;
 	private GregorianCalendar end;
+	@Indexed
 	private DEVISION devision;
 
 	/**

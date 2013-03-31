@@ -1,10 +1,12 @@
 package org.soldieringup;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 
 public class MeetingRequest
 {
+	@Id
+	protected ObjectId id;
 	private long bid;
 	private long qid;
 	private String time;
@@ -12,27 +14,6 @@ public class MeetingRequest
 	private String location;
 	private String veteran_showed;
 	private char business_showed;
-
-	/**
-	 * Default constructor
-	 */
-	public MeetingRequest()
-	{
-	}
-
-	/**
-	 * Initializes the object with the given result set
-	 * @param aAccountResultSet Result set to initialize the meeting request with
-	 */
-	public void init(ResultSet aAccountResultSet) throws SQLException
-	{
-		this.bid = aAccountResultSet.getLong( "bid" );
-		this.qid = aAccountResultSet.getLong( "qid" );
-		this.time = aAccountResultSet.getString( "time" );
-		this.day = aAccountResultSet.getString( "day" );
-		this.location = aAccountResultSet.getString( "location" );
-		this.veteran_showed = aAccountResultSet.getString( "veteran_showed" );
-	}
 
 	/**
 	 * Sets the id of the business who created the meeting request
@@ -89,7 +70,7 @@ public class MeetingRequest
 	}
 
 	/**
-	  * Sets the status of how the business showed up
+	 * Sets the status of how the business showed up
 	 * @param aVeteranShowed The status of how the business showed up
 	 */
 	public void setBusinessShowed( char aBusinessShowed )

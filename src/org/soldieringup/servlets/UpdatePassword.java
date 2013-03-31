@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.soldieringup.database.MySQL;
-import org.soldieringup.database.PasswordValidator;
+import org.soldieringup.utils.PasswordValidator;
 
 /**
  * Servlet implementation class PasswordUpdate

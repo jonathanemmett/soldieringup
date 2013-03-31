@@ -1,5 +1,9 @@
 package org.soldieringup;
 
+import java.util.List;
+
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 
 
 /**
@@ -10,6 +14,9 @@ package org.soldieringup;
 public class Business extends SoldierUpAccount {
 
 	private long bid;
+	private String name;
+	@DBRef
+	private List<Tag> tag;
 
 	/**
 	 * Gets the business id
@@ -27,6 +34,38 @@ public class Business extends SoldierUpAccount {
 	public void setBid( long bid )
 	{
 		this.bid = bid;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName ()
+	{
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName (String name)
+	{
+		this.name = name;
+	}
+
+	/**
+	 * @return the tag
+	 */
+	public List<Tag> getTag ()
+	{
+		return tag;
+	}
+
+	/**
+	 * @param tag the tag to set
+	 */
+	public void setTag (List<Tag> tag)
+	{
+		this.tag = tag;
 	}
 
 	/**
