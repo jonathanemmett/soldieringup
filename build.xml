@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="soldieringup" default="war" basedir=".">
+
+	<property name="project-name" value="soldieringup" />
+	<property name="builder" value="TeamCakes" />
+	<tstamp prefix="build-info">
+		<format property="current-date" pattern="d-MMMM-yyyy" locale="en" />
+		<format property="current-time" pattern="hh:mm:ss a z" locale="en" />
+	</tstamp>
+	<property name="war-file-name" value="soldierup-${build-info.current-date}.war" />
+	<property name="source-directory" value="src" />
+	<property name="classes-directory" value="build/classes" />
+	<property name="web-directory" value="WebContent" />
+	<property name="web-xml-file" value="WebContent/web.xml" />
+	<property name="build-directory" value="build" />
+
+	<target name="war" depends="">
+		<mkdir dir="${build-directory}" />
+		<delete file="${build-directory}/${war-file-name}" />
+		<war warfile="${build-directory}/${war-file-name}" webxml="${web-xml-file}">
+			<classes dir="${classes-directory}" />
+			<fileset dir="${web-directory}">
+				<!-- Need to exclude it since webxml is an attribute of the war tag above -->
+				<exclude name="web.xml" />
+				<exclude name="WEB-INF/lib/"/>
+			</fileset>
+			<manifest>
+				<attribute name="Built-By" value="${builder}" />
+				<attribute name="Built-On" value="${build-info.current-date}" />
+				<attribute name="Built-At" value="${build-info.current-time}" />
+			</manifest>
+		</war>
+	</target>
+</project>
