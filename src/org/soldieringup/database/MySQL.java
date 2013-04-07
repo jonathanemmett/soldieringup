@@ -42,7 +42,6 @@ import org.soldieringup.Business;
 import org.soldieringup.MeetingRequest;
 import org.soldieringup.Photo;
 import org.soldieringup.Question;
-import org.soldieringup.Roster;
 import org.soldieringup.Tag;
 import org.soldieringup.User;
 import org.soldieringup.Utilities;
@@ -63,10 +62,6 @@ public class MySQL
 	private Connection connect = null;
 
 	// database table column titles
-	private static final String _roster_title = "title";
-	private static final String _roster_description = "description";
-	private static final String _roster_id = "id";
-	private static final String _roster_tags = "tags";
 	private static final String _tag_name = "name";
 	private static final String _tag_id = "id";
 
@@ -105,75 +100,6 @@ public class MySQL
 		} catch (SQLException ex) {
 			log.log(Level.ERROR, null, ex);
 		}
-	}
-
-	public Map<Object,Roster> retrieveRoster () throws SQLException
-	{
-		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster`");
-		return retrieveRoster (ps);
-	}
-	public Map<Object,Roster> retrieveRoster (int account_id) throws SQLException
-	{
-		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster` WHERE account_id=?");
-		ps.setInt (1, account_id);
-		return retrieveRoster (ps);
-	}
-
-	private Map<Object,Roster> retrieveRoster (PreparedStatement ps)
-	{
-		Map<Object,Roster> mp = new HashMap<Object, Roster>();
-		// got all the Roster entries
-		try {
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Roster roster = new Roster ();
-				roster = parse(rs, roster);
-				mp.put (roster.get_id (), roster);
-			}
-		} catch (Exception e) {
-			log.error ("Failed to retrieve roster events", e);
-		}
-		log.debug ("Loaded " + mp.size () + "Roster posts from the database");
-		return mp;
-	}
-
-	private Roster parse (ResultSet rs, Roster roster) throws SQLException
-	{
-		roster.set_id (rs.getInt (_roster_id));
-		roster.set_title (rs.getString (_roster_title));
-		roster.set_description (rs.getString (_roster_description));
-		List<Tag> tags = tags( splitTags (rs.getString (_roster_tags)));
-		roster.set_tags (tags);
-		return roster;
-	}
-
-	/**
-	 * Split the tags IDs into an array
-	 * @param tags
-	 * @return
-	 */
-	private String[] splitTags (String tags)
-	{
-		tags = "java;Legal;Mechanical";
-		String[] tags_array = tags.split (";");
-		return tags_array;
-	}
-
-	/**
-	 * Should retrieve the tags from the database
-	 * @param tags_array
-	 * @return
-	 */
-	private List<Tag> tags (String[] tags_array)
-	{
-		List<Tag> ls = new ArrayList<Tag>();
-		for (String s : tags_array)
-		{
-			Tag tag = new Tag ();
-			tag.set_name (s);
-		}
-
-		return ls;
 	}
 
 	public Map<Object, Account> retrieveAccounts ()

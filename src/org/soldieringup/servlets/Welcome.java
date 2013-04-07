@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.soldieringup.Engine;
-import org.soldieringup.Roster;
 
 /**
  * Servlet implementation class Welcome
@@ -37,7 +36,6 @@ public class Welcome extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		log.debug ("Loading Welcome Servlet");
-		retrieveRoster (request, response);
 		request.getRequestDispatcher ("/index.jsp").include (request, response);
 	}
 
@@ -45,26 +43,9 @@ public class Welcome extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		retrieveRoster (request, response);
-		request.getRequestDispatcher ("index.jsp").include (request, response);
-	}
-
-	private void retrieveRoster (HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		Engine engine = new Engine ();
-		Map<Object, Roster> hm = engine.retrieveRoster ();
-		// Get a set of the entries
-		Set set = hm.entrySet();
-		// Get an iterator
-		Iterator i = set.iterator();
 
-		while(i.hasNext()) {
-			Map.Entry me = (Map.Entry)i.next();
-			log.debug ("Key:" + me.getKey() + ": ");
-			log.debug ("Value:" + ((Roster)me.getValue()).get_title());
-			}
-
-		req.setAttribute ("roster", engine.retrieveRoster ());
 	}
+
 }

@@ -33,33 +33,7 @@ public class Engine
 
 	public Engine ()
 	{
-		
-	}
-	
-	/**
-	 * retrieve events from the database
-	 * @return
-	 */
-	public Map<Object,Roster> retrieveRoster ()
-	{
-		MySQL mysql = MySQL.getInstance();
-		try {
-			return mysql.retrieveRoster ();
-		} catch (SQLException e) {
-			log.error ("Failed to retrieve roster", e);
-		}
-		return null;
-	}
-	
-	public Map<Object,Roster> retrieveRoster (int account_id)
-	{
-		MySQL mysql = MySQL.getInstance();
-		try {
-			return mysql.retrieveRoster ();
-		} catch (SQLException e) {
-			log.error ("Failed to retrieve roster", e);
-		}
-		return null;
+
 	}
 
 	public Map<Object,Account> retrieveAccounts ()
@@ -72,7 +46,7 @@ public class Engine
 	{
 		MySQL mysql = MySQL.getInstance();
 		mysql.AddAccount (values);
-		
+
 	}
 
 	public Map<Integer, Tag> retrieveTags ()
