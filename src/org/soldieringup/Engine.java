@@ -16,11 +16,7 @@
 
 package org.soldieringup;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
-import org.soldieringup.database.MySQL;
 
 /**
  * @author jjennings
@@ -35,26 +31,4 @@ public class Engine
 
 	}
 
-	/**
-	 * retrieve events from the database
-	 * @return
-	 */
-	public Map<Object,Account> retrieveAccounts ()
-	{
-		MySQL mysql = MySQL.getInstance();
-		return mysql.retrieveAccounts ();
-	}
-
-	public void AddAccount (HashMap<String, String> values)
-	{
-		MySQL mysql = MySQL.getInstance();
-		mysql.AddAccount (values);
-
-	}
-
-	public void addTags (HashMap<String, String> values)
-	{
-		MySQL mysql = MySQL.getInstance();
-		mysql.addTags (values);
-	}
 }
