@@ -1,7 +1,6 @@
 package org.soldieringup;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,26 +22,37 @@ public class Utilities {
 	 * @throws NoSuchAlgorithmException System does not have the Sha-1 algorithm
 	 * @throws UnsupportedEncodingException does not support UTF-8 encoding
 	 */
-	public static String sha1Output( String aString) throws NoSuchAlgorithmException, UnsupportedEncodingException
+	public static String sha1Output( String aString)
 	{
-		MessageDigest md = null;
-		md = MessageDigest.getInstance("SHA-1");
-		return byteArrayToHexString( md.digest( aString.getBytes( "UTF-8") ) );
+		try
+		{
+			MessageDigest md = null;
+			md = MessageDigest.getInstance("SHA-1");
+			return byteArrayToHexString( md.digest( aString.getBytes( "UTF-8") ) );
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			return aString;
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			return aString;
+		}
 	}
-	
+
 	/**
 	 * Takes in an array of bytes, and converts it to its proper hexadecimal string
 	 * @param aBytes The bytes array to convert to a string
 	 * @return The converted hexadecimal string
 	 */
 	public static String byteArrayToHexString(byte[] aBytes) {
-		  String result = "";
-		  for (int i=0; i < aBytes.length; i++) {
-		    result += Integer.toString( ( aBytes[i] & 0xff ) + 0x100, 16).substring( 1 );
-		  }
-		  return result;
+		String result = "";
+		for (int i=0; i < aBytes.length; i++) {
+			result += Integer.toString( ( aBytes[i] & 0xff ) + 0x100, 16).substring( 1 );
+		}
+		return result;
 	}
-	
+
 	/**
 	 * Determine if a given string is a numeric string
 	 * @param aString String to check
@@ -57,10 +67,10 @@ public class Utilities {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Determines if a given string from a request with a given key is null. If it is, we add an error to the error map
 	 * @param aString Key to check
@@ -74,38 +84,38 @@ public class Utilities {
 			aErrorMap.put(aString, "required" );
 		}
 	}
-	
+
 	/**
-	 * Prints out a error span if the given key has an error 
+	 * Prints out a error span if the given key has an error
 	 * @param aWriter JspWriter that we will output the error to
 	 * @param aKey The key used to search for an error.
 	 */
 	public static void printErrorSpan( JspWriter aWriter, String aKey, Map<String,String> aErrors )
 	{
-		try 
-		{	
+		try
+		{
 			if( aErrors != null && aErrors.containsKey( aKey ) )
 			{
 				aWriter.print("<span class=\"form_error\">"+aErrors.get( aKey ) + "</span>");
 			}
-		} 
+		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-		}	
+		}
 	}
-	
+
 	public static String getValueFromString( String value )
 	{
 		return value == null ? "" : value;
 	}
-	
+
 	/**
 -	 * Checks to see if a given element is in an array
-  	 * @param aElement Element to check
-  	 * @param aArray Array to search
-  	 * @return True if the given element exists in the given array,
-  	 * 		   false otherwise.  
+	 * @param aElement Element to check
+	 * @param aArray Array to search
+	 * @return True if the given element exists in the given array,
+	 * 		   false otherwise.
 	 */
 	public static boolean isElementInArray( String aElement, String[] aArray )
 	{
@@ -123,8 +133,8 @@ public class Utilities {
 	/**
 	 * Generates a password from a given set of inputs.
 	 * 
-	 * This password returns a generated string in clear text. Make sure to encrypt 
-	 * the password before inserting it into the database.  
+	 * This password returns a generated string in clear text. Make sure to encrypt
+	 * the password before inserting it into the database.
 	 * @param numberOfDigits The number of digits the password must have
 	 * @param numberOfAlphabeticalCharacters The number of alphabetical characters the password must have
 	 * @param numberOfSpecialCharacters The number of special characters the password must have. Special characters
@@ -136,36 +146,36 @@ public class Utilities {
 		int passwordLength = numberOfDigits + numberOfAlphabeticalCharacters + numberOfSpecialCharacters;
 		char password[] = new char[passwordLength];
 		int currentPasswordIndex = 0;
-		
+
 		String letters = "abcdefghijklmnopqrstuvwxyz";
 		String digits = "0123456789";
 		String specialCharacters = "!@#$%^&&*()_+='\"{}\\";
-		
+
 		for( int i = 0; i < numberOfDigits; ++i )
 		{
 			password[currentPasswordIndex++] = digits.charAt( (int)( Math.random() * digits.length() ) );
 		}
-		
+
 		for( int i = 0; i < numberOfAlphabeticalCharacters; ++i )
 		{
 			password[currentPasswordIndex++] = letters.charAt( (int)( Math.random() * letters.length() ) );
 		}
-		
+
 		for( int i = 0; i < numberOfSpecialCharacters; ++i )
 		{
 			password[currentPasswordIndex++] = specialCharacters.charAt( (int)( Math.random() * specialCharacters.length() ) );
 		}
-		
+
 		// Scramble the password
 		for( int i = 0; i < password.length; ++i )
 		{
 			int randIndex = (int)( Math.random() * password.length );
-			
+
 			char tempChar = password[i];
 			password[i] = password[randIndex];
 			password[randIndex] = tempChar;
 		}
-		
+
 		return new String( password );
 	}
 }

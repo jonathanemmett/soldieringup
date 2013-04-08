@@ -15,6 +15,9 @@ public class Business extends SoldierUpAccount {
 
 	private long bid;
 	private String name;
+	protected String short_summary;
+	protected String long_summary;
+	protected String work_number;
 	@DBRef
 	private List<Tag> tag;
 
@@ -53,6 +56,57 @@ public class Business extends SoldierUpAccount {
 	}
 
 	/**
+	 * Gets the short summary
+	 * @return The short summary
+	 */
+	public String getShortSummary()
+	{
+		return short_summary;
+	}
+
+	/**
+	 * Sets the short summary
+	 * @param short_summary Short Summary
+	 */
+	public void setShortSummary( String short_summary )
+	{
+		this.short_summary = short_summary;
+	}
+
+	/**
+	 * Gets the long summary
+	 * @return The long summary
+	 */
+	public String getLongSummary()
+	{
+		return long_summary;
+	}
+
+	public void setLongSummary( String long_summary )
+	{
+		this.long_summary = long_summary;
+	}
+
+	/**
+	 * Sets the phone number
+	 * @param work_number Phone Number
+	 */
+	public void setWorkNumber( String work_number )
+	{
+		this.work_number = work_number;
+	}
+
+	/**
+	 * Gets the phone number
+	 * @return Phone number
+	 */
+	public String getWorkNumber()
+	{
+		return work_number;
+	}
+
+
+	/**
 	 * @return the tag
 	 */
 	public List<Tag> getTag ()
@@ -66,18 +120,6 @@ public class Business extends SoldierUpAccount {
 	public void setTag (List<Tag> tag)
 	{
 		this.tag = tag;
-	}
-
-	/**
-	 * Makes that a given key and it's associated value are valid inputs
-	 * for the database
-	 * @param aKey Key to check
-	 * @param aValue Value associated to the key
-	 * @return True if the input is valid for the database, false otherwise
-	 */
-	public static boolean isValidDatabaseInput( String aKey, String aValue )
-	{
-		return false;
 	}
 
 	@Override

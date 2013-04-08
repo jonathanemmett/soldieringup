@@ -1,11 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
 <%@ page import="java.util.*" %>
+<%@ page import="org.soldieringup.Engine" %>
 <%@ page import="org.soldieringup.Veteran" %>
 <%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.User" %>
-<%@ page import="org.soldieringup.database.MySQL" %> 
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
 	if( session.getAttribute( "uid" ) == null ||
@@ -19,10 +19,10 @@
 	
 	long uid = Long.valueOf( session.getAttribute( "uid" ).toString() );
 	
-	MySQL databaseConnection = MySQL.getInstance();	
-	User contactUser = databaseConnection.getUserFromId( uid );
+	Engine engine = new Engine();	
+	User contactUser = engine.getUserFromId( uid );
 	Veteran foundVeteran = contactUser.getVeteran();
-	ZIP userZip = databaseConnection.getZIP( contactUser.getZip() );
+	ZIP userZip = engine.getZIP( contactUser.getZip() );
 %>  
 <!DOCTYPE html>
 <html>
@@ -138,7 +138,7 @@
 			<input type="submit"/>
 		</form>
 			<%
-				ArrayList<Tag> businessTags = databaseConnection.getTagsFromAccount( contactUser.getAid() );
+				ArrayList<Tag> businessTags = engine.getTagsFromAccount( contactUser.getAid() );
 				Iterator<Tag> tagIt = businessTags.iterator();
 					
 				while( tagIt.hasNext() )

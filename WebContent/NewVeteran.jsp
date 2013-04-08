@@ -2,7 +2,6 @@
 <%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
 <%@ page import="org.soldieringup.Business" %>
-<%@ page import="org.soldieringup.database.MySQL" %>
 <%@ page import="org.soldieringup.User"%>
 <%@ page import="org.soldieringup.Veteran" %>
 <%@ page import="org.soldieringup.ZIP;"%>
@@ -35,8 +34,6 @@ catch( ClassCastException e)
 {
 	loginErrors = null;
 }
-
-MySQL databaseConnection = MySQL.getInstance();
  %>
 <jsp:include page="Includes/header.jsp"></jsp:include>
 <section>

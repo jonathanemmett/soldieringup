@@ -156,6 +156,7 @@ public class Login extends HttpServlet
 		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getUid() );
 		if( foundVeteran != null )
 		{
+			currentSession.setAttribute( "aid", foundVeteran.getVid() );
 			currentSession.setAttribute( "editing_account_type", "veteran" );
 			request.getRequestDispatcher( "editVeteranProfile.jsp" ).forward( request, response );
 		}

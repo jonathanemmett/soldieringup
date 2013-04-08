@@ -1,14 +1,13 @@
-<%@page import="org.soldieringup.database.MySQL"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import ="java.util.ArrayList" %>
 <%@ page import ="java.util.Iterator" %>
 <%@ page import ="org.soldieringup.Business" %>
+<%@ page import ="org.soldieringup.Engine" %>
 <%@ page import ="org.soldieringup.MeetingRequest" %>
 <%@ page import ="org.soldieringup.Question" %>
 <%@ page import ="org.soldieringup.User" %>
-<%@ page import ="org.soldieringup.Veteran" %>
-<%@ page import ="org.soldieringup.database.MySQL;" %>
+<%@ page import ="org.soldieringup.Veteran;" %>
 <%
 	if( session.getAttribute( "uid" ) == null ||
 		session.getAttribute( "uid" ) == "" ||
@@ -19,10 +18,11 @@
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 
+	Engine engine = new Engine();
 	long uid = Long.valueOf( session.getAttribute( "uid" ).toString() );
-	User currentUser = MySQL.getInstance().getUserFromId( uid );
-	Veteran currentVeteran = MySQL.getInstance().getVeteran( uid );
-	ArrayList<Question> questionsAsked = MySQL.getInstance().getQuestionsFromVeteran( currentUser.getAid() ); 
+	User currentUser = engine.getUserFromId( uid );
+	Veteran currentVeteran = engine.getVeteran( uid );
+	ArrayList<Question> questionsAsked = engine.getQuestionsFromVeteran( currentUser.getAid() ); 
 	Iterator<Question> questionsIterator = questionsAsked.iterator();
 %>
 <!DOCTYPE html>
@@ -106,7 +106,7 @@
 <% while( questionsIterator.hasNext() )
 { 
 	Question currentQuestion = questionsIterator.next();
-	ArrayList<MeetingRequest> meetingRequests = MySQL.getInstance().getMeetingRequestsForQuestion( currentQuestion.getQid() );
+	ArrayList<MeetingRequest> meetingRequests = engine.getMeetingRequestsForQuestion( currentQuestion.getQid() );
 %>
 	<div class="veteran_question_div">
 	<div><span><%=currentQuestion.getQuestionTitle()%></span>
@@ -119,7 +119,7 @@
 				while( meetingRequestsIt.hasNext() )
 				{
 					MeetingRequest currentMeetingRequest = meetingRequestsIt.next();
-					Business businessFromRequest = MySQL.getInstance().getBusiness( currentMeetingRequest.getBid() );
+					Business businessFromRequest = engine.getBusiness( currentMeetingRequest.getBid() );
 					%><li>
 						<h2><a href="business.jsp?aid=<%=businessFromRequest.getAid() %>"><%=businessFromRequest.getName()%></a></h2>
 						<p>Day: <%=currentMeetingRequest.getDay()%></p>

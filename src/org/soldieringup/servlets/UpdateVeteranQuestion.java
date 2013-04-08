@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.soldieringup.Engine;
 import org.soldieringup.database.MySQL;
 
 /**
@@ -121,7 +122,8 @@ public class UpdateVeteranQuestion extends HttpServlet {
 
 	private void insertQuestion( HttpServletRequest request, HttpServletResponse response )
 	{
-		ResultSet generatedQuestionId = MySQL.getInstance().insertVeteranQuestion(
+		Engine engine = new Engine();
+		ResultSet generatedQuestionId = engine.insertVeteranQuestion(
 				request.getParameter( "question_title" ),
 				request.getParameter( "availability" ),
 				request.getParameter( "question_detailed_description" ),

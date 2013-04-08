@@ -23,9 +23,6 @@ public abstract class SoldierUpAccount
 	protected Photo profilePhoto;
 	protected List<Photo> photos;
 	protected String cover_src;
-	protected String short_summary;
-	protected String long_summary;
-	protected String work_number;
 	protected String address;
 	protected String zip;
 	protected String primary_number;
@@ -112,33 +109,6 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * Gets the short summary
-	 * @return The short summary
-	 */
-	public String getShortSummary()
-	{
-		return short_summary;
-	}
-
-	/**
-	 * Gets the long summary
-	 * @return The long summary
-	 */
-	public String getLongSummary()
-	{
-		return long_summary;
-	}
-
-	/**
-	 * Gets the phone number
-	 * @return Phone number
-	 */
-	public String getWorkNumber()
-	{
-		return work_number;
-	}
-
-	/**
 	 * Gets the street address
 	 * @return Street Address
 	 */
@@ -172,29 +142,6 @@ public abstract class SoldierUpAccount
 	public void setCoverSrc( String cover_src )
 	{
 		this.cover_src = cover_src;
-	}
-
-	/**
-	 * Sets the short summary
-	 * @param short_summary Short Summary
-	 */
-	public void setShortSummary( String short_summary )
-	{
-		this.short_summary = short_summary;
-	}
-
-	public void setLongSummary( String long_summary )
-	{
-		this.long_summary = long_summary;
-	}
-
-	/**
-	 * Sets the phone number
-	 * @param work_number Phone Number
-	 */
-	public void setWorkNumber( String work_number )
-	{
-		this.work_number = work_number;
 	}
 
 	/**

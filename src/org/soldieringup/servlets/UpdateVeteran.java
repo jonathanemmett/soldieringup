@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.soldieringup.Engine;
 import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
 
@@ -50,7 +51,7 @@ public class UpdateVeteran extends HttpServlet {
 
 		if( request.getSession().getAttribute( "uid" ) != null )
 		{
-
+			Engine engine = new Engine();
 			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
@@ -66,7 +67,7 @@ public class UpdateVeteran extends HttpServlet {
 				}
 			}
 
-			MySQL.getInstance().updateVeteran( uid, updateParameters );
+			engine.updateVeteran( uid, updateParameters );
 			request.getRequestDispatcher("/editVeteranProfile.jsp").forward(request, response);
 		}
 	}

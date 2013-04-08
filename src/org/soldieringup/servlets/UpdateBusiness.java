@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.soldieringup.Engine;
 import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class UpdateBusiness
@@ -46,6 +46,7 @@ public class UpdateBusiness extends HttpServlet {
 	{
 		if( request.getSession().getAttribute( "bid" ) != null )
 		{
+			Engine engine = new Engine();
 			long bid = Long.valueOf( request.getSession().getAttribute( "bid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
@@ -64,7 +65,7 @@ public class UpdateBusiness extends HttpServlet {
 				}
 			}
 
-			MySQL.getInstance().updateBusiness( bid, updateParameters );
+			engine.updateBusiness( bid, updateParameters );
 			request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 		}
 	}

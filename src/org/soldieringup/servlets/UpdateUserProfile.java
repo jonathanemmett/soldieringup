@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.soldieringup.Engine;
 import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class UpdateUserProfile
@@ -46,6 +46,7 @@ public class UpdateUserProfile extends HttpServlet {
 	{
 		if( request.getSession().getAttribute( "id" ) != null )
 		{
+			Engine engine = new Engine();
 			long bid = Long.valueOf( request.getSession().getAttribute( "id" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
@@ -63,7 +64,7 @@ public class UpdateUserProfile extends HttpServlet {
 				}
 			}
 
-			MySQL.getInstance().updateUser( bid, updateParameters );
+			engine.updateUser( bid, updateParameters );
 
 			if( request.getSession().getAttribute( "bid" ) != null )
 			{

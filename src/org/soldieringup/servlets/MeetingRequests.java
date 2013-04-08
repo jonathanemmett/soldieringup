@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONObject;
+import org.soldieringup.Engine;
 import org.soldieringup.MeetingRequest;
-import org.soldieringup.database.MySQL;
 
 /**
  *	This servlet is used to process the meeting requests that veterans and businesses will have
@@ -24,13 +24,13 @@ public class MeetingRequests extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public MeetingRequests(){
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public MeetingRequests(){
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,9 +40,10 @@ public class MeetingRequests extends HttpServlet
 	{
 		if( request.getParameter( "qid" ) != null && request.getParameter( "bid" ) != null )
 		{
+			Engine engine = new Engine();
 			Long qid = Long.valueOf( request.getParameter( "qid" ).toString() );
 			Long bid = Long.valueOf( request.getParameter( "bid" ).toString() );
-			MeetingRequest meetingRequest = MySQL.getInstance().getMeetingRequestFromQIDAndBID( qid, bid );
+			MeetingRequest meetingRequest = engine.getMeetingRequestFromQIDAndBID( qid, bid );
 			if( meetingRequest != null )
 			{
 				JSONObject meetingRequestJSON = new JSONObject();
@@ -70,9 +71,9 @@ public class MeetingRequests extends HttpServlet
 			{
 				switch( cmd )
 				{
-					case "insert":
-						insertNewMeetingRequest( request, response );
-						break;
+				case "insert":
+					insertNewMeetingRequest( request, response );
+					break;
 				}
 			}
 			catch( SQLException e )
@@ -84,11 +85,12 @@ public class MeetingRequests extends HttpServlet
 
 	private void insertNewMeetingRequest( HttpServletRequest request, HttpServletResponse response ) throws SQLException
 	{
+		Engine engine = new Engine();
 		String[] databaseColumns = { "qid", "time", "day", "location" };
 		HttpSession currentSession = request.getSession();
 
 		if( currentSession.getAttribute( "editing_account_type" ) != null &&
-			currentSession.getAttribute( "editing_account_type" ).equals( "business" ) )
+				currentSession.getAttribute( "editing_account_type" ).equals( "business" ) )
 		{
 			Map<String,Object> newMeetingRequestParameters = new HashMap<String,Object>();
 
@@ -99,7 +101,7 @@ public class MeetingRequests extends HttpServlet
 				newMeetingRequestParameters.put( databaseColumns[i], request.getParameter( databaseColumns[i] ) );
 			}
 
-			MySQL.getInstance().insertIntoTable( "meetingrequests", newMeetingRequestParameters );
+			engine.insertMeetingRequests(newMeetingRequestParameters);
 		}
 	}
 }

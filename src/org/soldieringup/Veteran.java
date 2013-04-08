@@ -15,11 +15,30 @@ public class Veteran
 {
 	@Id
 	protected ObjectId id;
+	private long vid;
 	private String mGoal = null;
 	private GregorianCalendar start;
 	private GregorianCalendar end;
 	@Indexed
 	private DEVISION devision;
+
+	/**
+	 * Gets the MySQL id for this veteran
+	 * @return MySQL id for this veteran
+	 */
+	public long getVid()
+	{
+		return this.vid;
+	}
+
+	/**
+	 * Sets the MySQL id for this Veteran object
+	 * @param MySQL VID for this object
+	 */
+	public void setVid( long vid )
+	{
+		this.vid = vid;
+	}
 
 	/**
 	 * Gets the veteran's goal
