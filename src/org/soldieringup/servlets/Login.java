@@ -150,7 +150,7 @@ public class Login extends HttpServlet
 		{
 			currentSession.setAttribute( "aid", ownedBusinesses.get(0).getBid() );
 			currentSession.setAttribute( "editing_account_type", "business" );
-			request.getRequestDispatcher( "editBusiness.jsp" ).forward( request, response );
+			request.getRequestDispatcher( "/editBusiness.jsp" ).forward( request, response );
 		}
 
 		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getUid() );
@@ -158,7 +158,7 @@ public class Login extends HttpServlet
 		{
 			currentSession.setAttribute( "aid", foundVeteran.getVid() );
 			currentSession.setAttribute( "editing_account_type", "veteran" );
-			request.getRequestDispatcher( "editVeteranProfile.jsp" ).forward( request, response );
+			request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
 		}
 	}
 }

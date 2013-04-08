@@ -35,7 +35,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Soldier Up - Entrepreneurs serving those who served us.</title>
-<link href="Styles/Styles.css" rel="stylesheet" type="text/css" />
+<link href="Styles/styles.css" rel="stylesheet" type="text/css" />
 <link href="Styles/formStyles.css" rel="stylesheet" />
 <link href="Styles/EditProfileStyles.css" rel="stylesheet" />
 <link href="Styles/jquery.Jcrop.min.css" rel="stylesheet" />

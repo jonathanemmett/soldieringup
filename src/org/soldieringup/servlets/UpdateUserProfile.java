@@ -44,10 +44,10 @@ public class UpdateUserProfile extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if( request.getSession().getAttribute( "id" ) != null )
+		if( request.getSession().getAttribute( "uid" ) != null )
 		{
 			Engine engine = new Engine();
-			long bid = Long.valueOf( request.getSession().getAttribute( "id" ).toString() );
+			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
@@ -64,9 +64,9 @@ public class UpdateUserProfile extends HttpServlet {
 				}
 			}
 
-			engine.updateUser( bid, updateParameters );
+			engine.updateUser( uid, updateParameters );
 
-			if( request.getSession().getAttribute( "bid" ) != null )
+			if( request.getSession().getAttribute( "editing_account_type" ).equals( "business" ) )
 			{
 				request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 			}

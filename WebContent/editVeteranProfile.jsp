@@ -29,7 +29,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Soldier Up - Entrepreneurs serving those who served us.</title>
-<link href="Styles/Styles.css" rel="stylesheet" />
+<link href="Styles/styles.css" rel="stylesheet" />
 <link href="Styles/formStyles.css" rel="stylesheet" />
 <link href="Styles/EditProfileStyles.css" rel="stylesheet" />
 <link href="Styles/jquery.Jcrop.min.css" rel="stylesheet" type="text/css"/>
@@ -69,13 +69,13 @@
 	</div>
 	<div class="edit_profile_sub_section_right_side">
 		<h3>Password <span style="font-size:small">  (must be at least 8 characters long and contain at least 2 digits).</span></h3>
-		<form id="password_change_form" method="post" action="Password">
+		<form id="password_change_form" method="post" action="UpdatePassword">
 			<p class="no_bottom_margin">
 				<label for="change_password_new_password">Password</label>
 				<label for="change_password_confirm_new_password">Confirm</label>
 			</p>
-			<input id="change_password_new_password" type="password"/>
-			<input id="change_password_comfirm_new_password" type="password"/>
+			<input id="change_password_new_password" type="password" name="password"/>
+			<input id="change_password_confirm_new_password" type="password" name="confirm_password"/>
 			<input id="change_password_submit" type="submit"/>
 		</form>
 	</div>

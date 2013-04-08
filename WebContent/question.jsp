@@ -5,11 +5,12 @@
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.Veteran" %>
 <%
-	session.setAttribute( "uid", 39 );
-	session.setAttribute( "aid", 14 );
-	session.setAttribute( "editing_account_type" , "business" );
-	long questionIndex;
+	if( session.getAttribute( "aid" ) == null )
+	{
+		%><jsp:forward page="/login.jsp"/><%
+	}
 
+	long questionIndex;
 	if( request.getParameter( "qid" ) != null )
 	{
 		questionIndex = Long.valueOf( request.getParameter( "qid" ).toString() );
@@ -27,7 +28,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Soldier Up - Entrepreneurs serving those who served us.</title>
-<link href="Styles/Styles.css" rel="stylesheet" />
+<link href="Styles/styles.css" rel="stylesheet" type="text/css" />
 <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->

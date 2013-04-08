@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -44,13 +43,13 @@ public class UploadImage extends HttpServlet
 	private static final int TEMP_PROFILE_IMAGE_WIDTH = 500;
 	private static final int TEMP_PROFILE_IMAGE_HEIGHT = 100;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UploadImage()
-    {
-        super();
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UploadImage()
+	{
+		super();
+	}
 
 	/**
 	 * Get method of the photo servlet. It returns the src's of any temporary profile they
@@ -211,11 +210,11 @@ public class UploadImage extends HttpServlet
 	 * @throws IOException
 	 */
 	private void uploadTemporaryPhoto( BufferedImage sourceImage,
-								   			String fileNameWithOutExtension,
-								   			String extension,
-								   			int targetImageWidth,
-								   			int minimumImageHeight ) throws NoSuchAlgorithmException, IOException
-	{
+			String fileNameWithOutExtension,
+			String extension,
+			int targetImageWidth,
+			int minimumImageHeight ) throws NoSuchAlgorithmException, IOException
+			{
 		if( extension != null )
 		{
 			int coverImageWidth = targetImageWidth;
@@ -248,7 +247,7 @@ public class UploadImage extends HttpServlet
 
 			return;
 		}
-	}
+			}
 
 	/**
 	 * Generates the extension of the photo based on the given mime type.

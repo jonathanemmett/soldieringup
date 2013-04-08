@@ -48,7 +48,7 @@ public class UpdatePassword extends HttpServlet {
 
 		String password = request.getParameter( "password" );
 		String confirmPassword = request.getParameter( "confirm_password" );
-		if( password != null && confirmPassword != null && request.getSession().getAttribute( "id" ) != null )
+		if( password != null && confirmPassword != null && request.getSession().getAttribute( "uid" ) != null )
 		{
 			Engine engine = new Engine();
 			out.println( "Comparing: " + password + " " + confirmPassword );
@@ -79,7 +79,7 @@ public class UpdatePassword extends HttpServlet {
 			else
 			{
 				HashMap<String,Object> passwordParameter = new HashMap<String,Object>();
-				long uid = Long.valueOf( request.getSession().getAttribute( "id" ).toString() );
+				long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 				passwordParameter.put( "password", password );
 				engine.updateUser( uid, passwordParameter );
 				out.println( "Password Successfully Updated" );

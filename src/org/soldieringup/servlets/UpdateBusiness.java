@@ -44,10 +44,10 @@ public class UpdateBusiness extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if( request.getSession().getAttribute( "bid" ) != null )
+		if( request.getSession().getAttribute( "aid" ) != null )
 		{
 			Engine engine = new Engine();
-			long bid = Long.valueOf( request.getSession().getAttribute( "bid" ).toString() );
+			long bid = Long.valueOf( request.getSession().getAttribute( "aid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
