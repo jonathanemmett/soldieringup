@@ -8,12 +8,8 @@
 <%@ page import="org.soldieringup.database.MySQL" %> 
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
-	session.setAttribute( "uid", 38 );
-	session.setAttribute( "aid", 9 );
-	session.setAttribute( "editing_account_type" , "veteran" );
-
-	if( session.getAttribute( "aid" ) == null ||
-		session.getAttribute( "aid" ) == "" ||
+	if( session.getAttribute( "uid" ) == null ||
+		session.getAttribute( "uid" ) == "" ||
 		session.getAttribute( "editing_account_type" ) == null ||
 		session.getAttribute( "editing_account_type" ) != "veteran"
 	  )
@@ -21,12 +17,11 @@
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 	
-	long vid = Long.valueOf( session.getAttribute( "aid" ).toString() );
 	long uid = Long.valueOf( session.getAttribute( "uid" ).toString() );
 	
 	MySQL databaseConnection = MySQL.getInstance();	
-	Veteran foundVeteran = databaseConnection.getVeteran( uid );
-	User contactUser = databaseConnection.getUserFromId( foundVeteran.getUid() );
+	User contactUser = databaseConnection.getUserFromId( uid );
+	Veteran foundVeteran = contactUser.getVeteran();
 	ZIP userZip = databaseConnection.getZIP( contactUser.getZip() );
 %>  
 <!DOCTYPE html>
@@ -65,7 +60,7 @@
 		<form id="upload_profile_pic_form" action="UploadImage" method="post">
 			<input type="hidden" name="type" value="profile"/>
 			<span id="profile_pic_display" style="display:inline-block; position:relative; width:100px; height:100px; border:#000 solid 1px;">
-				<% if( foundVeteran.getProfileSrc() != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ foundVeteran.getProfileSrc()+"\"/>");} %>
+				<% if( contactUser.getProfileSrc() != null){ out.println("<img id=\"profile_photo_display\" src=\"Images/"+ contactUser.getProfileSrc()+"\"/>");} %>
 				<span id="upload_profile_pic" style="width:20px; height:20px; background:#eee; position: absolute; right: 5px; bottom: 5px">
 				</span>
 			</span>
@@ -99,11 +94,11 @@
 		</span>
 		<span class="fields full_length">
 			<label>Primary Number</label>
-			<input type="text" name="primary_number" value="<%=contactUser.getPrimaryNumber()%>"  />
+			<input type="text" name="primary_number" value="<%=contactUser.getPrimary_number()%>"  />
 		</span>
 		<span class="fields full_length">
 			<label>Secondary Number</label>
-			<input type="text" name="secondary_number" value="<%=contactUser.getSecondaryNumber()%>"  />
+			<input type="text" name="secondary_number" value="<%=contactUser.getSecondary_number()%>"  />
 		</span>
 		<span class="fields full_length">
 			<label>Address</label>
@@ -143,14 +138,14 @@
 			<input type="submit"/>
 		</form>
 			<%
-				ArrayList<Tag> businessTags = databaseConnection.getTagsFromAccount( vid );
+				ArrayList<Tag> businessTags = databaseConnection.getTagsFromAccount( contactUser.getAid() );
 				Iterator<Tag> tagIt = businessTags.iterator();
 					
 				while( tagIt.hasNext() )
 				{
 					Tag currentTag = tagIt.next();
 					%>
-					<div id="<%="tag-"+currentTag.get_id() %>" class="account_tag" style="position:relative;">
+					<div id="<%="tag-"+currentTag.get_tid() %>" class="account_tag" style="position:relative;">
 					<p><%=currentTag.get_name()%><span class="account_tag_hours_section">4 hours</span></p>
 					<span class="remove_fields"></span>
 					</div>

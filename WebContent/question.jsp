@@ -113,7 +113,7 @@ if( queriedQuestion != null)
 	User associatedUser = databaseConnection.getUserFromId( 38 );
 %>
 <section id="right_question_section">
-<img src="Images/<%=veteranFromQuestion.getProfileSrc()%>"/>
+<img src="Images/<%=associatedUser.getProfileSrc()%>"/>
 <p><%=associatedUser.getFirstName() + " " + associatedUser.getLastName()%></p>
 <h1>Aspiration</h1>
 <p style="margin-top:5px; padding-top:0px;"><%=veteranFromQuestion.getGoal()%></p>

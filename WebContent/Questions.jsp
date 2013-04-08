@@ -6,10 +6,12 @@
 <%@ page import ="org.soldieringup.Business" %>
 <%@ page import ="org.soldieringup.MeetingRequest" %>
 <%@ page import ="org.soldieringup.Question" %>
+<%@ page import ="org.soldieringup.User" %>
+<%@ page import ="org.soldieringup.Veteran" %>
 <%@ page import ="org.soldieringup.database.MySQL;" %>
 <%
-	if( session.getAttribute( "aid" ) == null ||
-		session.getAttribute( "aid" ) == "" ||
+	if( session.getAttribute( "uid" ) == null ||
+		session.getAttribute( "uid" ) == "" ||
 		session.getAttribute( "editing_account_type" ) == null ||
 		session.getAttribute( "editing_account_type" ) != "veteran"
 	  )
@@ -17,8 +19,10 @@
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 
-	long vid = Long.valueOf( session.getAttribute( "aid" ).toString() );
-	ArrayList<Question> questionsAsked = MySQL.getInstance().getQuestionsFromVeteran( vid ); 
+	long uid = Long.valueOf( session.getAttribute( "uid" ).toString() );
+	User currentUser = MySQL.getInstance().getUserFromId( uid );
+	Veteran currentVeteran = MySQL.getInstance().getVeteran( uid );
+	ArrayList<Question> questionsAsked = MySQL.getInstance().getQuestionsFromVeteran( currentUser.getAid() ); 
 	Iterator<Question> questionsIterator = questionsAsked.iterator();
 %>
 <!DOCTYPE html>
@@ -26,7 +30,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Soldier Up - Entrepreneurs serving those who served us.</title>
-<link href="Styles/Styles.css" rel="stylesheet" />
+<link href="Styles/styles.css" rel="stylesheet" />
 <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]--> 
@@ -117,14 +121,14 @@
 					MeetingRequest currentMeetingRequest = meetingRequestsIt.next();
 					Business businessFromRequest = MySQL.getInstance().getBusiness( currentMeetingRequest.getBid() );
 					%><li>
-						<h2><a href="business.jsp?aid=<%=businessFromRequest.getAid() %>"><%=businessFromRequest.getBusinessName()%></a></h2>
+						<h2><a href="business.jsp?aid=<%=businessFromRequest.getAid() %>"><%=businessFromRequest.getName()%></a></h2>
 						<p>Day: <%=currentMeetingRequest.getDay()%></p>
 						<p>Time: <%=currentMeetingRequest.getTime()%></p>
 						<p>Location: <%=currentMeetingRequest.getLocation()%></p>
 						<p><input type="submit" value="Accept"/><input type="submit" value="Decline"/></p>
 					</li><%
 					%><li>
-						<h2><%=businessFromRequest.getBusinessName()%></h2>
+						<h2><%=businessFromRequest.getName()%></h2>
 						<p>Day: <%=currentMeetingRequest.getDay()%></p>
 						<p>Time: <%=currentMeetingRequest.getTime()%></p>
 						<p>Location: <%=currentMeetingRequest.getLocation()%></p>

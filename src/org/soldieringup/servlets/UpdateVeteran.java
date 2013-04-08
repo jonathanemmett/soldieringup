@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.Business;
-import org.soldieringup.Veteran;
+import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
 
 /**
@@ -23,13 +22,13 @@ import org.soldieringup.database.MySQL;
 public class UpdateVeteran extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateVeteran() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UpdateVeteran() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -47,12 +46,12 @@ public class UpdateVeteran extends HttpServlet {
 	{
 		MySQL databaseConnection = MySQL.getInstance();
 		Map<String,String> registrationErrors = new HashMap<String,String>();
-		String[] requiredBusinessKeys = { "business_name", "business_short_summary", "business_long_summary",
-		  		  "business_address", "business_city", "business_state", "business_ZIP" };
+		String[] requiredVeteranColumns = { "goal" };
 
-		if( request.getSession().getAttribute( "aid" ) != null )
+		if( request.getSession().getAttribute( "uid" ) != null )
 		{
-			long aid = Long.valueOf( request.getSession().getAttribute( "aid" ).toString() );
+
+			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
@@ -61,13 +60,13 @@ public class UpdateVeteran extends HttpServlet {
 			{
 				String currentKey = keysIterator.next();
 
-				if( Veteran.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
+				if( Utilities.isElementInArray( currentKey, requiredVeteranColumns ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
 
-			MySQL.getInstance().updateVeteran( aid, updateParameters );
+			MySQL.getInstance().updateVeteran( uid, updateParameters );
 			request.getRequestDispatcher("/editVeteranProfile.jsp").forward(request, response);
 		}
 	}

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -14,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.soldieringup.Question;
 import org.soldieringup.database.MySQL;
 
 /**
@@ -24,13 +22,13 @@ import org.soldieringup.database.MySQL;
 public class UpdateVeteranQuestion extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateVeteranQuestion() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UpdateVeteranQuestion() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -148,18 +146,17 @@ public class UpdateVeteranQuestion extends HttpServlet {
 	}
 
 	public void getValidationErrors
-			(
+	(
 			HttpServletRequest request,
 			HttpServletResponse response,
 			Map<String,String> inputErrors,
 			Map<String,Object> parametersForQuery
 			)
 	{
-		String[] requiredStrings = Question.QuestionDatabaseColumnsStrings;
+		String[] requiredStrings = { "qid", "question_title", "availability", "question_detailed_description", "vid" };
 		for( int i = 0; i <requiredStrings.length; ++i )
 		{
-			if( ( requiredStrings[i].equals( Question.QuestionDatabaseColumns.VID.getDatabaseColumnString() ) ||
-			      requiredStrings[i].equals( Question.QuestionDatabaseColumns.QID.getDatabaseColumnString() ) ) )
+			if( ( requiredStrings[i].equals( "vid" ) || requiredStrings[i].equals( "qid" ) ) )
 			{
 				// Do nothing.
 			}

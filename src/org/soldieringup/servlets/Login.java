@@ -149,13 +149,14 @@ public class Login extends HttpServlet
 		if( ownedBusinesses.size() > 0 )
 		{
 			currentSession.setAttribute( "aid", ownedBusinesses.get(0).getBid() );
+			currentSession.setAttribute( "editing_account_type", "business" );
 			request.getRequestDispatcher( "editBusiness.jsp" ).forward( request, response );
 		}
 
 		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getUid() );
 		if( foundVeteran != null )
 		{
-			currentSession.setAttribute( "aid", foundVeteran.getVid() );
+			currentSession.setAttribute( "editing_account_type", "veteran" );
 			request.getRequestDispatcher( "editVeteranProfile.jsp" ).forward( request, response );
 		}
 	}

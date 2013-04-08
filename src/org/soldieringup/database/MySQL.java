@@ -131,7 +131,7 @@ public class MySQL
 		while( businessesResults.next() )
 		{
 			Business nextBusiness = new Business();
-			nextBusiness.setProfileSrc( businessesResults.getString( "cover_src" ) );
+			nextBusiness.setProfileSrc( businessesResults.getString( "profile_src" ) );
 			nextBusiness.setUid( businessesResults.getLong( "uid" ) );
 			nextBusiness.setAid( businessesResults.getLong( "aid" ) );
 			nextBusiness.setName( businessesResults.getString( "name" ) );
@@ -165,7 +165,7 @@ public class MySQL
 			foundBusiness = new Business();
 			if( businessQueryResults.first() )
 			{
-				foundBusiness.setProfileSrc( businessQueryResults.getString( "cover_src" ) );
+				foundBusiness.setProfileSrc( businessQueryResults.getString( "profile_src" ) );
 				foundBusiness.setUid( businessQueryResults.getLong( "uid" ) );
 				foundBusiness.setAid( businessQueryResults.getLong( "aid" ) );
 				foundBusiness.setName( businessQueryResults.getString( "name" ) );
@@ -232,16 +232,17 @@ public class MySQL
 	{
 		User newUser = null;
 
+		System.out.println("Validating User");
 		try
 		{
 			PreparedStatement userQuery = connect.prepareStatement( "SELECT * FROM Users WHERE email = ? and password = SHA1( CONCAT( salt, ? ) )" );
 			userQuery.setString( 1, aEmail );
 			userQuery.setString( 2, aPassword );
 
-
 			ResultSet userQueryResults = userQuery.executeQuery();
 			if( userQueryResults.first() )
 			{
+				System.out.println("User found");
 				newUser = new User();
 				newUser.setUid( userQueryResults.getLong( "id" ) );
 				newUser.setFirstName( userQueryResults.getString( "first_name" ) );
@@ -273,7 +274,7 @@ public class MySQL
 
 		try
 		{
-			PreparedStatement foundUserSql = connect.prepareStatement( "SELECT * FROM Users WHERE id = ?" );
+			PreparedStatement foundUserSql = connect.prepareStatement( "SELECT * FROM Users JOIN accounts ON Users.id = Accounts.uid WHERE id = ?" );
 			foundUserSql.setLong( 1, uid );
 			ResultSet foundUserResults = foundUserSql.executeQuery();
 
@@ -284,10 +285,13 @@ public class MySQL
 				foundUser.setEmail( foundUserResults.getString( "email" ) );
 				foundUser.setFirstName( foundUserResults.getString( "first_name" ) );
 				foundUser.setLastName( foundUserResults.getString( "last_name" ) );
+				foundUser.setAid( foundUserResults.getLong( "aid" ) );
 				foundUser.setUid( foundUserResults.getLong( "id" ) );
 				foundUser.setPrimary_number( foundUserResults.getString( "primary_number" ) );
 				foundUser.setSecondary_number( foundUserResults.getString( "secondary_number" ) );
 				foundUser.setZip( foundUserResults.getString( "zip" ) );
+				foundUser.setProfileSrc( foundUserResults.getString("profile_src") );
+				foundUser.setVeteran( getVeteran( foundUser.getUid() ) );
 			}
 		}
 		catch(SQLException e)
@@ -468,15 +472,15 @@ public class MySQL
 	 * @param vid VID of the veteran to update
 	 * @param goal Goal to update the veteran profile with
 	 */
-	public void updateProfileVeteran( long vid, String goal )
+	public void updateProfileVeteran( long uid, String goal )
 	{
 		try
 		{
-			String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ?";
+			String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ( SELECT aid FROM accounts WHERE uid = ? )";
 
 			PreparedStatement updateVeteranPreparedStatement = getPreparedStatement( updateVeteranSQL );
 			updateVeteranPreparedStatement.setString( 1, goal );
-			updateVeteranPreparedStatement.setLong( 2, vid );
+			updateVeteranPreparedStatement.setLong( 2, uid );
 			updateVeteranPreparedStatement.executeUpdate();
 		}
 		catch( SQLException e )
@@ -556,10 +560,10 @@ public class MySQL
 
 	/**
 	 * Updates the veteran with the given objects
-	 * @param aVid ID of the veteran to update
+	 * @param aVid User ID of the veteran
 	 * @param aParameters The parameters to update the veteran with
 	 */
-	public void updateVeteran( long aVid, Map<String,Object> aParameters )
+	public void updateVeteran( long aUid, Map<String,Object> aParameters )
 	{
 		try
 		{
@@ -580,7 +584,7 @@ public class MySQL
 
 				//Eliminate the final comma, and append the rest of the SQL statement
 				updateVeteranSQL = updateVeteranSQL.substring(0, updateVeteranSQL.length() - 1 );
-				updateVeteranSQL += " WHERE vid = ?";
+				updateVeteranSQL += " WHERE vid = (SELECT aid FROM accounts WHERE uid = ?)";
 
 				PreparedStatement updateVeteranStatement = getPreparedStatement( updateVeteranSQL );
 				int currentPreparedStatementIndex;
@@ -590,14 +594,13 @@ public class MySQL
 					updateVeteranStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
 				}
 
-				updateVeteranStatement.setLong( currentPreparedStatementIndex + 1, aVid );
-				System.out.println( updateVeteranSQL );
+				updateVeteranStatement.setLong( currentPreparedStatementIndex + 1, aUid );
 				updateVeteranStatement.executeUpdate();
 			}
 		}
 		catch(SQLException e)
 		{
-			log.error ("Veteran "+aVid+" could not be registered", e);
+			log.error ("Veteran "+aUid+" could not be registered", e);
 		}
 	}
 
@@ -1004,7 +1007,7 @@ public class MySQL
 			while( foundBusinesses.next() )
 			{
 				Business nextBusiness = new Business();
-				nextBusiness.setProfileSrc( foundBusinesses.getString( "cover_src" ) );
+				nextBusiness.setProfileSrc( foundBusinesses.getString( "profile_src" ) );
 				nextBusiness.setUid( foundBusinesses.getLong( "uid" ) );
 				nextBusiness.setAid( foundBusinesses.getLong( "aid" ) );
 				nextBusiness.setName( foundBusinesses.getString( "name" ) );
@@ -1112,7 +1115,7 @@ public class MySQL
 			if( veteranQuery.first() )
 			{
 				foundVeteran = new Veteran();
-				foundVeteran.init( veteranQuery );
+				foundVeteran.setGoal( veteranQuery.getString( "goal" ) );
 			}
 		}
 		catch( SQLException e)
@@ -1295,7 +1298,10 @@ public class MySQL
 			while( getQuestionsResults.next() )
 			{
 				foundQuestion = new Question();
-				foundQuestion.init( getQuestionsResults );
+				foundQuestion.setQid( getQuestionsResults.getLong( "qid" ) );
+				foundQuestion.setQuestionTitle( getQuestionsResults.getString( "question_title" ) );
+				foundQuestion.setAvailability( getQuestionsResults.getString( "availability" ) );
+				foundQuestion.setVid( getQuestionsResults.getLong( "vid" ) );
 			}
 		}
 		catch( SQLException e )
@@ -1327,7 +1333,10 @@ public class MySQL
 			while( getQuestionsResults.next() )
 			{
 				Question currentQuestion = new Question();
-				currentQuestion.init( getQuestionsResults );
+				currentQuestion.setQid( getQuestionsResults.getLong( "qid" ) );
+				currentQuestion.setQuestionTitle( getQuestionsResults.getString( "question_title" ) );
+				currentQuestion.setAvailability( getQuestionsResults.getString( "availability" ) );
+				currentQuestion.setVid( getQuestionsResults.getLong( "vid" ) );
 				veteranQuestions.add( currentQuestion );
 			}
 		}
@@ -1360,7 +1369,11 @@ public class MySQL
 			if( findMeetingRequestResults.next() )
 			{
 				foundMeetingRequest = new MeetingRequest();
-				foundMeetingRequest.init( findMeetingRequestResults );
+				foundMeetingRequest.setBid( findMeetingRequestResults.getLong( "bid" ) );
+				foundMeetingRequest.setQid( findMeetingRequestResults.getLong( "qid" ) );
+				foundMeetingRequest.setTime( findMeetingRequestResults.getString( "time" ) );
+				foundMeetingRequest.setDay( findMeetingRequestResults.getString( "day" ) );
+				foundMeetingRequest.setLocation( findMeetingRequestResults.getString( "location" ) );
 			}
 		}
 		catch (SQLException e)
@@ -1390,7 +1403,11 @@ public class MySQL
 			while( getMeetingRequestsResults.next() )
 			{
 				MeetingRequest nextMeetingRequest = new MeetingRequest();
-				nextMeetingRequest.init( getMeetingRequestsResults );
+				nextMeetingRequest.setBid( getMeetingRequestsResults.getLong( "bid" ) );
+				nextMeetingRequest.setQid( getMeetingRequestsResults.getLong( "qid" ) );
+				nextMeetingRequest.setTime( getMeetingRequestsResults.getString( "time" ) );
+				nextMeetingRequest.setDay( getMeetingRequestsResults.getString( "day" ) );
+				nextMeetingRequest.setLocation( getMeetingRequestsResults.getString( "location" ) );
 				meetingRequests.add( nextMeetingRequest );
 			}
 		}

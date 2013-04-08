@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.Business;
-import org.soldieringup.User;
+import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
 
 /**
@@ -22,18 +21,19 @@ import org.soldieringup.database.MySQL;
 @WebServlet("/UpdateUserProfile")
 public class UpdateUserProfile extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateUserProfile() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UpdateUserProfile() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
@@ -41,6 +41,7 @@ public class UpdateUserProfile extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if( request.getSession().getAttribute( "id" ) != null )
@@ -49,19 +50,21 @@ public class UpdateUserProfile extends HttpServlet {
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
-			
+			String[] userProfileColumns = { "id", "first_name", "last_name", "email", "address",
+					"primary_number", "secondary_number", "password","salt", "ZIP" };
+
 			while( keysIterator.hasNext() )
 			{
 				String currentKey = keysIterator.next();
-				
-				if( User.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
+
+				if( Utilities.isElementInArray( currentKey, userProfileColumns ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
-			
+
 			MySQL.getInstance().updateUser( bid, updateParameters );
-			
+
 			if( request.getSession().getAttribute( "bid" ) != null )
 			{
 				request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);

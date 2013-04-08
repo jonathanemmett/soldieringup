@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.validator.routines.EmailValidator;
-import org.soldieringup.Business;
 import org.soldieringup.Utilities;
 import org.soldieringup.database.MySQL;
 
@@ -23,18 +21,19 @@ import org.soldieringup.database.MySQL;
 @WebServlet("/UpdateBusiness")
 public class UpdateBusiness extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateBusiness() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UpdateBusiness() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
@@ -42,6 +41,7 @@ public class UpdateBusiness extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if( request.getSession().getAttribute( "bid" ) != null )
@@ -50,17 +50,20 @@ public class UpdateBusiness extends HttpServlet {
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
-			
+
 			while( keysIterator.hasNext() )
 			{
 				String currentKey = keysIterator.next();
-				
-				if( Business.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
+				String[] requiredBusinessKeys = { "business_name", "business_short_summary", "business_long_summary",
+						"business_address", "business_city", "business_state", "business_ZIP" };
+
+
+				if( Utilities.isElementInArray( currentKey, requiredBusinessKeys ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
-			
+
 			MySQL.getInstance().updateBusiness( bid, updateParameters );
 			request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 		}

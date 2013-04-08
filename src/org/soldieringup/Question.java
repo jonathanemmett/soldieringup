@@ -12,6 +12,7 @@ public class Question
 {
 	@Id
 	protected ObjectId id;
+	public long qid;
 	public String question_title;
 	public String availability;
 	public String question_detailed_description;
@@ -25,6 +26,14 @@ public class Question
 
 	}
 
+	/**
+	 * Sets the MySQL id for the question
+	 * @param qid Question id
+	 */
+	public void setQid( long qid )
+	{
+		this.qid = qid;
+	}
 	/**
 	 * Sets the title of the question
 	 * @param aQuestionTitle The title to set the question to
@@ -59,6 +68,15 @@ public class Question
 	public ObjectId getID()
 	{
 		return id;
+	}
+
+	/**
+	 * Sets the MySQL id for the question
+	 * @param qid Question id
+	 */
+	public long getQid()
+	{
+		return this.qid;
 	}
 
 	/**

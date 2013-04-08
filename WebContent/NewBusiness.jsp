@@ -3,7 +3,6 @@
 <%@ page import="java.util.*"%>
 <%@ page import="org.soldieringup.database.MySQL"%>
 <%@ page import="org.soldieringup.Business"%>
-<%@ page import="org.soldieringup.Divisions"%>
 <%@ page import="org.soldieringup.User"%>
 <%@ page import="org.soldieringup.ZIP"%>
 <%@ page import="org.soldieringup.Utilities"%>
