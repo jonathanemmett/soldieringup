@@ -16,8 +16,6 @@
 
 package org.soldieringup.database;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -32,22 +30,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.catalina.tribes.util.Arrays;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import org.soldieringup.Account;
 import org.soldieringup.Business;
 import org.soldieringup.MeetingRequest;
 import org.soldieringup.Photo;
 import org.soldieringup.Question;
-import org.soldieringup.Roster;
 import org.soldieringup.Tag;
 import org.soldieringup.User;
 import org.soldieringup.Utilities;
@@ -112,46 +104,6 @@ public class MySQL
 		}
 	}
 
-	public Map<Object,Roster> retrieveRoster () throws SQLException
-	{
-		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster`");
-		return retrieveRoster (ps);
-	}
-	public Map<Object,Roster> retrieveRoster (int account_id) throws SQLException
-	{
-		PreparedStatement ps = connect.prepareStatement("select id,title,description,tags from `solderingup`.`roster` WHERE account_id=?");
-		ps.setInt (1, account_id);
-		return retrieveRoster (ps);
-	}
-
-	private Map<Object,Roster> retrieveRoster (PreparedStatement ps)
-	{
-		Map<Object,Roster> mp = new HashMap<Object, Roster>();
-		// got all the Roster entries
-		try {
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Roster roster = new Roster ();
-				roster = parse(rs, roster);
-				mp.put (roster.get_id (), roster);
-			}
-		} catch (Exception e) {
-			log.error ("Failed to retrieve roster events", e);
-		}
-		log.debug ("Loaded " + mp.size () + "Roster posts from the database");
-		return mp;
-	}
-
-	private Roster parse (ResultSet rs, Roster roster) throws SQLException
-	{
-		roster.set_id (rs.getInt (_roster_id));
-		roster.set_title (rs.getString (_roster_title));
-		roster.set_description (rs.getString (_roster_description));
-		List<Tag> tags = tags( splitTags (rs.getString (_roster_tags)));
-		roster.set_tags (tags);
-		return roster;
-	}
-
 	/**
 	 * Split the tags IDs into an array
 	 * @param tags
@@ -191,29 +143,29 @@ public class MySQL
 	{
 		try {
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO `solderingup`.`accounts`" +
-										"(`fname`,"+
-										"`lname`,"+
-										"`company`,"+
-										"`cellphone`,"+
-										"`homephone`,"+
-										"`businessphone`,"+
-										"`address`,"+
-										"`city`,"+
-										"`state`,"+
-										"`zip`,"+
-										"`email`)"+
-										"VALUES"+
-										"(?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?,"+
-										"?)");
+					"(`fname`,"+
+					"`lname`,"+
+					"`company`,"+
+					"`cellphone`,"+
+					"`homephone`,"+
+					"`businessphone`,"+
+					"`address`,"+
+					"`city`,"+
+					"`state`,"+
+					"`zip`,"+
+					"`email`)"+
+					"VALUES"+
+					"(?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?,"+
+					"?)");
 			ps.setString (1, values.get ("fname"));
 			ps.setString (2, values.get ("lname"));
 			ps.setString (3, values.get ("company"));
@@ -228,35 +180,16 @@ public class MySQL
 			log.debug (ps.toString ());
 			int result = ps.executeUpdate();
 			if (result == 0) {
-		        	log.error (ps.getWarnings ());
-		        	throw new SQLException("Failed, no rows affected.");
-		        } else {
-		        	log.debug ("Successfully added " + result + " account to the database");
-		        }
+				log.error (ps.getWarnings ());
+				throw new SQLException("Failed, no rows affected.");
+			} else {
+				log.debug ("Successfully added " + result + " account to the database");
+			}
 
 		} catch (Exception e) {
 			log.error ("Failed to add account", e);
 		}
 
-	}
-
-	public Map<Integer, Tag> retrieveTags ()
-	{
-		Map<Integer,Tag> mp = new HashMap<Integer, Tag>();
-		// got all the Roster entries
-		try {
-			PreparedStatement ps = connect.prepareStatement("select id,name from `solderingup`.`tags`");
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Tag tag = new Tag ();
-				tag = parse(rs, tag);
-				mp.put (tag.get_id (), tag);
-			}
-		} catch (Exception e) {
-			log.error ("Failed to retrieve roster events", e);
-		}
-		log.debug ("Loaded " + mp.size () + "Roster posts from the database");
-		return mp;
 	}
 
 	private Tag parse (ResultSet rs, Tag tag) throws SQLException
@@ -268,13 +201,13 @@ public class MySQL
 
 	public void addTags (HashMap<String, String> mp)
 	{
-		    Iterator<?> it = mp.entrySet().iterator();
-		    while (it.hasNext()) {
-		        @SuppressWarnings("rawtypes")
+		Iterator<?> it = mp.entrySet().iterator();
+		while (it.hasNext()) {
+			@SuppressWarnings("rawtypes")
 			Map.Entry pairs = (Map.Entry)it.next();
-		        addTag (pairs.getValue());
-		        it.remove(); // avoids a ConcurrentModificationException
-		    }
+			addTag (pairs.getValue());
+			it.remove(); // avoids a ConcurrentModificationException
+		}
 
 	}
 
@@ -286,11 +219,11 @@ public class MySQL
 			log.debug (ps.toString ());
 			int result = ps.executeUpdate();
 			if (result == 0) {
-		        	log.error (ps.getWarnings ());
-		        	throw new SQLException("Failed, no rows affected.");
-		        } else {
-		        	log.debug ("Successfully added " + result + " to the tag database");
-		        }
+				log.error (ps.getWarnings ());
+				throw new SQLException("Failed, no rows affected.");
+			} else {
+				log.debug ("Successfully added " + result + " to the tag database");
+			}
 
 		} catch (Exception e) {
 			log.error ("Failed to add tag", e);
@@ -511,9 +444,9 @@ public class MySQL
 	 * @return					The result set containing the user's id
 	 */
 	public ResultSet registerUser( String aFirstName, String aLastName, String aEmail,
-								   String aAddress, String aPrimaryNumber, String aSecondaryNumber,
-								   String aPassword, String aZip, String aCity,
-								   String aState, Map<String, String> aErrors )
+			String aAddress, String aPrimaryNumber, String aSecondaryNumber,
+			String aPassword, String aZip, String aCity,
+			String aState, Map<String, String> aErrors )
 	{
 		MySQL databaseConnection = MySQL.getInstance();
 		try
@@ -521,7 +454,7 @@ public class MySQL
 			verityZipInDatabase( aZip, aCity, aState );
 			PreparedStatement businessSQLInsert =
 					databaseConnection.getPreparedStatement("INSERT INTO Users( first_name, last_name, " +
-					"email, address, primary_number, secondary_number, password, salt, zip ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+							"email, address, primary_number, secondary_number, password, salt, zip ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 
 			// The salt for the user will be the time that they registered
 			long salt = new Date().getTime();
@@ -693,8 +626,8 @@ public class MySQL
 	 * @return				The result set containing the new businesses id
 	 */
 	public ResultSet registerBusiness( int aContactID, String aBusinessName, String aShortSummary,
-								  	String aLongSummary, String aWorkNumber, String aAddress,
-								    String aCity, String aState, String aZip )
+			String aLongSummary, String aWorkNumber, String aAddress,
+			String aCity, String aState, String aZip )
 	{
 		ResultSet generatedUserID = addAccountToUser( aContactID );
 		if( generatedUserID == null )
@@ -1060,7 +993,7 @@ public class MySQL
 	 *
 	 * In the case that a tag is not found, this function also inserts
 	 * the tag into the database
- 	 * @param aTag Tag to get the id for
+	 * @param aTag Tag to get the id for
 	 * @return The tag id
 	 * @throws SQLException
 	 */
