@@ -1,11 +1,9 @@
 package org.soldieringup.servlets;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -33,13 +31,13 @@ public class Login extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Login() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public Login() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * This doGet method removes any login errors, and redirects the user to the login page.
@@ -143,22 +141,21 @@ public class Login extends HttpServlet
 	{
 		MySQL databaseConnection = MySQL.getInstance();
 		HttpSession currentSession = request.getSession();
-		currentSession.setAttribute( "uid", aLoggedInUser.getId() );
-		Map<Integer, Business> ownedBusinesses;
+		currentSession.setAttribute( "uid", aLoggedInUser.getUid() );
+		ArrayList<Business> ownedBusinesses;
 
-		ownedBusinesses = databaseConnection.getBusinessesFromOwner( aLoggedInUser.getId() );
+		ownedBusinesses = databaseConnection.getBusinessesFromOwner( aLoggedInUser.getUid() );
 
 		if( ownedBusinesses.size() > 0 )
 		{
-			List<Integer> businessIDs = new ArrayList<Integer>( ownedBusinesses.keySet() );
-			currentSession.setAttribute( "aid", businessIDs.get( 0 ) );
+			currentSession.setAttribute( "aid", ownedBusinesses.get(0).getBid() );
 			request.getRequestDispatcher( "editBusiness.jsp" ).forward( request, response );
 		}
 
-		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getId() );
+		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getUid() );
 		if( foundVeteran != null )
 		{
-			currentSession.setAttribute( "aid", foundVeteran.getAid() );
+			currentSession.setAttribute( "aid", foundVeteran.getVid() );
 			request.getRequestDispatcher( "editVeteranProfile.jsp" ).forward( request, response );
 		}
 	}

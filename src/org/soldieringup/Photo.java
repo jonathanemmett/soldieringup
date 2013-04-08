@@ -7,6 +7,7 @@ public class Photo
 {
 	@Id
 	protected ObjectId id;
+	private long pid;
 	private long bid;
 	private String title;
 	private String src;
@@ -17,6 +18,11 @@ public class Photo
 	public ObjectId getId ()
 	{
 		return id;
+	}
+
+	public long getPid()
+	{
+		return pid;
 	}
 
 	public long getBid()
@@ -32,6 +38,11 @@ public class Photo
 	public String getSrc()
 	{
 		return src;
+	}
+
+	public void setPid( long pid )
+	{
+		this.pid = pid;
 	}
 
 	public void setBid( long bid )

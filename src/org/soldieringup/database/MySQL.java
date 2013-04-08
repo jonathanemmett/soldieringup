@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -120,9 +119,9 @@ public class MySQL
 	 * @return All the businesses associated with the given account
 	 * @throws SQLException Database could not be queried
 	 */
-	public Map<Integer,Business> getBusinessesFromOwner( long oid ) throws SQLException
+	public ArrayList<Business> getBusinessesFromOwner( long oid ) throws SQLException
 	{
-		Map<Integer,Business> businessesOwnerHas = new HashMap<Integer,Business>();
+		ArrayList<Business> businessesOwnerHas = new ArrayList<Business>();
 
 		String businessSelectSQL = "SELECT * FROM business JOIN accounts ON business.bid = accounts.aid WHERE uid = ?";
 		PreparedStatement businessesQuery = connect.prepareStatement( businessSelectSQL );
@@ -132,7 +131,17 @@ public class MySQL
 		while( businessesResults.next() )
 		{
 			Business nextBusiness = new Business();
-			nextBusiness.init( businessesResults );
+			nextBusiness.setProfileSrc( businessesResults.getString( "cover_src" ) );
+			nextBusiness.setUid( businessesResults.getLong( "uid" ) );
+			nextBusiness.setAid( businessesResults.getLong( "aid" ) );
+			nextBusiness.setName( businessesResults.getString( "name" ) );
+			nextBusiness.setShortSummary( businessesResults.getString( "short_summary" ) );
+			nextBusiness.setLongSummary( businessesResults.getString( "long_summary" ) );
+			nextBusiness.setWorkNumber( businessesResults.getString( "work_number" ) );
+			nextBusiness.setAddress( businessesResults.getString( "address" ) );
+			nextBusiness.setZip( businessesResults.getString( "ZIP" ) );
+			nextBusiness.setCoverSrc( businessesResults.getString( "cover_src" ) );
+			businessesOwnerHas.add( nextBusiness );
 		}
 
 		return businessesOwnerHas;
@@ -156,7 +165,16 @@ public class MySQL
 			foundBusiness = new Business();
 			if( businessQueryResults.first() )
 			{
-				foundBusiness.init( businessQueryResults );
+				foundBusiness.setProfileSrc( businessQueryResults.getString( "cover_src" ) );
+				foundBusiness.setUid( businessQueryResults.getLong( "uid" ) );
+				foundBusiness.setAid( businessQueryResults.getLong( "aid" ) );
+				foundBusiness.setName( businessQueryResults.getString( "name" ) );
+				foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
+				foundBusiness.setLongSummary( businessQueryResults.getString( "long_summary" ) );
+				foundBusiness.setWorkNumber( businessQueryResults.getString( "work_number" ) );
+				foundBusiness.setAddress( businessQueryResults.getString( "address" ) );
+				foundBusiness.setZip( businessQueryResults.getString( "ZIP" ) );
+				foundBusiness.setCoverSrc( businessQueryResults.getString( "cover_src" ) );
 			}
 		}
 		catch( SQLException e )
@@ -225,11 +243,11 @@ public class MySQL
 			if( userQueryResults.first() )
 			{
 				newUser = new User();
-				newUser.setId( userQueryResults.getLong( "id" ) );
+				newUser.setUid( userQueryResults.getLong( "id" ) );
 				newUser.setFirstName( userQueryResults.getString( "first_name" ) );
 				newUser.setLastName( userQueryResults.getString( "last_name" ) );
-				newUser.setPrimaryNumber( userQueryResults.getString( "primary_number" ) );
-				newUser.setSecondaryNumber( userQueryResults.getString( "secondary_number" ) );
+				newUser.setPrimary_number( userQueryResults.getString( "primary_number" ) );
+				newUser.setSecondary_number( userQueryResults.getString( "secondary_number" ) );
 				newUser.setAddress( userQueryResults.getString( "address" ) );
 				newUser.setEmail(  userQueryResults.getString( "email" ) );
 				newUser.setZip( userQueryResults.getString( "zip" ) );
@@ -266,9 +284,9 @@ public class MySQL
 				foundUser.setEmail( foundUserResults.getString( "email" ) );
 				foundUser.setFirstName( foundUserResults.getString( "first_name" ) );
 				foundUser.setLastName( foundUserResults.getString( "last_name" ) );
-				foundUser.setId( foundUserResults.getLong( "id" ) );
-				foundUser.setPrimaryNumber( foundUserResults.getString( "primary_number" ) );
-				foundUser.setSecondaryNumber( foundUserResults.getString( "secondary_number" ) );
+				foundUser.setUid( foundUserResults.getLong( "id" ) );
+				foundUser.setPrimary_number( foundUserResults.getString( "primary_number" ) );
+				foundUser.setSecondary_number( foundUserResults.getString( "secondary_number" ) );
 				foundUser.setZip( foundUserResults.getString( "zip" ) );
 			}
 		}
@@ -651,7 +669,9 @@ public class MySQL
 				while( parameterKeys.hasNext() )
 				{
 					String currentKey = parameterKeys.next();
-					if( User.isValidDatabaseInput( currentKey, (String) aParameters.get( currentKey ) ) )
+					String[] userColumns = {"id","first_name","last_name","email","address","primary_number",
+							"secondary_number","password","salt","zip"};
+					if( Utilities.isElementInArray(currentKey, userColumns) )
 					{
 						if( currentKey == "password" )
 						{
@@ -984,7 +1004,16 @@ public class MySQL
 			while( foundBusinesses.next() )
 			{
 				Business nextBusiness = new Business();
-				nextBusiness.init( foundBusinesses );
+				nextBusiness.setProfileSrc( foundBusinesses.getString( "cover_src" ) );
+				nextBusiness.setUid( foundBusinesses.getLong( "uid" ) );
+				nextBusiness.setAid( foundBusinesses.getLong( "aid" ) );
+				nextBusiness.setName( foundBusinesses.getString( "name" ) );
+				nextBusiness.setShortSummary( foundBusinesses.getString( "short_summary" ) );
+				nextBusiness.setLongSummary( foundBusinesses.getString( "long_summary" ) );
+				nextBusiness.setWorkNumber( foundBusinesses.getString( "work_number" ) );
+				nextBusiness.setAddress( foundBusinesses.getString( "address" ) );
+				nextBusiness.setZip( foundBusinesses.getString( "ZIP" ) );
+				nextBusiness.setCoverSrc( foundBusinesses.getString( "cover_src" ) );
 				businesses.add( nextBusiness );
 			}
 		}
@@ -1015,10 +1044,9 @@ public class MySQL
 			System.out.println( questionTagsSql );
 			while( questionTagsResult.next() )
 			{
-				Tag businessTag = new Tag();
-				businessTag.set_id( questionTagsResult.getInt( "id" ) );
+				Tag businessTag = new Tag( questionTagsResult.getString( "tag" ) );
+				businessTag.set_tid( questionTagsResult.getInt( "id" ) );
 				businessTag.set_name( questionTagsResult.getString( "tag" ) );
-				System.out.println( "Tag: " + businessTag.get_name() + " " + businessTag.get_id() );
 				questionTags.add( businessTag );
 			}
 
@@ -1051,8 +1079,8 @@ public class MySQL
 
 			while( tagsResult.next() )
 			{
-				Tag businessTag = new Tag();
-				businessTag.set_id( tagsResult.getInt( "id" ) );
+				Tag businessTag = new Tag( tagsResult.getString( "tag" ) );
+				businessTag.set_tid( tagsResult.getInt( "id" ) );
 				businessTag.set_name( tagsResult.getString( "tag" ) );
 				tags.add( businessTag );
 			}

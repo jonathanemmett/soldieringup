@@ -40,8 +40,8 @@
 <%} %>
 </div>
 <article style="width:200px; float:left">
-<% if( foundBusiness.getBusinessName() != null){ %>
-<p><%=foundBusiness.getBusinessName() %></p>
+<% if( foundBusiness.getName() != null){ %>
+<p><%=foundBusiness.getName() %></p>
 <span style="width:120px; height:24px; display:block;background-image:url(Images/fullStarRating.png);"></span>
 <p><%=foundBusiness.getAddress() %></p>
 <p><%=businessZIP.getCity() + " " + businessZIP.getState() + " " + foundBusiness.getZip() %></p>

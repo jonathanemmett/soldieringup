@@ -29,6 +29,7 @@ public class Tag
 {
 	@Id
 	protected ObjectId id;
+	protected long tid;
 	@Indexed(unique = true)
 	private String _name;
 
@@ -51,5 +52,15 @@ public class Tag
 	public void set_name (String _name)
 	{
 		this._name = _name;
+	}
+
+	public long get_tid()
+	{
+		return tid;
+	}
+
+	public void set_tid( long tid )
+	{
+		this.tid = tid;
 	}
 }
