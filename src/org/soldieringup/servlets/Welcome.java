@@ -1,9 +1,6 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.soldieringup.Engine;
 
 /**
  * Servlet implementation class Welcome
@@ -22,13 +18,13 @@ public class Welcome extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	static final Logger log = Logger.getLogger (Welcome.class.getName ());
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Welcome() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public Welcome() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,9 +39,8 @@ public class Welcome extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.getRequestDispatcher ("index.jsp").include (request, response);
 	}
 
 }

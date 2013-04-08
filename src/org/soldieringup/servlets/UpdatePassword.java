@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.database.MySQL;
-import org.soldieringup.database.PasswordValidator;
+import org.soldieringup.Engine;
+import org.soldieringup.utils.PasswordValidator;
 
 /**
  * Servlet implementation class PasswordUpdate
@@ -50,6 +50,7 @@ public class UpdatePassword extends HttpServlet {
 		String confirmPassword = request.getParameter( "confirm_password" );
 		if( password != null && confirmPassword != null && request.getSession().getAttribute( "uid" ) != null )
 		{
+			Engine engine = new Engine();
 			out.println( "Comparing: " + password + " " + confirmPassword );
 			boolean passwordIsValid = password.equals( confirmPassword );
 
@@ -80,7 +81,7 @@ public class UpdatePassword extends HttpServlet {
 				HashMap<String,Object> passwordParameter = new HashMap<String,Object>();
 				long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 				passwordParameter.put( "password", password );
-				MySQL.getInstance().updateUser( uid, passwordParameter );
+				engine.updateUser( uid, passwordParameter );
 				out.println( "Password Successfully Updated" );
 			}
 		}

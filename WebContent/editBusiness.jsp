@@ -2,10 +2,10 @@
     pageEncoding="US-ASCII"%>
 <%@ page import="java.util.*" %>
 <%@ page import="org.soldieringup.Business" %>
+<%@ page import="org.soldieringup.Engine" %>
 <%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.User" %>
-<%@ page import="org.soldieringup.database.MySQL" %> 
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
 	session.setAttribute( "uid", 39 );
@@ -25,10 +25,10 @@
 
 	long bid = Long.valueOf( session.getAttribute( "aid" ).toString() );
 	
-	MySQL databaseConnection = MySQL.getInstance();
-	Business foundBusiness = databaseConnection.getBusiness( bid );
-	ZIP businessZIP = databaseConnection.getZIP( foundBusiness.getZip() );
-	User contactUser = databaseConnection.getUserFromId( foundBusiness.getUid() );
+	Engine engine = new Engine();
+	Business foundBusiness = engine.getBusiness( bid );
+	ZIP businessZIP = engine.getZIP( foundBusiness.getZip() );
+	User contactUser = engine.getUserFromId( foundBusiness.getUid() );
 %>  
 <!DOCTYPE html>
 <html>
@@ -66,7 +66,7 @@
 <body>
 <jsp:include page="Includes/header.jsp"></jsp:include>
 <section id="edit_profile_section" style="margin-bottom:10px;">
-<% if( foundBusiness.getBusinessName() != null){ %>
+<% if( foundBusiness.getName() != null){ %>
 <div id="cover_banner">
 	<% if( foundBusiness.getCoverSrc() != null){ out.println("<img id=\"cover_photo_display\" src=\"Images/"+ foundBusiness.getCoverSrc()+"\"/>");} %>
 	<form id="upload_cover_image_form" method="post" action="UploadImage" enctype="multipart/form-data">
@@ -110,7 +110,7 @@
 		<form id="edit_business_form" method="post" action="UpdateBusiness">
 			<span class="fields full_length">
 				<label>Name</label>
-				<input type="text" name="name" required value="<%=foundBusiness.getBusinessName()%>" />
+				<input type="text" name="name" required value="<%=foundBusiness.getName()%>" />
 			</span>
 			<span class="fields full_length">
 				<label>Address</label>
@@ -159,11 +159,11 @@
 		</span>
 		<span class="fields full_length">
 			<label>Primary Number</label>
-			<input type="text" name="primary_number" value="<%=contactUser.getPrimaryNumber()%>"  />
+			<input type="text" name="primary_number" value="<%=contactUser.getPrimary_number()%>"  />
 		</span>
 		<span class="fields full_length">
 			<label>Secondary Number</label>
-			<input type="text" name="secondary_number" value="<%=contactUser.getSecondaryNumber()%>"  />
+			<input type="text" name="secondary_number" value="<%=contactUser.getSecondary_number()%>"  />
 		</span>
 		<span class="fields full_length">
 			<label>Address</label>
@@ -191,14 +191,14 @@
 			</select>
 			<input type="submit"/>
 				<%
-					ArrayList<Tag> businessTags = databaseConnection.getTagsFromAccount( bid );
+					ArrayList<Tag> businessTags = engine.getTagsFromAccount( bid );
 					Iterator<Tag> tagIt = businessTags.iterator();
 					
 					while( tagIt.hasNext() )
 					{
 						Tag currentTag = tagIt.next();
 						%>
-						<div id="<%="tag-"+currentTag.get_id() %>" class="account_tag" style="position:relative;">
+						<div id="<%="tag-"+currentTag.get_tid() %>" class="account_tag" style="position:relative;">
 						<p><%=currentTag.get_name()%><span class="account_tag_hours_section">4 hours</span></p>
 						<span class="remove_fields"></span>
 						</div>

@@ -16,8 +16,6 @@
 
 package org.soldieringup.database;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,9 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,8 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
-
-import org.soldieringup.Account;
 import org.soldieringup.Business;
 import org.soldieringup.MeetingRequest;
 import org.soldieringup.Photo;
@@ -102,122 +96,6 @@ public class MySQL
 		}
 	}
 
-	public Map<Object, Account> retrieveAccounts ()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void AddAccount (HashMap<String, String> values)
-	{
-		try {
-			PreparedStatement ps = connect.prepareStatement("INSERT INTO `solderingup`.`accounts`" +
-					"(`fname`,"+
-					"`lname`,"+
-					"`company`,"+
-					"`cellphone`,"+
-					"`homephone`,"+
-					"`businessphone`,"+
-					"`address`,"+
-					"`city`,"+
-					"`state`,"+
-					"`zip`,"+
-					"`email`)"+
-					"VALUES"+
-					"(?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?,"+
-					"?)");
-			ps.setString (1, values.get ("fname"));
-			ps.setString (2, values.get ("lname"));
-			ps.setString (3, values.get ("company"));
-			ps.setString (4, values.get ("cellphone"));
-			ps.setString (5, values.get ("homephone"));
-			ps.setString (6, values.get ("businessphone"));
-			ps.setString (7, values.get ("address"));
-			ps.setString (8, values.get ("city"));
-			ps.setString (9, values.get ("state"));
-			ps.setString (10, values.get ("zip"));
-			ps.setString (11, values.get ("email"));
-			log.debug (ps.toString ());
-			int result = ps.executeUpdate();
-			if (result == 0) {
-				log.error (ps.getWarnings ());
-				throw new SQLException("Failed, no rows affected.");
-			} else {
-				log.debug ("Successfully added " + result + " account to the database");
-			}
-
-		} catch (Exception e) {
-			log.error ("Failed to add account", e);
-		}
-
-	}
-
-	public Map<Integer, Tag> retrieveTags ()
-	{
-		Map<Integer,Tag> mp = new HashMap<Integer, Tag>();
-		// got all the Roster entries
-		try {
-			PreparedStatement ps = connect.prepareStatement("select id,name from `solderingup`.`tags`");
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Tag tag = new Tag ();
-				tag = parse(rs, tag);
-				mp.put (tag.get_id (), tag);
-			}
-		} catch (Exception e) {
-			log.error ("Failed to retrieve roster events", e);
-		}
-		log.debug ("Loaded " + mp.size () + "Roster posts from the database");
-		return mp;
-	}
-
-	private Tag parse (ResultSet rs, Tag tag) throws SQLException
-	{
-		tag.set_id (rs.getInt (_tag_id));
-		tag.set_name (rs.getString (_tag_name));
-		return tag;
-	}
-
-	public void addTags (HashMap<String, String> mp)
-	{
-		Iterator<?> it = mp.entrySet().iterator();
-		while (it.hasNext()) {
-			@SuppressWarnings("rawtypes")
-			Map.Entry pairs = (Map.Entry)it.next();
-			addTag (pairs.getValue());
-			it.remove(); // avoids a ConcurrentModificationException
-		}
-
-	}
-
-	private void addTag (Object tag_name)
-	{
-		try {
-			PreparedStatement ps = connect.prepareStatement("INSERT IGNORE INTO `solderingup`.`tags` (`name`) VALUES (?)");
-			ps.setString (1, (String)tag_name);
-			log.debug (ps.toString ());
-			int result = ps.executeUpdate();
-			if (result == 0) {
-				log.error (ps.getWarnings ());
-				throw new SQLException("Failed, no rows affected.");
-			} else {
-				log.debug ("Successfully added " + result + " to the tag database");
-			}
-
-		} catch (Exception e) {
-			log.error ("Failed to add tag", e);
-		}
-	}
-
 	/**
 	 * Gets all the businesses associated with a user account
 	 * @param oid The ID of the user
@@ -236,7 +114,16 @@ public class MySQL
 		while( businessesResults.next() )
 		{
 			Business nextBusiness = new Business();
-			nextBusiness.init( businessesResults );
+			nextBusiness.setProfileSrc( businessesResults.getString( "profile_src" ) );
+			nextBusiness.setUid( businessesResults.getLong( "uid" ) );
+			nextBusiness.setAid( businessesResults.getLong( "aid" ) );
+			nextBusiness.setName( businessesResults.getString( "name" ) );
+			nextBusiness.setShortSummary( businessesResults.getString( "short_summary" ) );
+			nextBusiness.setLongSummary( businessesResults.getString( "long_summary" ) );
+			nextBusiness.setWorkNumber( businessesResults.getString( "work_number" ) );
+			nextBusiness.setAddress( businessesResults.getString( "address" ) );
+			nextBusiness.setZip( businessesResults.getString( "ZIP" ) );
+			nextBusiness.setCoverSrc( businessesResults.getString( "cover_src" ) );
 			businessesOwnerHas.add( nextBusiness );
 		}
 
@@ -247,28 +134,32 @@ public class MySQL
 	 * Gets the business information for a given business id.
 	 * @param bid The business id for the business to query
 	 * @return The Business associated with bid
+	 * @throws SQLException
 	 */
-	public Business getBusiness( long bid )
+	public Business getBusiness( long bid ) throws SQLException
 	{
 		Business foundBusiness = null;
 		System.out.println( "This business: "+bid );
-		try
+
+		String selectSql = "SELECT * FROM accounts JOIN business ON accounts.aid = business.bid WHERE aid = ?";
+		PreparedStatement businessQuery = connect.prepareStatement( selectSql );
+		businessQuery.setLong( 1, bid );
+		ResultSet businessQueryResults = businessQuery.executeQuery();
+		foundBusiness = new Business();
+		if( businessQueryResults.first() )
 		{
-			String selectSql = "SELECT * FROM accounts JOIN business ON accounts.aid = business.bid WHERE aid = ?";
-			PreparedStatement businessQuery = connect.prepareStatement( selectSql );
-			businessQuery.setLong( 1, bid );
-			ResultSet businessQueryResults = businessQuery.executeQuery();
-			foundBusiness = new Business();
-			if( businessQueryResults.first() )
-			{
-				foundBusiness.init( businessQueryResults );
-			}
+			foundBusiness.setProfileSrc( businessQueryResults.getString( "profile_src" ) );
+			foundBusiness.setUid( businessQueryResults.getLong( "uid" ) );
+			foundBusiness.setAid( businessQueryResults.getLong( "aid" ) );
+			foundBusiness.setName( businessQueryResults.getString( "name" ) );
+			foundBusiness.setShortSummary( businessQueryResults.getString( "short_summary" ) );
+			foundBusiness.setLongSummary( businessQueryResults.getString( "long_summary" ) );
+			foundBusiness.setWorkNumber( businessQueryResults.getString( "work_number" ) );
+			foundBusiness.setAddress( businessQueryResults.getString( "address" ) );
+			foundBusiness.setZip( businessQueryResults.getString( "ZIP" ) );
+			foundBusiness.setCoverSrc( businessQueryResults.getString( "cover_src" ) );
 		}
-		catch( SQLException e )
-		{
-			log.error( "Business code could not be queried", e );
-			e.printStackTrace();
-		}
+
 		return foundBusiness;
 	}
 
@@ -276,32 +167,25 @@ public class MySQL
 	 * Get the ZIP code information for a given ZIP code.
 	 * @param aZip ZIP Code to find the information for.
 	 * @return The ZIP information for a given zip code.
+	 * @throws SQLException
 	 */
-	public ZIP getZIP( String aZip )
+	public ZIP getZIP( String aZip ) throws SQLException
 	{
 		ZIP queriedZip = new ZIP();
 		PreparedStatement stmt;
 
-		try
-		{
-			stmt = connect.prepareStatement( "SELECT * FROM zip WHERE zip = ?" );
+		stmt = connect.prepareStatement( "SELECT * FROM zip WHERE zip = ?" );
 
-			stmt.setString( 1, aZip );
-			ResultSet rs = stmt.executeQuery();
+		stmt.setString( 1, aZip );
+		ResultSet rs = stmt.executeQuery();
 
-			if( rs.first() )
-			{
-				queriedZip.setZip( rs.getString("zip") );
-				queriedZip.setCity( rs.getString("city") );
-				queriedZip.setState( rs.getString("state") );
-				queriedZip.setLatitude( rs.getDouble("latitude") );
-				queriedZip.setLongtitude( rs.getDouble("longitude") );
-			}
-		}
-		catch (SQLException e)
+		if( rs.first() )
 		{
-			log.error( "ZIP code could not be queried", e );
-			e.printStackTrace();
+			queriedZip.setZip( rs.getString("zip") );
+			queriedZip.setCity( rs.getString("city") );
+			queriedZip.setState( rs.getString("state") );
+			queriedZip.setLatitude( rs.getDouble("latitude") );
+			queriedZip.setLongtitude( rs.getDouble("longitude") );
 		}
 
 		return queriedZip;
@@ -311,38 +195,29 @@ public class MySQL
 	 *  Logs a user into the system
 	 *  @param aEmail E-mail address of the user
 	 *  @param aPassword Password of the registered user
+	 * @throws SQLException
 	 *  @result The result set of the login attempt
 	 */
-	public User validateUser( String aEmail, String aPassword )
+	public User validateUser( String aEmail, String aPassword ) throws SQLException
 	{
 		User newUser = null;
 
-		try
+		PreparedStatement userQuery = connect.prepareStatement( "SELECT * FROM Users WHERE email = ? and password = SHA1( CONCAT( salt, ? ) )" );
+		userQuery.setString( 1, aEmail );
+		userQuery.setString( 2, aPassword );
+
+		ResultSet userQueryResults = userQuery.executeQuery();
+		if( userQueryResults.first() )
 		{
-			PreparedStatement userQuery = connect.prepareStatement( "SELECT * FROM Users WHERE email = ? and password = SHA1( CONCAT( salt, ? ) )" );
-			userQuery.setString( 1, aEmail );
-			userQuery.setString( 2, aPassword );
-
-
-			ResultSet userQueryResults = userQuery.executeQuery();
-			if( userQueryResults.first() )
-			{
-				newUser = new User();
-				newUser.setId( userQueryResults.getLong( "id" ) );
-				newUser.setFirstName( userQueryResults.getString( "first_name" ) );
-				newUser.setLastName( userQueryResults.getString( "last_name" ) );
-				newUser.setPrimaryNumber( userQueryResults.getString( "primary_number" ) );
-				newUser.setSecondaryNumber( userQueryResults.getString( "secondary_number" ) );
-				newUser.setAddress( userQueryResults.getString( "address" ) );
-				newUser.setEmail(  userQueryResults.getString( "email" ) );
-				newUser.setZip( userQueryResults.getString( "zip" ) );
-			}
-
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.ERROR, null, e);
-			e.printStackTrace();
+			newUser = new User();
+			newUser.setUid( userQueryResults.getLong( "id" ) );
+			newUser.setFirstName( userQueryResults.getString( "first_name" ) );
+			newUser.setLastName( userQueryResults.getString( "last_name" ) );
+			newUser.setPrimary_number( userQueryResults.getString( "primary_number" ) );
+			newUser.setSecondary_number( userQueryResults.getString( "secondary_number" ) );
+			newUser.setAddress( userQueryResults.getString( "address" ) );
+			newUser.setEmail(  userQueryResults.getString( "email" ) );
+			newUser.setZip( userQueryResults.getString( "zip" ) );
 		}
 
 		return newUser;
@@ -352,34 +227,30 @@ public class MySQL
 	 * Get the user from an associated id
 	 * @param uid User ID to query
 	 * @return The User if the id exists in the database, null otherwise
+	 * @throws SQLException
 	 */
-	public User getUserFromId( long uid )
+	public User getUserFromId( long uid ) throws SQLException
 	{
 		User foundUser = null;
 
-		try
-		{
-			PreparedStatement foundUserSql = connect.prepareStatement( "SELECT * FROM Users WHERE id = ?" );
-			foundUserSql.setLong( 1, uid );
-			ResultSet foundUserResults = foundUserSql.executeQuery();
+		PreparedStatement foundUserSql = connect.prepareStatement( "SELECT * FROM Users JOIN accounts ON Users.id = Accounts.uid WHERE id = ?" );
+		foundUserSql.setLong( 1, uid );
+		ResultSet foundUserResults = foundUserSql.executeQuery();
 
-			if( foundUserResults.first() )
-			{
-				foundUser = new User();
-				foundUser.setAddress( foundUserResults.getString( "address" ) );
-				foundUser.setEmail( foundUserResults.getString( "email" ) );
-				foundUser.setFirstName( foundUserResults.getString( "first_name" ) );
-				foundUser.setLastName( foundUserResults.getString( "last_name" ) );
-				foundUser.setId( foundUserResults.getLong( "id" ) );
-				foundUser.setPrimaryNumber( foundUserResults.getString( "primary_number" ) );
-				foundUser.setSecondaryNumber( foundUserResults.getString( "secondary_number" ) );
-				foundUser.setZip( foundUserResults.getString( "zip" ) );
-			}
-		}
-		catch(SQLException e)
+		if( foundUserResults.first() )
 		{
-			log.error ("Errors occured while querying user", e);
-
+			foundUser = new User();
+			foundUser.setAddress( foundUserResults.getString( "address" ) );
+			foundUser.setEmail( foundUserResults.getString( "email" ) );
+			foundUser.setFirstName( foundUserResults.getString( "first_name" ) );
+			foundUser.setLastName( foundUserResults.getString( "last_name" ) );
+			foundUser.setAid( foundUserResults.getLong( "aid" ) );
+			foundUser.setUid( foundUserResults.getLong( "id" ) );
+			foundUser.setPrimary_number( foundUserResults.getString( "primary_number" ) );
+			foundUser.setSecondary_number( foundUserResults.getString( "secondary_number" ) );
+			foundUser.setZip( foundUserResults.getString( "zip" ) );
+			foundUser.setProfileSrc( foundUserResults.getString("profile_src") );
+			foundUser.setVeteran( getVeteran( foundUser.getUid() ) );
 		}
 
 		return foundUser;
@@ -389,22 +260,14 @@ public class MySQL
 	 * Checks to see if the email exist
 	 * @param aEmail Email to check
 	 * @return True if the email is in use, false otherwise
+	 * @throws SQLException
 	 */
-	public boolean checkIfEmailIsInUse( String aEmail )
+	public boolean checkIfEmailIsInUse( String aEmail ) throws SQLException
 	{
-		try
-		{
-			PreparedStatement checkEmail = connect.prepareStatement( "SELECT email FROM Users WHERE email = ?" );
-			checkEmail.setString( 1, aEmail );
-			ResultSet emailResults = checkEmail.executeQuery();
-			return emailResults.first();
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.ERROR, null, e);
-		}
-
-		return true;
+		PreparedStatement checkEmail = connect.prepareStatement( "SELECT email FROM Users WHERE email = ?" );
+		checkEmail.setString( 1, aEmail );
+		ResultSet emailResults = checkEmail.executeQuery();
+		return emailResults.first();
 	}
 
 	/**
@@ -419,53 +282,37 @@ public class MySQL
 	 * @param zip				User's zip
 	 * @param aErrors			Error messages retrieved while inserting the user
 	 * @return					The result set containing the user's id
+	 * @throws SQLException
 	 */
 	public ResultSet registerUser( String aFirstName, String aLastName, String aEmail,
 			String aAddress, String aPrimaryNumber, String aSecondaryNumber,
 			String aPassword, String aZip, String aCity,
-			String aState, Map<String, String> aErrors )
-	{
-		try
-		{
-			verityZipInDatabase( aZip, aCity, aState );
-			String businessInsertSQL  = "INSERT INTO Users( first_name, last_name, ";
-			businessInsertSQL		 +=	"email, address, primary_number, secondary_number, password, salt, zip ) ";
-			businessInsertSQL		 +=	"VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+			String aState, Map<String, String> aErrors ) throws SQLException
+			{
 
-			PreparedStatement businessInsertStmt = connect.prepareStatement( businessInsertSQL, Statement.RETURN_GENERATED_KEYS );
+		verityZipInDatabase( aZip, aCity, aState );
+		String businessInsertSQL  = "INSERT INTO Users( first_name, last_name, ";
+		businessInsertSQL		 +=	"email, address, primary_number, secondary_number, password, salt, zip ) ";
+		businessInsertSQL		 +=	"VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
-			// The salt for the user will be the time that they registered
-			long salt = new Date().getTime();
+		PreparedStatement businessInsertStmt = connect.prepareStatement( businessInsertSQL, Statement.RETURN_GENERATED_KEYS );
 
-			businessInsertStmt.setString(1, aFirstName);
-			businessInsertStmt.setString(2, aLastName);
-			businessInsertStmt.setString(3, aEmail);
-			businessInsertStmt.setString(4, aAddress);
-			businessInsertStmt.setString(5, aPrimaryNumber);
-			businessInsertStmt.setString(6, aSecondaryNumber == null ? "" : aSecondaryNumber);
-			businessInsertStmt.setString(7, Utilities.sha1Output( salt + aPassword) );
-			businessInsertStmt.setLong( 8, salt );
-			businessInsertStmt.setString( 9, aZip );
+		// The salt for the user will be the time that they registered
+		long salt = new Date().getTime();
 
-			businessInsertStmt.executeUpdate();
-			return businessInsertStmt.getGeneratedKeys();
-		}
-		catch (SQLException e)
-		{
-			aErrors.put("result", "Your account could not be entered. " + e.getMessage() );
-			e.printStackTrace();
-		}
-		catch (NoSuchAlgorithmException e)
-		{
-			e.printStackTrace();
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-		}
+		businessInsertStmt.setString(1, aFirstName);
+		businessInsertStmt.setString(2, aLastName);
+		businessInsertStmt.setString(3, aEmail);
+		businessInsertStmt.setString(4, aAddress);
+		businessInsertStmt.setString(5, aPrimaryNumber);
+		businessInsertStmt.setString(6, aSecondaryNumber == null ? "" : aSecondaryNumber);
+		businessInsertStmt.setString(7, Utilities.sha1Output( salt + aPassword) );
+		businessInsertStmt.setLong( 8, salt );
+		businessInsertStmt.setString( 9, aZip );
 
-		return null;
-	}
+		businessInsertStmt.executeUpdate();
+		return businessInsertStmt.getGeneratedKeys();
+			}
 
 	/**
 	 * Inserts a zip code into the database.
@@ -473,7 +320,7 @@ public class MySQL
 	 * @param City City associated to that zip code
 	 * @param State State associated to that zip code
 	 */
-	public void insertZip( String ZIP, String City, String State )
+	private void insertZip( String ZIP, String City, String State )
 	{
 		String query = "INSERT INTO ZIP VALUES( ZIP, City, State) ";
 		query += "VALUES(?,?,?)";
@@ -489,7 +336,7 @@ public class MySQL
 		}
 		catch (SQLException e)
 		{
-			e.printStackTrace();
+			log.error ("Errors occured while inserting zip " + ZIP, e);
 		}
 	}
 
@@ -517,13 +364,15 @@ public class MySQL
 
 		return generatedKeys;
 	}
+
 	/**
 	 * Registers a Veteran profile with SoldierUp
 	 * @param uid UID of the person registering the Veteran Profile
 	 * @param goal The goal that Veteran wants to accomplish through SoldierUp
 	 * @return
+	 * @throws SQLException
 	 */
-	public ResultSet registerVeteran( long uid, String goal )
+	public ResultSet registerVeteran( long uid, String goal ) throws SQLException
 	{
 		ResultSet generatedUserID = addAccountToUser( uid );
 		if( generatedUserID == null )
@@ -534,20 +383,13 @@ public class MySQL
 		String insertSql = "INSERT INTO veterans( vid, goal ) VALUES( ?, ? )";
 		ResultSet generatedKeys = null;
 
-		try
-		{
-			PreparedStatement insertStmt = connect.prepareStatement( insertSql, Statement.RETURN_GENERATED_KEYS );
-			generatedUserID.next();
+		PreparedStatement insertStmt = connect.prepareStatement( insertSql, Statement.RETURN_GENERATED_KEYS );
+		generatedUserID.next();
 
-			insertStmt.setLong( 1, generatedUserID.getLong( 1 ) );
-			insertStmt.setString( 2, goal );
-			insertStmt.executeUpdate();
-			generatedKeys = insertStmt.getGeneratedKeys();
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
+		insertStmt.setLong( 1, generatedUserID.getLong( 1 ) );
+		insertStmt.setString( 2, goal );
+		insertStmt.executeUpdate();
+		generatedKeys = insertStmt.getGeneratedKeys();
 
 		return generatedKeys;
 	}
@@ -556,42 +398,30 @@ public class MySQL
 	 * Updates a Veteran's profile
 	 * @param vid VID of the veteran to update
 	 * @param goal Goal to update the veteran profile with
+	 * @throws SQLException
 	 */
-	public void updateProfileVeteran( long vid, String goal )
+	public void updateProfileVeteran( long uid, String goal ) throws SQLException
 	{
-		try
-		{
-			String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ?";
+		String updateVeteranSQL = "UPDATE veterans SET goal = ? WHERE vid = ( SELECT aid FROM accounts WHERE uid = ? )";
 
-			PreparedStatement updateVeteranPreparedStatement = connect.prepareStatement( updateVeteranSQL );
-			updateVeteranPreparedStatement.setString( 1, goal );
-			updateVeteranPreparedStatement.setLong( 2, vid );
-			updateVeteranPreparedStatement.executeUpdate();
-		}
-		catch( SQLException e )
-		{
-			log.error ("Veteran could not be update", e);
-		}
+		PreparedStatement updateVeteranPreparedStatement = connect.prepareStatement( updateVeteranSQL );
+		updateVeteranPreparedStatement.setString( 1, goal );
+		updateVeteranPreparedStatement.setLong( 2, uid );
+		updateVeteranPreparedStatement.executeUpdate();
 	}
 
 	/**
 	 * Changes who the primary contact of a business is
 	 * @param aBusinessId ID of the business to transfer to another User
 	 * @param aUserId ID of the user to be the primary contact
+	 * @throws SQLException
 	 */
-	public void transferBusinessContact( long aUserId, long aBusinessId )
+	public void transferBusinessContact( long aUserId, long aBusinessId ) throws SQLException
 	{
-		try
-		{
-			PreparedStatement businessTransferStatement = connect.prepareStatement( "UPDATE accounts SET uid = ? WHERE aid = ?" );
-			businessTransferStatement.setLong( 1, aUserId );
-			businessTransferStatement.setLong( 2, aBusinessId );
-			businessTransferStatement.executeUpdate();
-		}
-		catch (SQLException e)
-		{
-			log.error ("Business " + aBusinessId + " could not be transferred to " + aUserId, e );
-		}
+		PreparedStatement businessTransferStatement = connect.prepareStatement( "UPDATE accounts SET uid = ? WHERE aid = ?" );
+		businessTransferStatement.setLong( 1, aUserId );
+		businessTransferStatement.setLong( 2, aBusinessId );
+		businessTransferStatement.executeUpdate();
 	}
 
 	/**
@@ -604,87 +434,72 @@ public class MySQL
 	 * @param aAddress      Street address for the associated business
 	 * @param aZip			ZIP address for the associated business
 	 * @return				The result set containing the new businesses id
+	 * @throws SQLException
 	 */
 	public ResultSet registerBusiness( int aContactID, String aBusinessName, String aShortSummary,
 			String aLongSummary, String aWorkNumber, String aAddress,
-			String aCity, String aState, String aZip )
-	{
+			String aCity, String aState, String aZip ) throws SQLException
+			{
 		ResultSet generatedUserID = addAccountToUser( aContactID );
 		if( generatedUserID == null )
 		{
 			return null;
 		}
 
-		try
-		{
-			verityZipInDatabase( aZip, aCity, aState );
+		verityZipInDatabase( aZip, aCity, aState );
 
-			String businessInsertQuery = "INSERT INTO BUSINESS ";
-			businessInsertQuery += "(bid,name,short_summary,long_summary,work_number,address,ZIP)";
-			businessInsertQuery += "VALUES(?,?,?,?,?,?,?)";
-			PreparedStatement businessSQLInsert = connect.prepareStatement( businessInsertQuery, Statement.RETURN_GENERATED_KEYS );
-			businessSQLInsert.setLong( 1, generatedUserID.getLong( "aid" ) );
-			businessSQLInsert.setString( 2, aBusinessName );
-			businessSQLInsert.setString( 3, aShortSummary );
-			businessSQLInsert.setString( 4, aLongSummary );
-			businessSQLInsert.setString( 5, aWorkNumber );
-			businessSQLInsert.setString( 6, aAddress);
-			businessSQLInsert.setString( 7, aZip );
+		String businessInsertQuery = "INSERT INTO BUSINESS ";
+		businessInsertQuery += "(bid,name,short_summary,long_summary,work_number,address,ZIP)";
+		businessInsertQuery += "VALUES(?,?,?,?,?,?,?)";
+		PreparedStatement businessSQLInsert = connect.prepareStatement( businessInsertQuery, Statement.RETURN_GENERATED_KEYS );
+		businessSQLInsert.setLong( 1, generatedUserID.getLong( "aid" ) );
+		businessSQLInsert.setString( 2, aBusinessName );
+		businessSQLInsert.setString( 3, aShortSummary );
+		businessSQLInsert.setString( 4, aLongSummary );
+		businessSQLInsert.setString( 5, aWorkNumber );
+		businessSQLInsert.setString( 6, aAddress);
+		businessSQLInsert.setString( 7, aZip );
 
-			businessSQLInsert.executeUpdate();
-			return businessSQLInsert.getGeneratedKeys();
-		}
-		catch (SQLException e)
-		{
-			log.error ("Business could not be registered", e);
-			return null;
-		}
-	}
-
+		businessSQLInsert.executeUpdate();
+		return businessSQLInsert.getGeneratedKeys();
+			}
 	/**
 	 * Updates the veteran with the given objects
-	 * @param aVid ID of the veteran to update
+	 * @param aVid User ID of the veteran
 	 * @param aParameters The parameters to update the veteran with
+	 * @throws SQLException
 	 */
-	public void updateVeteran( long aVid, Map<String,Object> aParameters )
+	public void updateVeteran( long aUid, Map<String,Object> aParameters ) throws SQLException
 	{
-		try
+		if( !aParameters.isEmpty() )
 		{
-			if( !aParameters.isEmpty() )
+			String updateVeteranSQL = "UPDATE veterans SET ";
+			Iterator<String> parameterKeys = aParameters.keySet().iterator();
+			ArrayList<String> validKeys = new ArrayList<String>();
+
+			// Create the SQL String statement, and store all of the keys so
+			// that we can loop through them after the statement is created.
+			while( parameterKeys.hasNext() )
 			{
-				String updateVeteranSQL = "UPDATE veterans SET ";
-				Iterator<String> parameterKeys = aParameters.keySet().iterator();
-				ArrayList<String> validKeys = new ArrayList<String>();
-
-				// Create the SQL String statement, and store all of the keys so
-				// that we can loop through them after the statement is created.
-				while( parameterKeys.hasNext() )
-				{
-					String currentKey = parameterKeys.next();
-					updateVeteranSQL += currentKey + " = ?,";
-					validKeys.add( currentKey );
-				}
-
-				//Eliminate the final comma, and append the rest of the SQL statement
-				updateVeteranSQL = updateVeteranSQL.substring(0, updateVeteranSQL.length() - 1 );
-				updateVeteranSQL += " WHERE vid = ?";
-
-				PreparedStatement updateVeteranStatement = connect.prepareStatement( updateVeteranSQL );
-				int currentPreparedStatementIndex;
-
-				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
-				{
-					updateVeteranStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
-				}
-
-				updateVeteranStatement.setLong( currentPreparedStatementIndex + 1, aVid );
-				System.out.println( updateVeteranSQL );
-				updateVeteranStatement.executeUpdate();
+				String currentKey = parameterKeys.next();
+				updateVeteranSQL += currentKey + " = ?,";
+				validKeys.add( currentKey );
 			}
-		}
-		catch(SQLException e)
-		{
-			log.error ("Veteran "+aVid+" could not be registered", e);
+
+			//Eliminate the final comma, and append the rest of the SQL statement
+			updateVeteranSQL = updateVeteranSQL.substring(0, updateVeteranSQL.length() - 1 );
+			updateVeteranSQL += " WHERE vid = (SELECT aid FROM accounts WHERE uid = ?)";
+
+			PreparedStatement updateVeteranStatement = connect.prepareStatement( updateVeteranSQL );
+			int currentPreparedStatementIndex;
+
+			for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
+			{
+				updateVeteranStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
+			}
+
+			updateVeteranStatement.setLong( currentPreparedStatementIndex + 1, aUid );
+			updateVeteranStatement.executeUpdate();
 		}
 	}
 
@@ -692,46 +507,41 @@ public class MySQL
 	 * Updates the business with the given objects
 	 * @param aBid ID of the business to update
 	 * @param aParameters The parameters to update the business with
+	 * @throws SQLException
 	 */
-	public void updateBusiness( long aBid, Map<String,Object> aParameters )
+	public void updateBusiness( long aBid, Map<String,Object> aParameters ) throws SQLException
 	{
-		try
+		if( !aParameters.isEmpty() )
 		{
-			if( !aParameters.isEmpty() )
+			String updateBusinessSQL = "UPDATE Business SET ";
+			Iterator<String> parameterKeys = aParameters.keySet().iterator();
+			ArrayList<String> validKeys = new ArrayList<String>();
+
+			// Create the SQL String statement, and store all of the keys so
+			// that we can loop through them after the statement is created.
+			while( parameterKeys.hasNext() )
 			{
-				String updateBusinessSQL = "UPDATE Business SET ";
-				Iterator<String> parameterKeys = aParameters.keySet().iterator();
-				ArrayList<String> validKeys = new ArrayList<String>();
-
-				// Create the SQL String statement, and store all of the keys so
-				// that we can loop through them after the statement is created.
-				while( parameterKeys.hasNext() )
-				{
-					String currentKey = parameterKeys.next();
-					updateBusinessSQL += currentKey + " = ?,";
-					validKeys.add( currentKey );
-				}
-
-				//Eliminate the final comma, and append the rest of the SQL statement
-				updateBusinessSQL = updateBusinessSQL.substring(0, updateBusinessSQL.length() - 1 );
-				updateBusinessSQL += " WHERE bid = ?";
-
-				PreparedStatement updateBusinessStatement = connect.prepareStatement( updateBusinessSQL );
-				int currentPreparedStatementIndex;
-
-				for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
-				{
-					updateBusinessStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
-				}
-
-				updateBusinessStatement.setLong( currentPreparedStatementIndex + 1, aBid );
-				System.out.println( updateBusinessSQL );
-				updateBusinessStatement.executeUpdate();
+				String currentKey = parameterKeys.next();
+				updateBusinessSQL += currentKey + " = ?,";
+				validKeys.add( currentKey );
 			}
-		}
-		catch(SQLException e)
-		{
-			log.error ("Business "+aBid+" could not be registered", e);
+
+			//Eliminate the final comma, and append the rest of the SQL statement
+			updateBusinessSQL = updateBusinessSQL.substring(0, updateBusinessSQL.length() - 1 );
+			updateBusinessSQL += " WHERE bid = ?";
+
+			System.out.println( updateBusinessSQL );
+			PreparedStatement updateBusinessStatement = connect.prepareStatement( updateBusinessSQL );
+			int currentPreparedStatementIndex;
+
+			for( currentPreparedStatementIndex = 0; currentPreparedStatementIndex < validKeys.size(); ++currentPreparedStatementIndex )
+			{
+				updateBusinessStatement.setObject( currentPreparedStatementIndex+1, aParameters.get( validKeys.get( currentPreparedStatementIndex ) ) );
+			}
+
+			updateBusinessStatement.setLong( currentPreparedStatementIndex + 1, aBid );
+			System.out.println( updateBusinessSQL );
+			updateBusinessStatement.executeUpdate();
 		}
 	}
 
@@ -739,36 +549,36 @@ public class MySQL
 	 * Updates the user with the given objects
 	 * @param aBid ID of the user to update
 	 * @param aParameters The parameters to update the user with
+	 * @throws SQLException
 	 */
-	public void updateUser( long aUid, Map<String,Object> aParameters )
+	public void updateUser( long aUid, Map<String,Object> aParameters ) throws SQLException
 	{
-		try
+		if( !aParameters.isEmpty() )
 		{
-			if( !aParameters.isEmpty() )
+			System.out.println( "Attempting to change password" );
+			String updateBusinessSQL = "UPDATE Users SET ";
+			Iterator<String> parameterKeys = aParameters.keySet().iterator();
+			ArrayList<String> validKeys = new ArrayList<String>();
+
+			// Create the SQL String statement, and store all of the keys so
+			// that we can loop through them after the statement is created.
+			while( parameterKeys.hasNext() )
 			{
-				System.out.println( "Attempting to change password" );
-				String updateBusinessSQL = "UPDATE Users SET ";
-				Iterator<String> parameterKeys = aParameters.keySet().iterator();
-				ArrayList<String> validKeys = new ArrayList<String>();
-
-				// Create the SQL String statement, and store all of the keys so
-				// that we can loop through them after the statement is created.
-				while( parameterKeys.hasNext() )
+				String currentKey = parameterKeys.next();
+				String[] userColumns = {"id","first_name","last_name","email","address","primary_number",
+						"secondary_number","password","salt","zip"};
+				if( Utilities.isElementInArray(currentKey, userColumns) )
 				{
-					String currentKey = parameterKeys.next();
-					if( User.isValidDatabaseInput( currentKey, (String) aParameters.get( currentKey ) ) )
+					if( currentKey == "password" )
 					{
-						if( currentKey == "password" )
-						{
-							updateBusinessSQL += currentKey + " = SHA1( CONCAT( salt, ? ) ),";
-						}
-						else
-						{
-							updateBusinessSQL += currentKey + " = ?,";
-						}
-
-						validKeys.add( currentKey );
+						updateBusinessSQL += currentKey + " = SHA1( CONCAT( salt, ? ) ),";
 					}
+					else
+					{
+						updateBusinessSQL += currentKey + " = ?,";
+					}
+
+					validKeys.add( currentKey );
 				}
 
 				//Eliminate the final comma, and append the rest of the SQL statement
@@ -790,11 +600,6 @@ public class MySQL
 				System.out.println( "Update successful" );
 			}
 		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			log.error ("User "+aUid+" could not be registered", e);
-		}
 	}
 
 	/**
@@ -804,7 +609,7 @@ public class MySQL
 	 * @param aCity City associated to aZip
 	 * @param aState State associated to aZip
 	 */
-	public void verityZipInDatabase( String aZip, String aCity, String aState )
+	private void verityZipInDatabase( String aZip, String aCity, String aState )
 	{
 		if( Utilities.stringIsNumeric(aZip) )
 		{
@@ -834,32 +639,25 @@ public class MySQL
 	 * Retrieves a photo from a pid
 	 * @param pid Photo id of the photo to retrieve
 	 * @return The photo associated with the pid
+	 * @throws SQLException
 	 */
-	public Photo getPhotoFromId( long pid )
+	public Photo getPhotoFromId( long pid ) throws SQLException
 	{
 		Photo foundPhoto = null;
 
 		System.out.println("Querying the photo: " + pid);
-		try
-		{
-			PreparedStatement photoQuery = connect.prepareStatement( "SELECT * FROM Photos WHERE pid = ?");
-			photoQuery.setLong( 1, pid );
+		PreparedStatement photoQuery = connect.prepareStatement( "SELECT * FROM Photos WHERE pid = ?");
+		photoQuery.setLong( 1, pid );
 
-			ResultSet photoQueryResult = photoQuery.executeQuery();
-			if( photoQueryResult.first() )
-			{
-				foundPhoto = new Photo();
-				foundPhoto.setBid( photoQueryResult.getLong( "bid" ) );
-				foundPhoto.setPid( photoQueryResult.getLong( "pid" ) );
-				foundPhoto.setSrc( photoQueryResult.getString( "src" ) );
-				foundPhoto.setTitle( photoQueryResult.getString( "title" ) );
-			}
-		}
-		catch (SQLException e)
+		ResultSet photoQueryResult = photoQuery.executeQuery();
+		if( photoQueryResult.first() )
 		{
-			log.error ("Errors occured while querying photo table", e);
+			foundPhoto = new Photo();
+			foundPhoto.setBid( photoQueryResult.getLong( "bid" ) );
+			foundPhoto.setPid( photoQueryResult.getLong( "pid" ) );
+			foundPhoto.setSrc( photoQueryResult.getString( "src" ) );
+			foundPhoto.setTitle( photoQueryResult.getString( "title" ) );
 		}
-
 		return foundPhoto;
 	}
 
@@ -869,27 +667,22 @@ public class MySQL
 	 * @param title Title of the photo
 	 * @param src SRC of the photo
 	 * @return The generated photo ID if the insertion is successful, null otherwise
+	 * @throws SQLException
 	 */
-	public ResultSet insertPhoto( long bid, String title, String src )
+	public ResultSet insertPhoto( long bid, String title, String src ) throws SQLException
 	{
 		ResultSet photoKeys = null;
-		try
-		{
-			PreparedStatement insertPhoto = connect.prepareStatement(
-					"INSERT INTO Photos (bid, title, src) VALUES(?,?,?)",
-					Statement.RETURN_GENERATED_KEYS
-					);
 
-			insertPhoto.setLong( 1, bid );
-			insertPhoto.setString( 2, title );
-			insertPhoto.setString( 3, src );
-			insertPhoto.executeUpdate();
-			photoKeys = insertPhoto.getGeneratedKeys();
-		}
-		catch(SQLException e)
-		{
+		PreparedStatement insertPhoto = connect.prepareStatement(
+				"INSERT INTO Photos (bid, title, src) VALUES(?,?,?)",
+				Statement.RETURN_GENERATED_KEYS
+				);
 
-		}
+		insertPhoto.setLong( 1, bid );
+		insertPhoto.setString( 2, title );
+		insertPhoto.setString( 3, src );
+		insertPhoto.executeUpdate();
+		photoKeys = insertPhoto.getGeneratedKeys();
 
 		return photoKeys;
 	}
@@ -900,40 +693,29 @@ public class MySQL
 	 * @param aPhotoType Photo type we are setting for the account
 	 * @param aAccountType Type of account that aOid corresponds to
 	 * @param aSrc The src of the photo
+	 * @throws SQLException
 	 */
-	public void setAccountPhoto(
-			long aOid,
-			String aPhotoType,
-			String aAccountType,
-			String aSrc )
+	public void setAccountPhoto( long aOid, String aPhotoType, String aAccountType, String aSrc ) throws SQLException
 	{
-		System.out.println( "Account Profile" );
-		try
+		PreparedStatement updateUser = null;
+		String updateProfilePhotoSql;
+
+		String targetPhoto = aPhotoType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? "cover_src" : "profile_src";
+
+		if( targetPhoto.equals( "profile_src" ) )
 		{
-			PreparedStatement updateUser = null;
-			String updateProfilePhotoSql;
-
-			String targetPhoto = aPhotoType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? "cover_src" : "profile_src";
-
-			if( targetPhoto.equals( "profile_src" ) )
-			{
-				updateProfilePhotoSql = "UPDATE accounts SET profile_src = ? WHERE aid = ?";
-			}
-			else
-			{
-				updateProfilePhotoSql = "UPDATE business SET cover_src = ? WHERE bid = ?";
-			}
-
-			updateUser = connect.prepareStatement( updateProfilePhotoSql );
-
-			updateUser.setString( 1, aSrc );
-			updateUser.setLong( 2, aOid );
-			updateUser.executeUpdate();
+			updateProfilePhotoSql = "UPDATE accounts SET profile_src = ? WHERE aid = ?";
 		}
-		catch(SQLException e)
+		else
 		{
-			e.printStackTrace();
+			updateProfilePhotoSql = "UPDATE business SET cover_src = ? WHERE bid = ?";
 		}
+
+		updateUser = connect.prepareStatement( updateProfilePhotoSql );
+
+		updateUser.setString( 1, aSrc );
+		updateUser.setLong( 2, aOid );
+		updateUser.executeUpdate();
 	}
 
 	/**
@@ -941,7 +723,7 @@ public class MySQL
 	 * @param tag Tag to insert into the database
 	 * @return The id if the insertion tag was successful, 0 otherwise
 	 */
-	public long insertTag( String tag )
+	private long insertTag( String tag )
 	{
 		try
 		{
@@ -980,7 +762,7 @@ public class MySQL
 	 * @return The tag id
 	 * @throws SQLException
 	 */
-	public long getTagId( String aTag ) throws SQLException
+	private long getTagId( String aTag ) throws SQLException
 	{
 		String getTagIdSql = "SELECT id FROM Tags WHERE tag = ?";
 
@@ -1004,34 +786,25 @@ public class MySQL
 	 * @param aRequest Request to search for an account for
 	 * @param aHoursRequested The number of hours that the object requests for a given tag
 	 * @return The ID of the tag to insert into the logged in user
+	 * @throws SQLException
 	 */
-	public long attachTagToAccount( String aTag, HttpServletRequest aRequest, Long aHoursRequested )
+	public long attachTagToAccount( String aTag, HttpServletRequest aRequest, Long aHoursRequested ) throws SQLException
 	{
 		long tagId = -1;
+		tagId = getTagId( aTag );
 
-		System.out.println( "Attempting to tag" );
-		try
+		if( tagId > 0)
 		{
-			tagId = getTagId( aTag );
+			long oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
+			String attachTagToUserSql;
+			attachTagToUserSql  = "INSERT IGNORE INTO account_tags (aid, tid, hours_requested)";
+			attachTagToUserSql += "VALUE(?, ?, ?)";
 
-			if( tagId > 0)
-			{
-				long oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
-				String attachTagToUserSql;
-				attachTagToUserSql  = "INSERT IGNORE INTO account_tags (aid, tid, hours_requested)";
-				attachTagToUserSql += "VALUE(?, ?, ?)";
-
-				PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
-				attachTagStmt.setLong( 1, oid );
-				attachTagStmt.setLong( 2, tagId );
-				attachTagStmt.setLong( 3, aHoursRequested );
-				attachTagStmt.executeUpdate();
-			}
-		}
-		catch( SQLException e)
-		{
-			e.printStackTrace();
-			log.error ("Errors occured while trying to attach a tag to an account", e);
+			PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
+			attachTagStmt.setLong( 1, oid );
+			attachTagStmt.setLong( 2, tagId );
+			attachTagStmt.setLong( 3, aHoursRequested );
+			attachTagStmt.executeUpdate();
 		}
 
 		return tagId;
@@ -1041,66 +814,62 @@ public class MySQL
 	 * Detaches a tag from the signed in account for the current session
 	 * @param aTag Tag to detach from signed in account
 	 * @param aRequest Request to search for an account for
+	 * @throws SQLException
 	 */
-	public void detachTagFromAccount( long aTagId, HttpServletRequest aRequest )
+	public void detachTagFromAccount( long aTagId, HttpServletRequest aRequest ) throws SQLException
 	{
-		try
-		{
-			long oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
-			String attachTagToUserSql = "DELETE FROM account_tags WHERE tid = ? AND aid = ?";
+		long oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
+		String attachTagToUserSql = "DELETE FROM account_tags WHERE tid = ? AND aid = ?";
 
-			PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
-			attachTagStmt.setLong( 1, aTagId );
-			attachTagStmt.setLong( 2, oid );
-			attachTagStmt.executeUpdate();
-		}
-		catch( SQLException e)
-		{
-			e.printStackTrace();
-			log.error ("Errors occured while trying to detach a tag from an account", e);
-		}
+		PreparedStatement attachTagStmt = connect.prepareStatement( attachTagToUserSql );
+		attachTagStmt.setLong( 1, aTagId );
+		attachTagStmt.setLong( 2, oid );
+		attachTagStmt.executeUpdate();
 	}
 
 	/**
 	 * Get all the business that have the given tags
 	 * @param aTags Tags to search for businesses for
 	 * @return The business that have the given tags
+	 * @throws SQLException
 	 */
-	public ArrayList<Business> getBusinessesFromTags(String aTags[])
+	public ArrayList<Business> getBusinessesFromTags(String aTags[]) throws SQLException
 	{
 		ArrayList<Business> businesses = new ArrayList<Business>();
 
-		try
+		String tagIdQuery = "SELECT id FROM tags WHERE ";
+		for( int i = 0; i < aTags.length; ++i )
 		{
-			String tagIdQuery = "SELECT id FROM tags WHERE ";
-			for( int i = 0; i < aTags.length; ++i )
-			{
-				tagIdQuery += "tag LIKE ? OR ";
-			}
-
-			//Remove the last OR statement
-			tagIdQuery = tagIdQuery.substring( 0, tagIdQuery.length() - 4 );
-			String query = "SELECT * FROM business JOIN accounts on aid = bid WHERE bid in ( SELECT aid FROM account_tags WHERE tid IN ( ";
-			query += tagIdQuery + " ) )";
-
-			PreparedStatement businessQueryStatement = connect.prepareStatement( query );
-			for( int i = 0; i < aTags.length; ++i )
-			{
-				businessQueryStatement.setString( i+1, "%"+aTags[i]+"%" );
-			}
-
-			ResultSet foundBusinesses = businessQueryStatement.executeQuery();
-
-			while( foundBusinesses.next() )
-			{
-				Business nextBusiness = new Business();
-				nextBusiness.init( foundBusinesses );
-				businesses.add( nextBusiness );
-			}
+			tagIdQuery += "tag LIKE ? OR ";
 		}
-		catch(SQLException e)
+
+		//Remove the last OR statement
+		tagIdQuery = tagIdQuery.substring( 0, tagIdQuery.length() - 4 );
+		String query = "SELECT * FROM business JOIN accounts on aid = bid WHERE bid in ( SELECT aid FROM account_tags WHERE tid IN ( ";
+		query += tagIdQuery + " ) )";
+
+		PreparedStatement businessQueryStatement = connect.prepareStatement( query );
+		for( int i = 0; i < aTags.length; ++i )
 		{
-			e.printStackTrace();
+			businessQueryStatement.setString( i+1, "%"+aTags[i]+"%" );
+		}
+
+		ResultSet foundBusinesses = businessQueryStatement.executeQuery();
+
+		while( foundBusinesses.next() )
+		{
+			Business nextBusiness = new Business();
+			nextBusiness.setProfileSrc( foundBusinesses.getString( "profile_src" ) );
+			nextBusiness.setUid( foundBusinesses.getLong( "uid" ) );
+			nextBusiness.setAid( foundBusinesses.getLong( "aid" ) );
+			nextBusiness.setName( foundBusinesses.getString( "name" ) );
+			nextBusiness.setShortSummary( foundBusinesses.getString( "short_summary" ) );
+			nextBusiness.setLongSummary( foundBusinesses.getString( "long_summary" ) );
+			nextBusiness.setWorkNumber( foundBusinesses.getString( "work_number" ) );
+			nextBusiness.setAddress( foundBusinesses.getString( "address" ) );
+			nextBusiness.setZip( foundBusinesses.getString( "ZIP" ) );
+			nextBusiness.setCoverSrc( foundBusinesses.getString( "cover_src" ) );
+			businesses.add( nextBusiness );
 		}
 
 		return businesses;
@@ -1110,33 +879,23 @@ public class MySQL
 	 * Gets the tags from the given question
 	 * @param aQid Question to get the tags for
 	 * @return The tags for the given question
+	 * @throws SQLException
 	 */
-	public ArrayList<Tag> getTagsFromQuestion( long aQid )
+	public ArrayList<Tag> getTagsFromQuestion( long aQid ) throws SQLException
 	{
 		ArrayList<Tag> questionTags = new ArrayList<Tag>();
 
-		try
-		{
-			String questionTagsSql = "SELECT * FROM Tags WHERE id in ( SELECT tid FROM question_tags WHERE qid = ? )";
-			PreparedStatement questionTagsStmt = connect.prepareStatement( questionTagsSql );
-			questionTagsStmt.setLong( 1, aQid );
-			ResultSet questionTagsResult = questionTagsStmt.executeQuery();
+		String questionTagsSql = "SELECT * FROM Tags WHERE id in ( SELECT tid FROM question_tags WHERE qid = ? )";
+		PreparedStatement questionTagsStmt = connect.prepareStatement( questionTagsSql );
+		questionTagsStmt.setLong( 1, aQid );
+		ResultSet questionTagsResult = questionTagsStmt.executeQuery();
 
-			System.out.println( questionTagsSql );
-			while( questionTagsResult.next() )
-			{
-				Tag businessTag = new Tag();
-				businessTag.set_id( questionTagsResult.getInt( "id" ) );
-				businessTag.set_name( questionTagsResult.getString( "tag" ) );
-				System.out.println( "Tag: " + businessTag.get_name() + " " + businessTag.get_id() );
-				questionTags.add( businessTag );
-			}
-
-			System.out.println("Count: " + questionTags.size() );
-		}
-		catch (SQLException e)
+		while( questionTagsResult.next() )
 		{
-			e.printStackTrace();
+			Tag businessTag = new Tag( questionTagsResult.getString( "tag" ) );
+			businessTag.set_tid( questionTagsResult.getInt( "id" ) );
+			businessTag.set_name( questionTagsResult.getString( "tag" ) );
+			questionTags.add( businessTag );
 		}
 
 		return questionTags;
@@ -1146,30 +905,24 @@ public class MySQL
 	 * Finds all the tags associated to a business
 	 * @param aOid ID of the business to query for
 	 * @return The tags associated to a business
+	 * @throws SQLException
 	 */
-	public ArrayList<Tag> getTagsFromAccount( long aOid )
+	public ArrayList<Tag> getTagsFromAccount( long aOid ) throws SQLException
 	{
 		ArrayList<Tag> tags = new ArrayList<Tag>();
 
-		try
-		{
-			String tagsQuerySql = "SELECT * FROM TAGS WHERE id in ( SELECT tid FROM account_tags WHERE aid = ? )";
+		String tagsQuerySql = "SELECT * FROM TAGS WHERE id in ( SELECT tid FROM account_tags WHERE aid = ? )";
 
-			PreparedStatement tagsQueryStmt = connect.prepareStatement( tagsQuerySql );
-			tagsQueryStmt.setLong( 1, aOid );
-			ResultSet tagsResult = tagsQueryStmt.executeQuery();
+		PreparedStatement tagsQueryStmt = connect.prepareStatement( tagsQuerySql );
+		tagsQueryStmt.setLong( 1, aOid );
+		ResultSet tagsResult = tagsQueryStmt.executeQuery();
 
-			while( tagsResult.next() )
-			{
-				Tag businessTag = new Tag();
-				businessTag.set_id( tagsResult.getInt( "id" ) );
-				businessTag.set_name( tagsResult.getString( "tag" ) );
-				tags.add( businessTag );
-			}
-		}
-		catch(SQLException e)
+		while( tagsResult.next() )
 		{
-			log.error ("Errors occured while searching for business tags", e);
+			Tag businessTag = new Tag( tagsResult.getString( "tag" ) );
+			businessTag.set_tid( tagsResult.getInt( "id" ) );
+			businessTag.set_name( tagsResult.getString( "tag" ) );
+			tags.add( businessTag );
 		}
 
 		return tags;
@@ -1179,27 +932,22 @@ public class MySQL
 	 * Gets a veteran from a user id
 	 * @param uid The user id of the user
 	 * @return The Veteran object if found, false otherwise
+	 * @throws SQLException
 	 */
-	public Veteran getVeteran( long uid )
+	public Veteran getVeteran( long uid ) throws SQLException
 	{
 		Veteran foundVeteran = null;
-		try
-		{
-			String selectSql = "SELECT * FROM accounts JOIN veterans ON veterans.vid = accounts.aid WHERE uid = ?";
-			PreparedStatement veteranSql = connect.prepareStatement( selectSql );
-			veteranSql.setLong( 1, uid );
 
-			ResultSet veteranQuery = veteranSql.executeQuery();
-			if( veteranQuery.first() )
-			{
-				foundVeteran = new Veteran();
-				foundVeteran.init( veteranQuery );
-			}
-		}
-		catch( SQLException e)
+		String selectSql = "SELECT * FROM accounts JOIN veterans ON veterans.vid = accounts.aid WHERE uid = ?";
+		PreparedStatement veteranSql = connect.prepareStatement( selectSql );
+		veteranSql.setLong( 1, uid );
+
+		ResultSet veteranQuery = veteranSql.executeQuery();
+		if( veteranQuery.first() )
 		{
-			log.error ("Errors occured while trying to retrieve a veteran", e);
-			e.printStackTrace();
+			foundVeteran = new Veteran();
+			foundVeteran.setVid( veteranQuery.getLong( "aid" ) );
+			foundVeteran.setGoal( veteranQuery.getString( "goal" ) );
 		}
 
 		return foundVeteran;
@@ -1210,27 +958,20 @@ public class MySQL
 	 * also do not exist in the account of the logged in user.
 	 * @param aTagToSearch Tag name to find similar tags for
 	 * @return The tags found from a keyword
+	 * @throws SQLException
 	 */
-	public JSONArray getSimiliarTags( String aTagToSearch )
+	public JSONArray getSimiliarTags( String aTagToSearch ) throws SQLException
 	{
 		JSONArray arrayOfTags = new JSONArray();
+		String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? ";
 
-		try
+		PreparedStatement stmt = connect.prepareStatement( getTagsSql );
+		stmt.setString( 1, "%"+aTagToSearch+"%" );
+		ResultSet tags = stmt.executeQuery();
+
+		while( tags.next() )
 		{
-			String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? ";
-
-			PreparedStatement stmt = connect.prepareStatement( getTagsSql );
-			stmt.setString( 1, "%"+aTagToSearch+"%" );
-			ResultSet tags = stmt.executeQuery();
-
-			while( tags.next() )
-			{
-				arrayOfTags.add( tags.getString( "tag" ) );
-			}
-		}
-		catch(SQLException e)
-		{
-
+			arrayOfTags.add( tags.getString( "tag" ) );
 		}
 
 		return arrayOfTags;
@@ -1241,30 +982,24 @@ public class MySQL
 	 * also do not exist in the account of the logged in user.
 	 * @param aTagToSearch Tag name to find similar tags for
 	 * @return The tags found from a keyword
+	 * @throws SQLException
 	 */
-	public JSONArray getSimiliarTagsNotInAccount( String aTagToSearch, HttpServletRequest aRequest )
+	public JSONArray getSimiliarTagsNotInAccount( String aTagToSearch, HttpServletRequest aRequest ) throws SQLException
 	{
 		JSONArray arrayOfTags = new JSONArray();
 
-		try
-		{
-			long oid;
-			String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? AND id NOT in";
-			oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
-			getTagsSql += " (SELECT tid FROM account_tags WHERE aid = ?)";
-			PreparedStatement stmt = connect.prepareStatement( getTagsSql );
-			stmt.setString( 1, "%"+aTagToSearch+"%" );
-			stmt.setLong( 2, oid );
-			ResultSet tags = stmt.executeQuery();
+		long oid;
+		String getTagsSql = "SELECT * FROM tags WHERE tag LIKE ? AND id NOT in";
+		oid = Long.valueOf( aRequest.getSession().getAttribute( "aid" ).toString() );
+		getTagsSql += " (SELECT tid FROM account_tags WHERE aid = ?)";
+		PreparedStatement stmt = connect.prepareStatement( getTagsSql );
+		stmt.setString( 1, "%"+aTagToSearch+"%" );
+		stmt.setLong( 2, oid );
+		ResultSet tags = stmt.executeQuery();
 
-			while( tags.next() )
-			{
-				arrayOfTags.add( tags.getString( "tag" ) );
-			}
-		}
-		catch(SQLException e)
+		while( tags.next() )
 		{
-
+			arrayOfTags.add( tags.getString( "tag" ) );
 		}
 
 		return arrayOfTags;
@@ -1276,82 +1011,67 @@ public class MySQL
 	 * @param aAvailability General string that describes when the Veteran is available
 	 * @param aQuestionDetailedDescription Detailed description of the question
 	 * @param aVid Id of the veteran asking the question
+	 * @throws SQLException
 	 */
 	public ResultSet insertVeteranQuestion(
 			String aQuestionTitle,
 			String aAvailability,
 			String aQuestionDetailedDescription,
-			long aVid )
-	{
+			long aVid ) throws SQLException
+			{
 		ResultSet generatedQuestionID = null;
 
-		try
-		{
-			String insertQuestionSQL = "INSERT INTO questions (question_title, availability, question_detailed_description, vid) ";
-			insertQuestionSQL 		+= "VALUES( ?, ?, ?, ? )";
+		String insertQuestionSQL = "INSERT INTO questions (question_title, availability, question_detailed_description, vid) ";
+		insertQuestionSQL 		+= "VALUES( ?, ?, ?, ? )";
 
-			PreparedStatement insertQuestionStatement = connect.prepareStatement( insertQuestionSQL, Statement.RETURN_GENERATED_KEYS );
-			insertQuestionStatement.setString( 1, aQuestionTitle );
-			insertQuestionStatement.setString( 2, aAvailability );
-			insertQuestionStatement.setString( 3, aQuestionDetailedDescription );
-			insertQuestionStatement.setLong( 4, aVid );
-			insertQuestionStatement.executeUpdate();
-			generatedQuestionID = insertQuestionStatement.getGeneratedKeys();
-		}
-		catch( SQLException e )
-		{
-			log.error ("Failed to insert a question into the database", e);
-		}
+		PreparedStatement insertQuestionStatement = connect.prepareStatement( insertQuestionSQL, Statement.RETURN_GENERATED_KEYS );
+		insertQuestionStatement.setString( 1, aQuestionTitle );
+		insertQuestionStatement.setString( 2, aAvailability );
+		insertQuestionStatement.setString( 3, aQuestionDetailedDescription );
+		insertQuestionStatement.setLong( 4, aVid );
+		insertQuestionStatement.executeUpdate();
+		generatedQuestionID = insertQuestionStatement.getGeneratedKeys();
 
 		return generatedQuestionID;
-	}
+			}
 
 	/**
 	 * Removes tags from the question associated to the given id.
 	 * @param aQid ID of question to remove tags from
+	 * @throws SQLException
 	 */
-	public void removeTagsFromQuestion( long aQid )
+	public void removeTagsFromQuestion( long aQid ) throws SQLException
 	{
-		try
-		{
-			String removeTagsSql = "DELETE FROM question_tags WHERE qid = ?";
-			PreparedStatement removeTagsStmt = connect.prepareStatement( removeTagsSql );
-			removeTagsStmt.setLong( 1, aQid );
-			removeTagsStmt.executeUpdate();
-		}
-		catch (SQLException e )
-		{
-			log.error ("Failed to delete tags from question", e);
-		}
+		String removeTagsSql = "DELETE FROM question_tags WHERE qid = ?";
+		PreparedStatement removeTagsStmt = connect.prepareStatement( removeTagsSql );
+		removeTagsStmt.setLong( 1, aQid );
+		removeTagsStmt.executeUpdate();
 	}
+
 	/**
 	 * Attaches the given tags to the question with the given id
+	 * @param aTag Tag to insert
+	 * @param aQid Question to attach tag to
+	 * @return The id of the tag
+	 * @throws SQLException
 	 */
-	public long attachTagsToQuestion( String aTag, long aQid )
+	public long attachTagsToQuestion( String aTag, long aQid ) throws SQLException
 	{
 		long tagId = -1;
-		try
+		tagId = getTagId( aTag );
+
+		if( tagId > 0)
 		{
-			tagId = getTagId( aTag );
+			String attachTagToQuestionSql;
+			attachTagToQuestionSql  = "INSERT IGNORE INTO question_tags (qid, tid )";
+			attachTagToQuestionSql += "VALUE(?, ? )";
 
-			if( tagId > 0)
-			{
-				String attachTagToQuestionSql;
-				attachTagToQuestionSql  = "INSERT IGNORE INTO question_tags (qid, tid )";
-				attachTagToQuestionSql += "VALUE(?, ? )";
+			PreparedStatement attachTagStmt = connect.prepareStatement(
+					attachTagToQuestionSql );
 
-				PreparedStatement attachTagStmt = connect.prepareStatement(
-						attachTagToQuestionSql );
-
-				attachTagStmt.setLong( 1, aQid );
-				attachTagStmt.setLong( 2, tagId );
-				attachTagStmt.executeUpdate();
-			}
-		}
-		catch( SQLException e)
-		{
-			e.printStackTrace();
-			log.error ("Errors occured while trying to attach a tag to an account", e);
+			attachTagStmt.setLong( 1, aQid );
+			attachTagStmt.setLong( 2, tagId );
+			attachTagStmt.executeUpdate();
 		}
 
 		return tagId;
@@ -1361,28 +1081,25 @@ public class MySQL
 	 * Gets a question from the given question id
 	 * @param aQid The question Id
 	 * @return The question from the ID if the id is found, false otherwise
+	 * @throws SQLException
 	 */
-	public Question getQuestionFromId( long aQid )
+	public Question getQuestionFromId( long aQid ) throws SQLException
 	{
 		Question foundQuestion = null;
-		try
+		String getQuestionsSQL = "SELECT * FROM questions WHERE qid = ?";
+
+		PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
+		getQuestionsStatement.setLong( 1, aQid );
+
+		ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
+
+		while( getQuestionsResults.next() )
 		{
-			String getQuestionsSQL = "SELECT * FROM questions WHERE qid = ?";
-
-			PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
-			getQuestionsStatement.setLong( 1, aQid );
-
-			ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
-
-			while( getQuestionsResults.next() )
-			{
-				foundQuestion = new Question();
-				foundQuestion.init( getQuestionsResults );
-			}
-		}
-		catch( SQLException e )
-		{
-
+			foundQuestion = new Question();
+			foundQuestion.setQid( getQuestionsResults.getLong( "qid" ) );
+			foundQuestion.setQuestionTitle( getQuestionsResults.getString( "question_title" ) );
+			foundQuestion.setAvailability( getQuestionsResults.getString( "availability" ) );
+			foundQuestion.setVid( getQuestionsResults.getLong( "vid" ) );
 		}
 
 		return foundQuestion;
@@ -1392,30 +1109,27 @@ public class MySQL
 	 * Gets all the questions that a veteran asked
 	 * @param aVid The ID of the veteran to get the questions for
 	 * @return The questions that a veteran asked
+	 * @throws SQLException
 	 */
-	public ArrayList<Question> getQuestionsFromVeteran( long aVid )
+	public ArrayList<Question> getQuestionsFromVeteran( long aVid ) throws SQLException
 	{
 		ArrayList<Question> veteranQuestions = new ArrayList<Question>();
 
-		try
+		String getQuestionsSQL = "SELECT * FROM questions WHERE vid = ?";
+
+		PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
+		getQuestionsStatement.setLong( 1, aVid );
+
+		ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
+
+		while( getQuestionsResults.next() )
 		{
-			String getQuestionsSQL = "SELECT * FROM questions WHERE vid = ?";
-
-			PreparedStatement getQuestionsStatement = connect.prepareStatement( getQuestionsSQL );
-			getQuestionsStatement.setLong( 1, aVid );
-
-			ResultSet getQuestionsResults = getQuestionsStatement.executeQuery();
-
-			while( getQuestionsResults.next() )
-			{
-				Question currentQuestion = new Question();
-				currentQuestion.init( getQuestionsResults );
-				veteranQuestions.add( currentQuestion );
-			}
-		}
-		catch( SQLException e )
-		{
-
+			Question currentQuestion = new Question();
+			currentQuestion.setQid( getQuestionsResults.getLong( "qid" ) );
+			currentQuestion.setQuestionTitle( getQuestionsResults.getString( "question_title" ) );
+			currentQuestion.setAvailability( getQuestionsResults.getString( "availability" ) );
+			currentQuestion.setVid( getQuestionsResults.getLong( "vid" ) );
+			veteranQuestions.add( currentQuestion );
 		}
 
 		return veteranQuestions;
@@ -1426,28 +1140,26 @@ public class MySQL
 	 * @param aQid ID of the question the meeting request is for
 	 * @param aBid ID of the business who sent the request
 	 * @return The Meeting Request if found, NULL otherwise
+	 * @throws SQLException
 	 */
-	public MeetingRequest getMeetingRequestFromQIDAndBID( long aQid, long aBid )
+	public MeetingRequest getMeetingRequestFromQIDAndBID( long aQid, long aBid ) throws SQLException
 	{
 		MeetingRequest foundMeetingRequest = null;
 
-		try
-		{
-			String findMeetingRequestSQL = "SELECT * From MeetingRequests WHERE qid = ? and bid = ?";
-			PreparedStatement findMeetingRequestStmt = connect.prepareStatement( findMeetingRequestSQL );
-			findMeetingRequestStmt.setLong( 1, aQid );
-			findMeetingRequestStmt.setLong( 2, aBid );
-			ResultSet findMeetingRequestResults = findMeetingRequestStmt.executeQuery();
+		String findMeetingRequestSQL = "SELECT * From MeetingRequests WHERE qid = ? and bid = ?";
+		PreparedStatement findMeetingRequestStmt = connect.prepareStatement( findMeetingRequestSQL );
+		findMeetingRequestStmt.setLong( 1, aQid );
+		findMeetingRequestStmt.setLong( 2, aBid );
+		ResultSet findMeetingRequestResults = findMeetingRequestStmt.executeQuery();
 
-			if( findMeetingRequestResults.next() )
-			{
-				foundMeetingRequest = new MeetingRequest();
-				foundMeetingRequest.init( findMeetingRequestResults );
-			}
-		}
-		catch (SQLException e)
+		if( findMeetingRequestResults.next() )
 		{
-			e.printStackTrace();
+			foundMeetingRequest = new MeetingRequest();
+			foundMeetingRequest.setBid( findMeetingRequestResults.getLong( "bid" ) );
+			foundMeetingRequest.setQid( findMeetingRequestResults.getLong( "qid" ) );
+			foundMeetingRequest.setTime( findMeetingRequestResults.getString( "time" ) );
+			foundMeetingRequest.setDay( findMeetingRequestResults.getString( "day" ) );
+			foundMeetingRequest.setLocation( findMeetingRequestResults.getString( "location" ) );
 		}
 
 		return foundMeetingRequest;
@@ -1456,62 +1168,56 @@ public class MySQL
 	/**
 	 * Gets the meeting request for a given question id
 	 * @param aQid The question ID to retrieve the meeting requests for
+	 * @throws SQLException
 	 */
-	public ArrayList<MeetingRequest> getMeetingRequestsForQuestion( long aQid )
+	public ArrayList<MeetingRequest> getMeetingRequestsForQuestion( long aQid ) throws SQLException
 	{
 		ArrayList<MeetingRequest> meetingRequests = new ArrayList<MeetingRequest>();
 
-		try
-		{
-			String getMeetingRequestsSQL = "SELECT * FROM MeetingRequests WHERE qid = ?";
-			PreparedStatement getMeetingRequestsStmt;
-			getMeetingRequestsStmt = connect.prepareStatement( getMeetingRequestsSQL );
-			getMeetingRequestsStmt.setLong( 1, aQid );
-			ResultSet getMeetingRequestsResults = getMeetingRequestsStmt.executeQuery();
+		String getMeetingRequestsSQL = "SELECT * FROM MeetingRequests WHERE qid = ?";
+		PreparedStatement getMeetingRequestsStmt;
+		getMeetingRequestsStmt = connect.prepareStatement( getMeetingRequestsSQL );
+		getMeetingRequestsStmt.setLong( 1, aQid );
+		ResultSet getMeetingRequestsResults = getMeetingRequestsStmt.executeQuery();
 
-			while( getMeetingRequestsResults.next() )
-			{
-				MeetingRequest nextMeetingRequest = new MeetingRequest();
-				nextMeetingRequest.init( getMeetingRequestsResults );
-				meetingRequests.add( nextMeetingRequest );
-			}
-		}
-		catch (SQLException e)
+		while( getMeetingRequestsResults.next() )
 		{
-			e.printStackTrace();
+			MeetingRequest nextMeetingRequest = new MeetingRequest();
+			nextMeetingRequest.setBid( getMeetingRequestsResults.getLong( "bid" ) );
+			nextMeetingRequest.setQid( getMeetingRequestsResults.getLong( "qid" ) );
+			nextMeetingRequest.setTime( getMeetingRequestsResults.getString( "time" ) );
+			nextMeetingRequest.setDay( getMeetingRequestsResults.getString( "day" ) );
+			nextMeetingRequest.setLocation( getMeetingRequestsResults.getString( "location" ) );
+			meetingRequests.add( nextMeetingRequest );
 		}
 
 		return meetingRequests;
 	}
 
 	/**
-	 * Inserts the a row into the given table with the given column names and values
-	 * @param aTable Table to insert a new row into
-	 * @param aInsertParameters Parameters to use for the new row
-\	 * @throws SQLException
+	 * Inserts a meeting request
+	 * @param aMeetingParameters
+	 * @throws SQLException
 	 */
-	public void insertIntoTable( String aTable, Map<String,Object> aInsertParameters ) throws SQLException
+	public void insertMeetingRequests( Map<String,Object> aMeetingParameters ) throws SQLException
 	{
-		String insertTableSQL = "INSERT INTO " + aTable + " (";
+		String insertTableSQL = "INSERT INTO meetingrequests (";
 		String valuesSQL = " VALUES(";
-		Object[] objectsToInsert = new Object[aInsertParameters.size()];
+		Object[] objectsToInsert = new Object[aMeetingParameters.size()];
 		int currentObjectArrayIndex = 0;
 
-		Iterator<String> tableColumns = aInsertParameters.keySet().iterator();
+		Iterator<String> tableColumns = aMeetingParameters.keySet().iterator();
 		while( tableColumns.hasNext() )
 		{
 			String currentKey = tableColumns.next();
 			insertTableSQL += currentKey + ",";
 			valuesSQL += "?,";
-			objectsToInsert[currentObjectArrayIndex++] = aInsertParameters.get( currentKey );
+			objectsToInsert[currentObjectArrayIndex++] = aMeetingParameters.get( currentKey );
 		}
 
 		insertTableSQL = insertTableSQL.substring( 0, insertTableSQL.length() - 1 ) + ")";
 		valuesSQL = valuesSQL.substring( 0, valuesSQL.length() - 1 ) + ")";
-		PreparedStatement insertRowStmt = connect.prepareStatement(
-				insertTableSQL + valuesSQL,
-				Statement.RETURN_GENERATED_KEYS
-				);
+		PreparedStatement insertRowStmt = connect.prepareStatement( insertTableSQL + valuesSQL, Statement.RETURN_GENERATED_KEYS );
 
 		for( int i = 0; i < objectsToInsert.length; ++i )
 		{

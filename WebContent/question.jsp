@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+<%@ page import="org.soldieringup.Engine" %>
 <%@ page import="org.soldieringup.Question" %>
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.Veteran" %>
-<%@ page import="org.soldieringup.database.MySQL" %>
 <%
 	if( session.getAttribute( "aid" ) == null )
 	{
@@ -19,15 +19,9 @@
 	{
 		questionIndex = 1;
 	}
-
-	long accountId = Long.valueOf( session.getAttribute( "aid" ).toString() );
-	MySQL databaseConnection = MySQL.getInstance();
-	Question queriedQuestion = databaseConnection.getQuestionFromId( questionIndex );
 	
-	if( session.getAttribute( "editing_account_type" ).equals( "veteran" ) && accountId != queriedQuestion.getVid() )
-	{
-		%><jsp:forward page="/login.jsp"/><%
-	}
+	Engine engine = new Engine();
+	Question queriedQuestion = engine.getQuestionFromId( questionIndex );
 %>
 <!DOCTYPE html>
 <html>
@@ -116,11 +110,11 @@
 <%
 if( queriedQuestion != null)
 {
-	Veteran veteranFromQuestion = databaseConnection.getVeteran( 38 );
-	User associatedUser = databaseConnection.getUserFromId( 38 );
+	Veteran veteranFromQuestion = engine.getVeteran( 38 );
+	User associatedUser = engine.getUserFromId( 38 );
 %>
 <section id="right_question_section">
-<img src="Images/<%=veteranFromQuestion.getProfileSrc()%>"/>
+<img src="Images/<%=associatedUser.getProfileSrc()%>"/>
 <p><%=associatedUser.getFirstName() + " " + associatedUser.getLastName()%></p>
 <h1>Aspiration</h1>
 <p style="margin-top:5px; padding-top:0px;"><%=veteranFromQuestion.getGoal()%></p>

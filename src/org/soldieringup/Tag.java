@@ -16,28 +16,29 @@
 
 package org.soldieringup;
 
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 /**
  * @author jjennings
- *
  */
+@Document
 public class Tag
 {
-	private int _id;
+	@Id
+	protected ObjectId id;
+	protected long tid;
+	@Indexed(unique = true)
 	private String _name;
-	/**
-	 * @return the _id
-	 */
-	public int get_id ()
+
+
+	public Tag (String tag_name)
 	{
-		return _id;
+		this._name = tag_name;
 	}
-	/**
-	 * @param _id the _id to set
-	 */
-	public void set_id (int _id)
-	{
-		this._id = _id;
-	}
+
 	/**
 	 * @return the _name
 	 */
@@ -52,6 +53,14 @@ public class Tag
 	{
 		this._name = _name;
 	}
-	
-	
+
+	public long get_tid()
+	{
+		return tid;
+	}
+
+	public void set_tid( long tid )
+	{
+		this.tid = tid;
+	}
 }

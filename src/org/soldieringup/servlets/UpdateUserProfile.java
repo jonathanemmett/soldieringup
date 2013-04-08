@@ -12,9 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.Business;
-import org.soldieringup.User;
-import org.soldieringup.database.MySQL;
+import org.soldieringup.Engine;
+import org.soldieringup.Utilities;
 
 /**
  * Servlet implementation class UpdateUserProfile
@@ -47,22 +46,25 @@ public class UpdateUserProfile extends HttpServlet {
 	{
 		if( request.getSession().getAttribute( "uid" ) != null )
 		{
+			Engine engine = new Engine();
 			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
 			Iterator<String> keysIterator = keys.iterator();
+			String[] userProfileColumns = { "id", "first_name", "last_name", "email", "address",
+					"primary_number", "secondary_number", "password","salt", "ZIP" };
 
 			while( keysIterator.hasNext() )
 			{
 				String currentKey = keysIterator.next();
 
-				if( User.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
+				if( Utilities.isElementInArray( currentKey, userProfileColumns ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
 
-			MySQL.getInstance().updateUser( uid, updateParameters );
+			engine.updateUser( uid, updateParameters );
 
 			if( request.getSession().getAttribute( "editing_account_type" ).equals( "business" ) )
 			{

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.validator.routines.EmailValidator;
-import org.soldieringup.database.MySQL;
+import org.soldieringup.Engine;
 
 /**
  * Servlet implementation class UniqueEmail
@@ -18,38 +18,40 @@ import org.soldieringup.database.MySQL;
 @WebServlet("/UniqueEmail")
 public class UniqueEmail extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
 	// Ajax request parameters
 	private static final String REQUEST_EMAIL = "email";
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UniqueEmail() 
-    {
-        super();
-    }
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public UniqueEmail()
+	{
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		
+
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		PrintWriter writer = response.getWriter();
-		
+
 		String requestParameter = request.getParameter( "request" );
-		
+
 		if( requestParameter == null)
 			return;
-		
+
 		switch( requestParameter )
 		{
 		case REQUEST_EMAIL:
@@ -57,7 +59,7 @@ public class UniqueEmail extends HttpServlet {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Checks to make sure that an email is valid, and unique
 	 * @param aResponseOutput The writer to output to the request
@@ -66,10 +68,11 @@ public class UniqueEmail extends HttpServlet {
 	public void checkValidAndUniqueEmail( PrintWriter aResponseOutput, String aEmail )
 	{
 
+		Engine engine = new Engine();
 		boolean validEmail =  aEmail != null &&
-							  EmailValidator.getInstance().isValid( aEmail ) &&
-							  !MySQL.getInstance().checkIfEmailIsInUse( aEmail );
-		
+				EmailValidator.getInstance().isValid( aEmail ) &&
+				!engine.checkIfEmailIsInUse( aEmail );
+
 		if( validEmail )
 		{
 			aResponseOutput.println( "true" );
@@ -78,8 +81,8 @@ public class UniqueEmail extends HttpServlet {
 		{
 			aResponseOutput.println( "" );
 		}
-		
-		
+
+
 	}
 
 }

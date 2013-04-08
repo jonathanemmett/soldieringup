@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.soldieringup.EmailMessage;
+import org.soldieringup.Engine;
 import org.soldieringup.Utilities;
 
 /**
@@ -29,7 +30,7 @@ public class UserRegistration
 	private static void checkForNullUserInputs( HttpServletRequest aRequest, Map<String,String> aRegistrationErrors )
 	{
 		String[] requiredKeys = { "first_name", "last_name", "contact_address",
-				  "contact_state", "contact_city", "contact_email", "contact_ZIP", "contact_primary_number" };
+				"contact_state", "contact_city", "contact_email", "contact_ZIP", "contact_primary_number" };
 
 		// Check to make sure all the required keys are present in the request
 		for( String key : requiredKeys )
@@ -49,7 +50,7 @@ public class UserRegistration
 	{
 		ResultSet generatedId = null;
 
-		MySQL databaseConnection = MySQL.getInstance();
+		Engine engine = new Engine();
 		String primaryContactNumber = "";
 		String secondaryContactNumber = "";
 
@@ -113,24 +114,24 @@ public class UserRegistration
 				}
 			}
 
-			generatedId = databaseConnection.registerUser(
-						  	request.getParameter( "first_name" ),
-						  	request.getParameter( "last_name" ),
-						  	request.getParameter( "contact_email" ),
-						  	request.getParameter( "contact_address" ),
-						  	primaryContactNumber,
-						  	secondaryContactNumber,
-						  	generatedPassword,
-						  	request.getParameter( "contact_ZIP" ),
-						  	request.getParameter( "contact_city" ),
-						  	request.getParameter( "contact_state" ),
-						  	registrationErrors );
+			generatedId = engine.registerUser(
+					request.getParameter( "first_name" ),
+					request.getParameter( "last_name" ),
+					request.getParameter( "contact_email" ),
+					request.getParameter( "contact_address" ),
+					primaryContactNumber,
+					secondaryContactNumber,
+					generatedPassword,
+					request.getParameter( "contact_ZIP" ),
+					request.getParameter( "contact_city" ),
+					request.getParameter( "contact_state" ),
+					registrationErrors );
 
 			EmailMessage.getInstance().sendMessage(
 					request.getParameter( "contact_email" ),
 					"Welcome to SoldierUp!",
 					generateEmailMessage( request.getParameter( "first_name" ), generatedPassword )
-			);
+					);
 		}
 
 		return generatedId;

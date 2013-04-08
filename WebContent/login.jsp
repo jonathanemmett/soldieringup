@@ -3,14 +3,13 @@
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.Business" %>
 <%@ page import="org.soldieringup.Veteran" %>
-<%@ page import="org.soldieringup.database.MySQL" %>
 <%@ page import="org.apache.commons.validator.routines.EmailValidator" %>
+<%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.sql.ResultSet;" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map;" %>
 <%
 	session.setAttribute( "login_page", request.getRequestURI() );
 	Map<String,String> loginErrors;

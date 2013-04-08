@@ -1,11 +1,9 @@
 package org.soldieringup.servlets;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -143,22 +141,22 @@ public class Login extends HttpServlet
 	{
 		MySQL databaseConnection = MySQL.getInstance();
 		HttpSession currentSession = request.getSession();
-		currentSession.setAttribute( "uid", aLoggedInUser.getId() );
+		currentSession.setAttribute( "uid", aLoggedInUser.getUid() );
 		ArrayList<Business> ownedBusinesses;
 
-		ownedBusinesses = databaseConnection.getBusinessesFromOwner( aLoggedInUser.getId() );
+		ownedBusinesses = databaseConnection.getBusinessesFromOwner( aLoggedInUser.getUid() );
 
 		if( ownedBusinesses.size() > 0 )
 		{
-			currentSession.setAttribute( "aid", ownedBusinesses.get( 0 ).getAid() );
+			currentSession.setAttribute( "aid", ownedBusinesses.get(0).getBid() );
 			currentSession.setAttribute( "editing_account_type", "business" );
 			request.getRequestDispatcher( "/editBusiness.jsp" ).forward( request, response );
 		}
 
-		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getId() );
+		Veteran foundVeteran = databaseConnection.getVeteran( aLoggedInUser.getUid() );
 		if( foundVeteran != null )
 		{
-			currentSession.setAttribute( "aid", foundVeteran.getAid() );
+			currentSession.setAttribute( "aid", foundVeteran.getVid() );
 			currentSession.setAttribute( "editing_account_type", "veteran" );
 			request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
 		}

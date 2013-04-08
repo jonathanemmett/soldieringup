@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" language="java" errorPage="" %>
 <%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
-<%@ page import="org.soldieringup.database.MySQL"%>
 <%@ page import="org.soldieringup.Business"%>
 <%@ page import="org.soldieringup.User"%>
 <%@ page import="org.soldieringup.ZIP"%>
@@ -12,8 +11,6 @@
 <head>
 <% 
 Map<String, String> inputErrors = (Map<String, String>)request.getAttribute( "registration_errors" );
-
-MySQL databaseConnection = MySQL.getInstance();
 
 session.setAttribute( "login_page", request.getRequestURI() );
 

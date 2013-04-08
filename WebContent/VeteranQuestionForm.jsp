@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="java.util.*" %>
-<%@ page import="java.lang.NumberFormatException" %>
+<%@ page import="org.soldieringup.Engine" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.Question" %>
-<%@ page import="org.soldieringup.database.MySQL;" %>
+<%@ page import="java.lang.NumberFormatException" %>
+<%@ page import="java.util.*;" %>
 <%
 	session.setAttribute( "uid", 38 );
 	session.setAttribute( "aid", 9 );
@@ -17,7 +17,7 @@
 	}
 	
 	long vid = Long.valueOf( session.getAttribute( "aid" ).toString() );
-	MySQL databaseConnection = MySQL.getInstance();
+	Engine engine = new Engine();
 	Question questionToModify = null;
 	Iterator<Tag> questionTags = null;
 	
@@ -27,11 +27,11 @@
 	{
 		try
 		{
-			questionToModify = databaseConnection.getQuestionFromId( Long.valueOf( request.getParameter( "qid" ).toString() ) );
+			questionToModify = engine.getQuestionFromId( Long.valueOf( request.getParameter( "qid" ).toString() ) );
 			isUpdatingQuestion = questionToModify.getVid() == vid;
 			if( isUpdatingQuestion )
 			{
-				ArrayList<Tag> questionTagsList = databaseConnection.getTagsFromQuestion( questionToModify.getQid() );
+				ArrayList<Tag> questionTagsList = engine.getTagsFromQuestion( questionToModify.getQid() );
 				questionTags = questionTagsList.iterator();
 			}
 		}

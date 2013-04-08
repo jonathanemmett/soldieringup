@@ -1,8 +1,10 @@
 package org.soldieringup;
 
-import java.sql.ResultSet;
+import java.util.List;
 
-import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
+
 
 /**
  * Class represents a registered business
@@ -11,78 +13,13 @@ import org.apache.commons.validator.routines.EmailValidator;
  */
 public class Business extends SoldierUpAccount {
 
-	public static enum BusinessDatabaseColumns
-	{
-		BID (0),
-		NAME (1),
-		SHORT_SUMMARY (2),
-		LONG_SUMMARY (3),
-		WORK_NUMBER (4),
-		ADDRESS (5),
-		ZIP (6),
-		COVER_SRC (7);
-
-		int mDatabaseTableIndex;
-
-		private BusinessDatabaseColumns( int aDatabaseTableIndex )
-		{
-			this.mDatabaseTableIndex = aDatabaseTableIndex;
-		}
-
-		public int getDatabaseColumnIndex()
-		{
-			return mDatabaseTableIndex;
-		}
-
-		public String getDatabaseColumn()
-		{
-			return BusinessDatabaseColumnsStrings[mDatabaseTableIndex];
-		}
-	}
-
-	public static String BusinessDatabaseColumnsStrings[] =
-		{
-		"bid",
-		"name",
-		"short_summary",
-		"long_summary",
-		"work_number",
-		"address",
-		"ZIP",
-		"cover_src"
-		};
-
 	private long bid;
-	private String cover_src;
 	private String name;
-	private String short_summary;
-	private String long_summary;
-	private String work_number;
-	private String address;
-	private String zip;
-
-	/**
-	 * Class Constructor
-	 */
-	public Business( )
-	{
-
-	}
-
-	@Override
-	public void init( ResultSet aBusinessResultSet ) throws java.sql.SQLException
-	{
-		super.init( aBusinessResultSet );
-
-		bid = aBusinessResultSet.getLong( BusinessDatabaseColumns.BID.getDatabaseColumn() );
-		cover_src = aBusinessResultSet.getString( BusinessDatabaseColumns.COVER_SRC.getDatabaseColumn() );
-		name = aBusinessResultSet.getString( BusinessDatabaseColumns.NAME.getDatabaseColumn() );
-		short_summary = aBusinessResultSet.getString( BusinessDatabaseColumns.SHORT_SUMMARY.getDatabaseColumn() );
-		long_summary = aBusinessResultSet.getString( BusinessDatabaseColumns.LONG_SUMMARY.getDatabaseColumn() );
-		work_number = aBusinessResultSet.getString( BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumn() );
-		address = aBusinessResultSet.getString( BusinessDatabaseColumns.ADDRESS.getDatabaseColumn() );
-		zip = aBusinessResultSet.getString( BusinessDatabaseColumns.ZIP.getDatabaseColumn() );
-	}
+	protected String short_summary;
+	protected String long_summary;
+	protected String work_number;
+	@DBRef
+	private List<Tag> tag;
 
 	/**
 	 * Gets the business id
@@ -91,69 +28,6 @@ public class Business extends SoldierUpAccount {
 	public long getBid()
 	{
 		return bid;
-	}
-
-	/**
-	 * Gets the src of the cover photo
-	 * @return The src of the cover photo
-	 */
-	public String getCoverSrc()
-	{
-		return cover_src;
-	}
-
-	/**
-	 * Gets the name
-	 * @return The name
-	 */
-	public String getBusinessName()
-	{
-		return name;
-	}
-
-	/**
-	 * Gets the short summary
-	 * @return The short summary
-	 */
-	public String getShortSummary()
-	{
-		return short_summary;
-	}
-
-	/**
-	 * Gets the long summary
-	 * @return The long summary
-	 */
-	public String getLongSummary()
-	{
-		return long_summary;
-	}
-
-	/**
-	 * Gets the phone number
-	 * @return Phone number
-	 */
-	public String getWorkNumber()
-	{
-		return work_number;
-	}
-
-	/**
-	 * Gets the street address
-	 * @return Street Address
-	 */
-	public String getAddress()
-	{
-		return address;
-	}
-
-	/**
-	 * Gets the zip code
-	 * @return Zip code
-	 */
-	public String getZip()
-	{
-		return zip;
 	}
 
 	/**
@@ -166,21 +40,28 @@ public class Business extends SoldierUpAccount {
 	}
 
 	/**
-	 * Sets the src of the cover photo
-	 * @param cover_src Src of the business cover
+	 * @return the name
 	 */
-	public void setCoverSrc( String cover_src )
+	public String getName ()
 	{
-		this.cover_src = cover_src;
+		return name;
 	}
 
 	/**
-	 * Sets the name
-	 * @param name Business Name
+	 * @param name the name to set
 	 */
-	public void setName( String name )
+	public void setName (String name)
 	{
 		this.name = name;
+	}
+
+	/**
+	 * Gets the short summary
+	 * @return The short summary
+	 */
+	public String getShortSummary()
+	{
+		return short_summary;
 	}
 
 	/**
@@ -190,6 +71,15 @@ public class Business extends SoldierUpAccount {
 	public void setShortSummary( String short_summary )
 	{
 		this.short_summary = short_summary;
+	}
+
+	/**
+	 * Gets the long summary
+	 * @return The long summary
+	 */
+	public String getLongSummary()
+	{
+		return long_summary;
 	}
 
 	public void setLongSummary( String long_summary )
@@ -207,44 +97,33 @@ public class Business extends SoldierUpAccount {
 	}
 
 	/**
-	 * Sets the street address
-	 * @param Street address
+	 * Gets the phone number
+	 * @return Phone number
 	 */
-	public void setAddress( String address )
+	public String getWorkNumber()
 	{
-		this.address = address;
+		return work_number;
+	}
+
+
+	/**
+	 * @return the tag
+	 */
+	public List<Tag> getTag ()
+	{
+		return tag;
 	}
 
 	/**
-	 * Sets the zip code
-	 * @param zip Zip code
+	 * @param tag the tag to set
 	 */
-	public void setZip( String zip )
+	public void setTag (List<Tag> tag)
 	{
-		this.zip = zip;
+		this.tag = tag;
 	}
 
-	/**
-	 * Makes that a given key and it's associated value are valid inputs
-	 * for the database
-	 * @param aKey Key to check
-	 * @param aValue Value associated to the key
-	 * @return True if the input is valid for the database, false otherwise
-	 */
-	public static boolean isValidDatabaseInput( String aKey, String aValue )
-	{
-		if( Utilities.isElementInArray( aKey, BusinessDatabaseColumnsStrings) )
-		{
-			if( aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.ZIP.getDatabaseColumnIndex()] ||
-				aKey == BusinessDatabaseColumnsStrings[BusinessDatabaseColumns.WORK_NUMBER.getDatabaseColumnIndex()] )
-			{
-				return Utilities.stringIsNumeric( aValue );
-			}
-			else
-			{
-				return aValue != null;
-			}
-		}
-		return false;
+	@Override
+	public String toString() {
+		return "Business [id=" + id + ", name=" + name + ", address=" + address + ", zip=" + zip + "]";
 	}
 }

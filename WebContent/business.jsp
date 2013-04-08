@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
 <%@ page import="org.soldieringup.Business" %>
-	<%@ page import="org.soldieringup.Photo" %>
-<%@ page import="org.soldieringup.database.MySQL" %> 
+<%@ page import="org.soldieringup.Engine" %> 
+<%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
 	long number = 0;
@@ -12,9 +12,9 @@
 		 number = Long.valueOf( request.getParameter("aid") );
 	}
 
-	MySQL databaseConnection = MySQL.getInstance();	
-	Business foundBusiness = databaseConnection.getBusiness( number );
-	ZIP businessZIP = databaseConnection.getZIP( foundBusiness.getZip() );
+	Engine engine = new Engine();	
+	Business foundBusiness = engine.getBusiness( number );
+	ZIP businessZIP = engine.getZIP( foundBusiness.getZip() );
 %>  
 <!DOCTYPE html>
 <html>
@@ -40,8 +40,8 @@
 <%} %>
 </div>
 <article style="width:200px; float:left">
-<% if( foundBusiness.getBusinessName() != null){ %>
-<p><%=foundBusiness.getBusinessName() %></p>
+<% if( foundBusiness.getName() != null){ %>
+<p><%=foundBusiness.getName() %></p>
 <span style="width:120px; height:24px; display:block;background-image:url(Images/fullStarRating.png);"></span>
 <p><%=foundBusiness.getAddress() %></p>
 <p><%=businessZIP.getCity() + " " + businessZIP.getState() + " " + foundBusiness.getZip() %></p>

@@ -12,10 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.validator.routines.EmailValidator;
-import org.soldieringup.Business;
+import org.soldieringup.Engine;
 import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class UpdateBusiness
@@ -48,6 +46,7 @@ public class UpdateBusiness extends HttpServlet {
 	{
 		if( request.getSession().getAttribute( "aid" ) != null )
 		{
+			Engine engine = new Engine();
 			long bid = Long.valueOf( request.getSession().getAttribute( "aid" ).toString() );
 			Set<String> keys = request.getParameterMap().keySet();
 			Map<String,Object> updateParameters = new HashMap<String,Object>();
@@ -56,14 +55,17 @@ public class UpdateBusiness extends HttpServlet {
 			while( keysIterator.hasNext() )
 			{
 				String currentKey = keysIterator.next();
+				String[] requiredBusinessKeys = { "name", "short_summary", "long_summary",
+						"address", "ZIP" };
 
-				if( Business.isValidDatabaseInput( currentKey, request.getParameter( currentKey ) ) )
+				if( Utilities.isElementInArray( currentKey, requiredBusinessKeys ) )
 				{
 					updateParameters.put( currentKey, request.getParameter( currentKey ) );
 				}
 			}
 
-			MySQL.getInstance().updateBusiness( bid, updateParameters );
+			System.out.println( updateParameters.size() );
+			engine.updateBusiness( bid, updateParameters );
 			request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
 		}
 	}

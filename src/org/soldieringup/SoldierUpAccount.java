@@ -1,55 +1,81 @@
 package org.soldieringup;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SoldierUpAccount
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+/**
+ * Abstract Class that all accounts inherit from
+ *
+ */
+@Document
+public abstract class SoldierUpAccount
 {
-	public static enum AccountColumns
+	@Id
+	protected ObjectId id;
+	protected long mAid;
+	protected long mUid;
+	protected String mProfileSrc;
+	protected Photo profilePhoto;
+	protected List<Photo> photos;
+	protected String cover_src;
+	protected String address;
+	protected String zip;
+	protected String primary_number;
+	protected String secondary_number;
+	@Indexed
+	protected String email;
+
+	/**
+	 * @return the primary_number
+	 */
+	public String getPrimary_number ()
 	{
-		AID(0),
-		UID(1),
-		PROFILE_SRC(2);
-
-		int mColumnIndex;
-
-		AccountColumns(int aColumnIndex)
-		{
-			this.mColumnIndex = aColumnIndex;
-		}
-
-		String getDatabaseColumn()
-		{
-			return AccountColumnsString[mColumnIndex];
-		}
-	};
-
-	public static String[] AccountColumnsString =
-	{
-		"aid",
-		"uid",
-		"profile_src"
-	};
-
-	private long mAid;
-	private long mUid;
-	private String mProfileSrc;
-
-	public SoldierUpAccount()
-	{
-
+		return primary_number;
 	}
 
 	/**
-	 * Initializes a soldierup account from a database result set
-	 * @param aAccountResultSet The result set to initialize the account with
-	 * @throws SQLException
+	 * @param primary_number the primary_number to set
 	 */
-	public void init( ResultSet aAccountResultSet ) throws SQLException
+	public void setPrimary_number (String primary_number)
 	{
-		mAid = aAccountResultSet.getLong( AccountColumns.AID.getDatabaseColumn() );
-		mUid = aAccountResultSet.getLong( AccountColumns.UID.getDatabaseColumn() );
-		mProfileSrc = aAccountResultSet.getString( AccountColumns.PROFILE_SRC.getDatabaseColumn() );
+		this.primary_number = primary_number;
+	}
+
+	/**
+	 * @return the secondary_number
+	 */
+	public String getSecondary_number ()
+	{
+		return secondary_number;
+	}
+
+	/**
+	 * @param secondary_number the secondary_number to set
+	 */
+	public void setSecondary_number (String secondary_number)
+	{
+		this.secondary_number = secondary_number;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail ()
+	{
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail (String email)
+	{
+		this.email = email;
 	}
 
 	public void setAid( long aAid )
@@ -80,5 +106,98 @@ public class SoldierUpAccount
 	public String getProfileSrc()
 	{
 		return mProfileSrc;
+	}
+
+	/**
+	 * Gets the street address
+	 * @return Street Address
+	 */
+	public String getAddress()
+	{
+		return address;
+	}
+
+	/**
+	 * Gets the zip code
+	 * @return Zip code
+	 */
+	public String getZip()
+	{
+		return zip;
+	}
+
+	/**
+	 * Gets the src of the cover photo
+	 * @return The src of the cover photo
+	 */
+	public String getCoverSrc()
+	{
+		return cover_src;
+	}
+
+	/**
+	 * Sets the src of the cover photo
+	 * @param cover_src Src of the business cover
+	 */
+	public void setCoverSrc( String cover_src )
+	{
+		this.cover_src = cover_src;
+	}
+
+	/**
+	 * Sets the street address
+	 * @param Street address
+	 */
+	public void setAddress( String address )
+	{
+		this.address = address;
+	}
+
+	/**
+	 * Sets the zip code
+	 * @param zip Zip code
+	 */
+	public void setZip( String zip )
+	{
+		this.zip = zip;
+	}
+
+	/**
+	 * @return the profile_photo
+	 */
+	public Photo getProfilePhoto ()
+	{
+		return profilePhoto;
+	}
+
+	/**
+	 * @param profile_photo the profile_photo to set
+	 */
+	public void setProfilePhoto (Photo profile_photo)
+	{
+		this.profilePhoto = profile_photo;
+	}
+
+	/**
+	 * @return the photos
+	 */
+	public List<Photo> getPhotos ()
+	{
+		return photos;
+	}
+
+	/**
+	 * @param photos the photos to set
+	 */
+	public void setPhotos (List<Photo> photos)
+	{
+		this.photos = photos;
+	}
+
+	public void addPhoto (Photo photo)
+	{
+		if (this.photos == null)
+			this.photos = new ArrayList<Photo>();
+		this.photos.add (photo);
 	}
 }
