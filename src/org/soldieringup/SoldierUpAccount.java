@@ -31,6 +31,14 @@ public abstract class SoldierUpAccount
 	protected String email;
 
 	/**
+	 * @return the id
+	 */
+	public ObjectId getObject_id()
+	{
+		return id;
+	}
+
+	/**
 	 * @return the primary_number
 	 */
 	public String getPrimary_number ()
