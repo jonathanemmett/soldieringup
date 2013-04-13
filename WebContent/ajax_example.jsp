@@ -10,9 +10,9 @@
         <script>
             $(document).ready(function() {                        
                 $('#submit').click(function(event) {  
-                    var username=$('#user').val();
-                 $.get('rest/accounts/user',{user:username},function(responseText) { 
-                        $('#welcometext').text(responseText);         
+                    var email=$('#email').val();
+                 $.get('rest/accounts',{email:email},function(responseText) { 
+                        $('#welcometext').text(User.getEmail);         
                     });
                 });
             });
@@ -21,8 +21,8 @@
 <body>
 <form id="form1">
 <h1>AJAX Demo using Jquery in JSP and Servlet</h1>
-Enter your Name:
-<input type="text" id="user"/>
+Enter your email address:
+<input type="text" id="email"/>
 <input type="button" id="submit" value="Ajax Submit"/>
 <br/>
 <div id="welcometext">

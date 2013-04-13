@@ -5,9 +5,9 @@ import org.soldieringup.DEVISION;
 import org.soldieringup.User;
 import org.soldieringup.Veteran;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -16,15 +16,18 @@ public class JSONController {
 	// Example:
 	//http://localhost:8080/soldieringup/rest/account/jared
 
-	@RequestMapping(value="{name}", method = RequestMethod.GET)
-	public @ResponseBody User getShopInJSON(@PathVariable String name) {
+	@RequestMapping(method = RequestMethod.GET)
+	public @ResponseBody User getShopInJSON(@RequestParam String email) {
+		return getUser (email);
+	}
 
-		System.out.println ("getShopInJSON:" + name);
-
+	private User getUser (String email)
+	{
 		User user = new User ();
+
 		user.setFirstName("Jared");
 		user.setLastName ("Jennings");
-		user.setEmail ("jared@jaredjennings.org");
+		user.setEmail (email);
 		user.setAddress ("705 Sheridan ST");
 		user.setZip ("64075");
 		user.setPrimary_number ("816.678.4152");
@@ -37,7 +40,5 @@ public class JSONController {
 		user.setVeteran (vet);
 
 		return user;
-
 	}
-
 }
