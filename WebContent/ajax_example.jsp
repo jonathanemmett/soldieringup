@@ -12,7 +12,7 @@
                 $('#submit').click(function(event) {  
                     var email=$('#email').val();
                  $.get('rest/accounts',{email:email},function(responseText) { 
-                        $('#welcometext').text(User.getEmail);         
+                        $('#welcometext').text(responseText);         
                     });
                 });
             });

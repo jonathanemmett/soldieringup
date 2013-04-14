@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.gson.Gson;
+
 @Controller
 @RequestMapping("/accounts")
 public class JSONController {
@@ -17,8 +19,9 @@ public class JSONController {
 	//http://localhost:8080/soldieringup/rest/account/jared
 
 	@RequestMapping(method = RequestMethod.GET)
-	public @ResponseBody User getShopInJSON(@RequestParam String email) {
-		return getUser (email);
+	public @ResponseBody String getShopInJSON(@RequestParam String email) {
+		Gson gson = new Gson();
+		return gson.toJson(getUser (email));
 	}
 
 	private User getUser (String email)
