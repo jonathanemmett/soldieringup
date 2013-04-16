@@ -5,7 +5,7 @@ package org.soldieringup;
  * @author jjennings
  *
  */
-public enum DEVISION
+public enum DIVISION
 {
 	ARMY,
 	NAVY,

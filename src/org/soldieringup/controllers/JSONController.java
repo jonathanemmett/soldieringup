@@ -1,7 +1,7 @@
 package org.soldieringup.controllers;
 
 import org.soldieringup.Business;
-import org.soldieringup.DEVISION;
+import org.soldieringup.DIVISION;
 import org.soldieringup.User;
 import org.soldieringup.Veteran;
 import org.springframework.stereotype.Controller;
@@ -39,7 +39,7 @@ public class JSONController {
 		user.setBusiness (bus);
 
 		Veteran vet = new Veteran ();
-		vet.setDevision (DEVISION.AIRFORCE);
+		vet.setDevision (DIVISION.AIRFORCE);
 		user.setVeteran (vet);
 
 		return user;
