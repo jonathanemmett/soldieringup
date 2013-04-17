@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.gson.Gson;
 
 @Controller
-@RequestMapping("/messages")
+@RequestMapping("/rest")
 public class JSONMessages {
 	// Example:
 	//http://localhost:8080/soldieringup/rest/messages
 
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value="accounts", method = RequestMethod.GET)
 	public @ResponseBody String handleGetMessages(@RequestParam String email) {
 		System.out.println ("Received request for email:" + email);
 		Gson gson = new Gson();
 		return gson.toJson(getMessage (email));
 	}
 
-	@RequestMapping(params = {"msgID"}, method = RequestMethod.GET)
+	@RequestMapping(value="accounts", params = {"msgID"}, method = RequestMethod.GET)
 	public @ResponseBody String handleGetMessage(@RequestParam String msgID) {
 		System.out.println ("Received request for msgID:" + msgID);
 		Gson gson = new Gson();
@@ -33,13 +33,13 @@ public class JSONMessages {
 	}
 
 	//http://localhost:8080/soldieringup/rest/messages/msg.do?msgID=<id>
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value="accounts", method = RequestMethod.POST)
 	public @ResponseBody String handlePostMessages(@RequestParam String msgID) {
 		Gson gson = new Gson();
 		return gson.toJson(getMessage (msgID));
 	}
 
-	@RequestMapping(params = {"msgID"}, method = RequestMethod.POST)
+	@RequestMapping(value="accounts", params = {"msgID"}, method = RequestMethod.POST)
 	public @ResponseBody String handlePostMessage(@RequestParam String msgID) {
 		System.out.println ("Received request for msgID:" + msgID);
 		Gson gson = new Gson();
