@@ -6,6 +6,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -29,6 +30,8 @@ public abstract class SoldierUpAccount
 	protected String secondary_number;
 	@Indexed
 	protected String email;
+	@DBRef
+	private List<Tag> tag;
 
 	/**
 	 * @return the id
@@ -208,4 +211,21 @@ public abstract class SoldierUpAccount
 			this.photos = new ArrayList<Photo>();
 		this.photos.add (photo);
 	}
+
+	/**
+	 * @return the tag
+	 */
+	public List<Tag> getTag ()
+	{
+		return tag;
+	}
+
+	/**
+	 * @param tag the tag to set
+	 */
+	public void setTag (List<Tag> tag)
+	{
+		this.tag = tag;
+	}
+
 }
