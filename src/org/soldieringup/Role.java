@@ -7,6 +7,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "role")
+/**
+ * For Authentication purposes.
+ * Normal users are assigned the USER_ROLE.
+ * @author jjennings
+ * @created April 20, 2013
+ */
 public class Role
 {
 	@Id
@@ -25,13 +31,9 @@ public class Role
 	}
 
 	/**
-	 * @return the role
+	 * Returns the String Value of the Role Name.
+	 * @return
 	 */
-	public String getName ()
-	{
-		return role;
-	}
-
 	public String getRole ()
 	{
 		return role;

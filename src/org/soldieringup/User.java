@@ -16,9 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class User extends SoldierUpAccount implements UserDetails
 {
-	/**
-	 * 
-	 */
 	private static final long			serialVersionUID	= 7885033133143889220L;
 	private String					first_name;
 	private String					last_name;
@@ -222,7 +219,7 @@ public class User extends SoldierUpAccount implements UserDetails
 		String delim = "";
 		StringBuilder sb = new StringBuilder ();
 		for (Role r : this.roles) {
-			sb.append (delim).append (r.getName ());
+			sb.append (delim).append (r.getRole ());
 			delim = ",";
 		}
 		return sb.toString ();
