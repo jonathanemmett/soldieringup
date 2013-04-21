@@ -32,7 +32,7 @@ public class Welcome extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		log.debug ("Loading Welcome Servlet");
-		request.getRequestDispatcher ("/index.jsp").include (request, response);
+		request.getRequestDispatcher ("WEB-INF/index.jsp").include (request, response);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class Welcome extends HttpServlet {
 	 */
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher ("index.jsp").include (request, response);
+		request.getRequestDispatcher ("WEB-INF/index.jsp").include (request, response);
 	}
 
 }
