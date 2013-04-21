@@ -24,7 +24,7 @@
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
         <property name="basenames">
             <list>
-                <value>resources/messages</value>
+                <value>classpath:/resources/messages</value>
             </list>
         </property>
     </bean>

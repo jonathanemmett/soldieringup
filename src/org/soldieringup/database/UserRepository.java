@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository
 {
+	private static final String COLLECTION_NAME = "userAccount";
 
 	@Autowired
 	MongoOperations op;
@@ -25,8 +26,8 @@ public class UserRepository
 	 * On startup, make sure that the collection exists
 	 */
 	public void run () {
-		if (!op.collectionExists (User.class)) {
-			op.createCollection(User.class);
+		if (!op.collectionExists (COLLECTION_NAME)) {
+			op.createCollection (COLLECTION_NAME);
 		}
 	}
 
@@ -35,8 +36,8 @@ public class UserRepository
 	 */
 	public void dropCollection ()
 	{
-		if (op.collectionExists (User.class)) {
-			op.dropCollection (User.class);
+		if (op.collectionExists (COLLECTION_NAME)) {
+			op.dropCollection (COLLECTION_NAME);
 		}
 	}
 
@@ -46,7 +47,7 @@ public class UserRepository
 	 */
 	public List<User> findAll ()
 	{
-		return op.findAll(User.class);
+		return op.findAll (User.class);
 	}
 
 	public List<User> find (String fieldName, Object fieldValue)
@@ -85,6 +86,34 @@ public class UserRepository
 		if (op.count (new Query(Criteria.where("email").is(email_address)), User.class) == 0)
 			return false;
 		return true;
+	}
+
+	public void save (User user)
+	{
+		op.save (user);
+	}
+
+	public List<User> findByEmailAndPassword (String aEmail, String password)
+	{
+		List<User> matches = op.find (new Query(Criteria.where("email").is(aEmail)),User.class);
+		return matches;
+	}
+
+	public void delete (User user)
+	{
+		System.out.println ("Deleting User:" + user.getUsername ());
+
+	}
+
+	public User findByEmail (String aEmail)
+	{
+		List<User> matches = op.find (new Query(Criteria.where("email").is(aEmail)),User.class);
+		if (matches != null && matches.size () > 0) {
+			System.out.println ("findByEmail found a total of:" + matches.size () + " users");
+			return matches.get (0);
+		} else {
+			return null;
+		}
 	}
 
 }

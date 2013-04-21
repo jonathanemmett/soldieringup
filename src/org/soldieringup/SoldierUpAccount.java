@@ -10,30 +10,54 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Abstract Class that all accounts inherit from
- *
+ * 
  */
-@Document
+@Document(collection = "user")
 public abstract class SoldierUpAccount
 {
+
+	public interface IUserService
+	{
+
+		public abstract long countAllUsers ();
+
+		public abstract void deleteUser (User user);
+
+		public abstract User findUser (String id);
+
+		public abstract List<?> findAllUsers ();
+
+		public abstract List<?> findUserEntries (int firstResult, int maxResults);
+
+		public abstract User findByUsername (String username);
+
+		public abstract void saveUser (User user);
+
+		public abstract User updateUser (User user);
+
+		public abstract List<?> getUserRoles (String id);
+
+	}
+
 	@Id
-	protected ObjectId id;
-	protected long mAid;
-	protected long mUid;
-	protected String mProfileSrc;
-	protected Photo profilePhoto;
-	protected List<Photo> photos;
-	protected String cover_src;
-	protected String address;
-	protected String zip;
-	protected String primary_number;
-	protected String secondary_number;
+	protected ObjectId	id;
+	protected long		mAid;
+	protected long		mUid;
+	protected String	mProfileSrc;
+	protected Photo		profilePhoto;
+	protected List<Photo>	photos;
+	protected String	cover_src;
+	protected String	address;
+	protected String	zip;
+	protected String	primary_number;
+	protected String	secondary_number;
 	@Indexed
-	protected String email;
+	protected String	email;
 
 	/**
 	 * @return the id
 	 */
-	public ObjectId getObject_id()
+	public ObjectId getObject_id ()
 	{
 		return id;
 	}
@@ -47,7 +71,8 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * @param primary_number the primary_number to set
+	 * @param primary_number
+	 *                the primary_number to set
 	 */
 	public void setPrimary_number (String primary_number)
 	{
@@ -63,7 +88,8 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * @param secondary_number the secondary_number to set
+	 * @param secondary_number
+	 *                the secondary_number to set
 	 */
 	public void setSecondary_number (String secondary_number)
 	{
@@ -79,93 +105,103 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * @param email the email to set
+	 * @param email
+	 *                the email to set
 	 */
 	public void setEmail (String email)
 	{
 		this.email = email;
 	}
 
-	public void setAid( long aAid )
+	public void setAid (long aAid)
 	{
 		this.mAid = aAid;
 	}
 
-	public void setUid( long aUid )
+	public void setUid (long aUid)
 	{
 		this.mUid = aUid;
 	}
 
-	public void setProfileSrc( String aProfileSrc )
+	public void setProfileSrc (String aProfileSrc)
 	{
 		this.mProfileSrc = aProfileSrc;
 	}
 
-	public long getAid()
+	public long getAid ()
 	{
 		return mAid;
 	}
 
-	public long getUid()
+	public long getUid ()
 	{
 		return mUid;
 	}
 
-	public String getProfileSrc()
+	public String getProfileSrc ()
 	{
 		return mProfileSrc;
 	}
 
 	/**
 	 * Gets the street address
+	 * 
 	 * @return Street Address
 	 */
-	public String getAddress()
+	public String getAddress ()
 	{
 		return address;
 	}
 
 	/**
 	 * Gets the zip code
+	 * 
 	 * @return Zip code
 	 */
-	public String getZip()
+	public String getZip ()
 	{
 		return zip;
 	}
 
 	/**
 	 * Gets the src of the cover photo
+	 * 
 	 * @return The src of the cover photo
 	 */
-	public String getCoverSrc()
+	public String getCoverSrc ()
 	{
 		return cover_src;
 	}
 
 	/**
 	 * Sets the src of the cover photo
-	 * @param cover_src Src of the business cover
+	 * 
+	 * @param cover_src
+	 *                Src of the business cover
 	 */
-	public void setCoverSrc( String cover_src )
+	public void setCoverSrc (String cover_src)
 	{
 		this.cover_src = cover_src;
 	}
 
 	/**
 	 * Sets the street address
-	 * @param Street address
+	 * 
+	 * @param Street
+	 *                address
 	 */
-	public void setAddress( String address )
+	public void setAddress (String address)
 	{
 		this.address = address;
 	}
 
 	/**
 	 * Sets the zip code
-	 * @param zip Zip code
+	 * 
+	 * @param zip
+	 *                Zip code
 	 */
-	public void setZip( String zip )
+	public void setZip (String zip)
 	{
 		this.zip = zip;
 	}
@@ -179,7 +215,8 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * @param profile_photo the profile_photo to set
+	 * @param profile_photo
+	 *                the profile_photo to set
 	 */
 	public void setProfilePhoto (Photo profile_photo)
 	{
@@ -195,7 +232,8 @@ public abstract class SoldierUpAccount
 	}
 
 	/**
-	 * @param photos the photos to set
+	 * @param photos
+	 *                the photos to set
 	 */
 	public void setPhotos (List<Photo> photos)
 	{
@@ -205,7 +243,7 @@ public abstract class SoldierUpAccount
 	public void addPhoto (Photo photo)
 	{
 		if (this.photos == null)
-			this.photos = new ArrayList<Photo>();
+			this.photos = new ArrayList<Photo> ();
 		this.photos.add (photo);
 	}
 }
