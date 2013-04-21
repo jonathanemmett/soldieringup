@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository
 {
-	private static final String COLLECTION_NAME = "userAccount";
+	private static final String COLLECTION_NAME = "user";
 
 	@Autowired
 	MongoOperations op;
