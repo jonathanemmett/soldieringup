@@ -1,20 +1,17 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import org.soldieringup.Engine;
-import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
+import org.bson.types.ObjectId;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
 
 /**
  * Servlet implementation class UpdateVeteran
@@ -26,17 +23,28 @@ public class UpdateVeteran extends HttpServlet {
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public UpdateVeteran() {
+	public UpdateVeteran()
+	{
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		HttpSession currentSession = request.getSession();
+		if( currentSession.getAttribute( "editing_account_type" ) != null &&
+				currentSession.getAttribute( "editing_account_type" ).equals( "veteran" ) )
+		{
+			MongoEngine engine = new MongoEngine();
+			User veteran = engine.findUsers( "_id", currentSession.getAttribute( "uid" ) ).get(0);
+
+			request.setAttribute( "account_to_edit", veteran );
+			request.setAttribute( "account_zip", engine.findZip( veteran.getZip() ) );
+			request.getRequestDispatcher( "/editVeteranProfile.jsp" ).forward( request, response );
+		}
 	}
 
 	/**
@@ -45,31 +53,18 @@ public class UpdateVeteran extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		MySQL databaseConnection = MySQL.getInstance();
-		Map<String,String> registrationErrors = new HashMap<String,String>();
-		String[] requiredVeteranColumns = { "goal" };
+		String goal = request.getParameter( "goal" );
+		Object accountType = request.getSession().getAttribute( "editing_account_type" );
 
-		if( request.getSession().getAttribute( "uid" ) != null )
+		if( request.getSession().getAttribute( "uid" ) != null && accountType != null &&
+				accountType.equals( "veteran" ) && goal != null )
 		{
-			Engine engine = new Engine();
-			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
-			Set<String> keys = request.getParameterMap().keySet();
-			Map<String,Object> updateParameters = new HashMap<String,Object>();
-			Iterator<String> keysIterator = keys.iterator();
-
-			while( keysIterator.hasNext() )
-			{
-				String currentKey = keysIterator.next();
-
-				if( Utilities.isElementInArray( currentKey, requiredVeteranColumns ) )
-				{
-					updateParameters.put( currentKey, request.getParameter( currentKey ) );
-				}
-			}
-
-			engine.updateVeteran( uid, updateParameters );
-			request.getRequestDispatcher("/editVeteranProfile.jsp").forward(request, response);
+			MongoEngine engine = new MongoEngine();
+			ObjectId uid = (ObjectId) request.getSession().getAttribute( "uid" );
+			User userToUpdate = engine.findUsers( "_id", uid ).get( 0 );
+			userToUpdate.getVeteran().setGoal( goal );
+			engine.updateUser( userToUpdate );
+			response.sendRedirect( "/UpdateVeteran" );
 		}
 	}
-
 }

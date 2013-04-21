@@ -2,33 +2,15 @@
     pageEncoding="US-ASCII"%>
 <%@ page import="java.util.*" %>
 <%@ page import="org.soldieringup.Business" %>
-<%@ page import="org.soldieringup.Engine" %>
+<%@ page import="org.soldieringup.MongoEngine" %>
 <%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.ZIP" %> 
 <%
-	session.setAttribute( "uid", 39 );
-	session.setAttribute( "aid", 14 );
-	session.setAttribute( "editing_account_type" , "business" );
-
-	if( session.getAttribute( "aid" ) == null ||
-		session.getAttribute( "aid" ) == "" ||
-		session.getAttribute( "editing_account_type" ) == null ||
-		session.getAttribute( "editing_account_type" ) != "business"
-		)
-	{
-	%><jsp:forward page="/login.jsp"/><% 
-	}
-	
-	session.setAttribute( "editing_account_type" , "business" );
-
-	long bid = Long.valueOf( session.getAttribute( "aid" ).toString() );
-	
-	Engine engine = new Engine();
-	Business foundBusiness = engine.getBusiness( bid );
-	ZIP businessZIP = engine.getZIP( foundBusiness.getZip() );
-	User contactUser = engine.getUserFromId( foundBusiness.getUid() );
+	Business foundBusiness = (Business) request.getAttribute( "business_to_edit" );
+	User contactUser = (User) request.getAttribute( "user_to_edit" );
+	ZIP businessZIP = (ZIP) request.getAttribute ( "business_zip" );
 %>  
 <!DOCTYPE html>
 <html>
@@ -191,18 +173,22 @@
 			</select>
 			<input type="submit"/>
 				<%
-					ArrayList<Tag> businessTags = engine.getTagsFromAccount( bid );
-					Iterator<Tag> tagIt = businessTags.iterator();
+					List<Tag> businessTags = foundBusiness.getTag();
 					
-					while( tagIt.hasNext() )
+					if( businessTags != null )
 					{
-						Tag currentTag = tagIt.next();
-						%>
-						<div id="<%="tag-"+currentTag.get_tid() %>" class="account_tag" style="position:relative;">
-						<p><%=currentTag.get_name()%><span class="account_tag_hours_section">4 hours</span></p>
-						<span class="remove_fields"></span>
-						</div>
-						<%
+						Iterator<Tag> tagIt = businessTags.iterator();
+					
+						while( tagIt.hasNext() )
+						{
+							Tag currentTag = tagIt.next(); 
+							%>
+							<div id="<%="tag-"+currentTag.getObject_id().toString() %>" class="account_tag" style="position:relative;">
+							<p><%=currentTag.get_name()%><span class="account_tag_hours_section">4 hours</span></p>
+							<span class="remove_fields"></span>
+							</div>
+							<%
+						}
 					}
 				%>
 		</form>
