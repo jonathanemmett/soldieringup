@@ -17,7 +17,7 @@
 <article class="front_header enterprise">
 <a href="NewBusiness.jsp">Entrepreneurs</a>
 <p>Soldier up for those that made the sacrifice! You're here because of them. Now be there for them this time. We invite
-all people and organizations that have entrepreneurial spirit and a strong desire to help to join us! </p>
+all people and organizations that have entrepreneurial spirit and a strong desire to help to join us!</p>
 </article>
 <article class="front_header">
 <a href="NewVeteran.jsp">Veterans</a>

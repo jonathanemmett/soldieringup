@@ -1,13 +1,14 @@
 package org.soldieringup.database;
 
-import java.sql.ResultSet;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.soldieringup.EmailMessage;
-import org.soldieringup.Engine;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
 import org.soldieringup.Utilities;
 
 /**
@@ -46,11 +47,11 @@ public class UserRegistration
 	 * @return The ResultSet containing the generated ID of the user if successfully inserted into the database.
 	 * 		   If the insertion fails, this function returns null.
 	 */
-	public static ResultSet registerUser( HttpServletRequest request, Map<String,String> registrationErrors )
+	public static User registerUser( HttpServletRequest request, Map<String,String> registrationErrors )
 	{
-		ResultSet generatedId = null;
+		User registeredUser = null;
 
-		Engine engine = new Engine();
+		MongoEngine engine = new MongoEngine();
 		String primaryContactNumber = "";
 		String secondaryContactNumber = "";
 
@@ -85,12 +86,17 @@ public class UserRegistration
 			{
 				registrationErrors.put( "contact_email", "Invalid Email" );
 			}
+			else if( engine.emailExists( request.getParameter( "contact_email" ) ) )
+			{
+				registrationErrors.put( "contact_email", "Email already exists" );
+			}
 
 			if( !Utilities.stringIsNumeric( request.getParameter( "contact_ZIP" ) ) )
 			{
 				registrationErrors.put( "contact_ZIP", "Invalid Number" );
 			}
 		}
+
 		if( registrationErrors.isEmpty() )
 		{
 			// Generate a password for the user.
@@ -114,18 +120,20 @@ public class UserRegistration
 				}
 			}
 
-			generatedId = engine.registerUser(
-					request.getParameter( "first_name" ),
-					request.getParameter( "last_name" ),
-					request.getParameter( "contact_email" ),
-					request.getParameter( "contact_address" ),
-					primaryContactNumber,
-					secondaryContactNumber,
-					generatedPassword,
-					request.getParameter( "contact_ZIP" ),
-					request.getParameter( "contact_city" ),
-					request.getParameter( "contact_state" ),
-					registrationErrors );
+			long passwordSalt = new Date().getTime();
+			String hashedPassword = Utilities.sha1Output( passwordSalt + generatedPassword );
+
+			registeredUser = new User();
+			registeredUser.setFirstName( request.getParameter( "first_name" ) );
+			registeredUser.setLastName( request.getParameter( "last_name" ) );
+			registeredUser.setEmail( request.getParameter( "contact_email" ) );
+			registeredUser.setAddress( request.getParameter( "contact_address" ) );
+			registeredUser.setPrimary_number( primaryContactNumber );
+			registeredUser.setSecondary_number( secondaryContactNumber );
+			registeredUser.setZip( request.getParameter( "contact_ZIP" ) );
+			registeredUser.setSalt( passwordSalt );
+			registeredUser.setPassword( hashedPassword );
+			engine.insertUser( registeredUser );
 
 			EmailMessage.getInstance().sendMessage(
 					request.getParameter( "contact_email" ),
@@ -134,7 +142,7 @@ public class UserRegistration
 					);
 		}
 
-		return generatedId;
+		return registeredUser;
 	}
 
 	/**
@@ -147,7 +155,7 @@ public class UserRegistration
 	{
 		String message = "Hello " + aFirstName + "!";
 		message += "\n\nThank you for registering with SoldierUp! We hope you have a great experience!";
-		message += "\nYou can login wiht the following password: " + aPassword;
+		message += "\nYou can login with the following password: " + aPassword;
 		message += "\n\nIf you have any problems, feel free to reply with the issues you are having.";
 		return message;
 	}

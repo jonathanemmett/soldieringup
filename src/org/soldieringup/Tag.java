@@ -31,27 +31,16 @@ public class Tag
 	protected ObjectId id;
 	protected long tid;
 	@Indexed(unique = true)
-	private String _name;
+	private String name;
 
-
-	public Tag (String tag_name)
+	public ObjectId getObject_id()
 	{
-		this._name = tag_name;
+		return id;
 	}
 
-	/**
-	 * @return the _name
-	 */
-	public String get_name ()
+	public Tag (String name)
 	{
-		return _name;
-	}
-	/**
-	 * @param _name the _name to set
-	 */
-	public void set_name (String _name)
-	{
-		this._name = _name;
+		this.name = name;
 	}
 
 	public long get_tid()
@@ -62,5 +51,15 @@ public class Tag
 	public void set_tid( long tid )
 	{
 		this.tid = tid;
+	}
+
+	public String get_name()
+	{
+		return name;
+	}
+
+	public void set_name( String name )
+	{
+		this.name = name;
 	}
 }

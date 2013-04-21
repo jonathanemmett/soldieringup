@@ -1,7 +1,10 @@
 package org.soldieringup;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 /**
  * Class the represents a question that a Veteran is asking
@@ -16,7 +19,11 @@ public class Question
 	public String question_title;
 	public String availability;
 	public String question_detailed_description;
-	public long vid;
+	@DBRef
+	public User veteran;
+	@DBRef
+	public List<Tag> tag;
+	public long mySqlVid;
 
 	/**
 	 * Constructor for question
@@ -58,7 +65,34 @@ public class Question
 	 */
 	public void setVid( long aVid )
 	{
-		this.vid = aVid;
+		this.mySqlVid = aVid;
+	}
+
+	/**
+	 * Sets the veteran that asked the question
+	 * @param aVeteran Veteran that asked the question
+	 */
+	public void setVeteran( User aVeteran )
+	{
+		this.veteran = aVeteran;
+	}
+
+	/**
+	 * 
+	 * @param aTags
+	 */
+	public void setTags( List<Tag> aTags )
+	{
+		this.tag = aTags;
+	}
+
+	/**
+	 * Sets the detailed description for the question
+	 * @param aDetailedDescription Detailed description to set the question to
+	 */
+	public void setDetailedDescription( String aDetailedDescription )
+	{
+		this.question_detailed_description = aDetailedDescription;
 	}
 
 	/**
@@ -103,7 +137,25 @@ public class Question
 	 */
 	public long getVid()
 	{
-		return vid;
+		return mySqlVid;
+	}
+
+	/**
+	 * Gets the veteran that asked the question
+	 * @return Veteran that asked the question
+	 */
+	public User getVeteran()
+	{
+		return veteran;
+	}
+
+	/**
+	 * Gets the tags associated to this question
+	 * @return The tags associated to this question
+	 */
+	public List<Tag> getTags()
+	{
+		return tag;
 	}
 
 	/**

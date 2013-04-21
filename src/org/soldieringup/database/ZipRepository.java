@@ -53,4 +53,9 @@ public class ZipRepository
 	{
 		return op.find (new Query(Criteria.where(fieldName).is(fieldValue)),ZIP.class);
 	}
+
+	public void update (ZIP aZip)
+	{
+		op.save (aZip);
+	}
 }

@@ -26,7 +26,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONObject;
 import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
 
 /**
  * Servlet implementation class UploadImageRework
@@ -35,6 +34,10 @@ import org.soldieringup.database.MySQL;
 public class UploadImage extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
+
+	// Types of images to store in the temp uploads file
+	public static final String TEMP_UPLOAD_IMAGE_PROFILE = "profile";
+	public static final String TEMP_UPLOAD_IMAGE_COVER = "cover";
 
 	// Target widths and heights for the different types
 	// of images that can be uploaded to the database.
@@ -168,13 +171,13 @@ public class UploadImage extends HttpServlet
 
 				// Generate a random string for the src using the sha1 algorithm and the
 				// string of 100 times the user. This helps to keep uniqueness for profiles.
-				fileName = Utilities.sha1Output( time + "profile" ) + ( 100 * Long.valueOf( request.getSession().getAttribute( "aid" ).toString() ) );
+				fileName = Utilities.sha1Output( time + "profile" ) + request.getSession().getAttribute( "aid" ).toString();
 
 				int targetImageWidth =
-						uploadType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_WIDTH : TEMP_PROFILE_IMAGE_WIDTH;
+						uploadType.equals( TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_WIDTH : TEMP_PROFILE_IMAGE_WIDTH;
 
 				int targetImageHeight =
-						uploadType.equals( MySQL.TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_HEIGHT : TEMP_PROFILE_IMAGE_HEIGHT;
+						uploadType.equals( TEMP_UPLOAD_IMAGE_COVER ) ? TEMP_COVER_IMAGE_HEIGHT : TEMP_PROFILE_IMAGE_HEIGHT;
 
 				uploadTemporaryPhoto( sourceImage, fileName, extension, targetImageWidth, targetImageHeight );
 				request.getSession().setAttribute( "temp_"+uploadType+"_src", fileName+extension );

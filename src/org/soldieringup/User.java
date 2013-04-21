@@ -12,20 +12,20 @@ import org.springframework.security.core.userdetails.UserDetails;
  * Class represents a user in the database
  * 
  * @author Jake
- * 
+ *
  */
 public class User extends SoldierUpAccount implements UserDetails
 {
 	private static final long			serialVersionUID	= 7885033133143889220L;
-	private String					first_name;
-	private String					last_name;
-	private Business				business;
-	private Veteran					veteran;
+	private String first_name;
+	private String last_name;
+	private long salt;
+	private String password;
+	private Business business;
+	private Veteran veteran;
 	@DBRef
-	private War					war;
-	@DBRef
-	private List<Tag>				tag;
-	private String					password;
+	private War war;
+
 	private List<Role>				roles;
 	private boolean					enabled			= true;
 	private UserAccountStatus			status;
@@ -45,24 +45,61 @@ public class User extends SoldierUpAccount implements UserDetails
 		// TODO Auto-generated constructor stub
 	}
 
-	public String getFirstName ()
+	public String getFirstName()
 	{
 		return first_name;
 	}
 
-	public String getLastName ()
+	public String getLastName()
 	{
 		return last_name;
 	}
 
-	public void setFirstName (String first_name)
+	public void setFirstName( String first_name )
 	{
 		this.first_name = first_name;
 	}
 
-	public void setLastName (String last_name)
+	public void setLastName( String last_name )
 	{
 		this.last_name = last_name;
+	}
+
+	/**
+	 * Gets the salt for the account password
+	 * @return The salt for the account password
+	 */
+	public long getSalt()
+	{
+		return this.salt;
+	}
+
+	/**
+	 * Gets the password for the account
+	 * @return The password for the account
+	 */
+	@Override
+	public String getPassword()
+	{
+		return this.password;
+	}
+
+	/**
+	 * Sets the salt for the account password
+	 * @param salt The salt for the account password
+	 */
+	public void setSalt( long salt )
+	{
+		this.salt = salt;
+	}
+
+	/**
+	 * Sets the password for the account
+	 * @param The password for the account
+	 */
+	public void setPassword( String password )
+	{
+		this.password = password;
 	}
 
 	/**
@@ -108,8 +145,10 @@ public class User extends SoldierUpAccount implements UserDetails
 	}
 
 	/**
+
 	 * @return the tag
 	 */
+	@Override
 	public List<Tag> getTag ()
 	{
 		return tag;
@@ -119,6 +158,7 @@ public class User extends SoldierUpAccount implements UserDetails
 	 * @param tag
 	 *                the tag to set
 	 */
+	@Override
 	public void setTag (List<Tag> tag)
 	{
 		this.tag = tag;
@@ -138,17 +178,6 @@ public class User extends SoldierUpAccount implements UserDetails
 	{
 		return "User [id=" + id + ", " + "first_name=" + first_name + ", " + "last_name=" + last_name + ", " + "address=" + address + ", " + "zip="
 				+ zip + "]";
-	}
-
-	public void setPassword (String password)
-	{
-		this.password = password;
-	}
-
-	@Override
-	public String getPassword ()
-	{
-		return this.password;
 	}
 
 	public void addRole (Role role)

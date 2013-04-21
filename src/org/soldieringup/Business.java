@@ -1,7 +1,5 @@
 package org.soldieringup;
 
-import java.util.List;
-
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 
@@ -18,8 +16,27 @@ public class Business extends SoldierUpAccount {
 	protected String short_summary;
 	protected String long_summary;
 	protected String work_number;
+
 	@DBRef
-	private List<Tag> tag;
+	private User owner;
+
+	/**
+	 * Sets the id of the business owner
+	 * @param owner_id The ID of the business owner
+	 */
+	public void setOwner( User owner )
+	{
+		this.owner = owner;
+	}
+
+	/**
+	 * Gets the id of the business owner
+	 * @return The id of the business owner
+	 */
+	public User getOwner()
+	{
+		return owner;
+	}
 
 	/**
 	 * Gets the business id
@@ -103,23 +120,6 @@ public class Business extends SoldierUpAccount {
 	public String getWorkNumber()
 	{
 		return work_number;
-	}
-
-
-	/**
-	 * @return the tag
-	 */
-	public List<Tag> getTag ()
-	{
-		return tag;
-	}
-
-	/**
-	 * @param tag the tag to set
-	 */
-	public void setTag (List<Tag> tag)
-	{
-		this.tag = tag;
 	}
 
 	@Override

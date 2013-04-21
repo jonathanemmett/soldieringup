@@ -1,9 +1,9 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -13,22 +13,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.soldieringup.Engine;
-import org.soldieringup.database.MySQL;
+import org.bson.types.ObjectId;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.Question;
+import org.soldieringup.Tag;
+import org.soldieringup.User;
 
 /**
  * Servlet implementation class UpdateVeteranQuestion
  */
 @WebServlet("/UpdateVeteranQuestion")
-public class UpdateVeteranQuestion extends HttpServlet {
+public class UpdateVeteranQuestion extends HttpServlet
+{
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public UpdateVeteranQuestion() {
+	public UpdateVeteranQuestion()
+	{
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -38,21 +39,31 @@ public class UpdateVeteranQuestion extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		String command = request.getParameter( "command" );
+
 		if( command != null && command.equals( "delete") && request.getParameter( "qid" ) != null )
 		{
-			Map<String,Object> objectsToDelete = new HashMap<String,Object>();
-			objectsToDelete.put( "qid", request.getParameter( "qid" ) );
-			try
+			removeQuestion( request.getParameter( "qid" ), (ObjectId) request.getSession().getAttribute( "uid" ) );
+			request.getRequestDispatcher( "/Questions.jsp" ).forward( request, response );
+		}
+	}
+
+	/**
+	 * Removes the question from the id if the given veteran
+	 * id matches the veteran that asked the question
+	 * @param aQuestionId ID of the question to remove
+	 * @param aVeteranId ID of the veteran
+	 */
+	public void removeQuestion( String aQuestionId, ObjectId aVeteranId )
+	{
+		if( ObjectId.isValid( aQuestionId ) )
+		{
+			ObjectId questionId = new ObjectId( aQuestionId );
+			MongoEngine engine = new MongoEngine();
+			List<Question> possibleQuestions = engine.findQuestions( "_id", questionId );
+			User loggedInVeteran = engine.findUsers( "_id", aVeteranId ).get( 0 );
+			if( possibleQuestions.size() > 0 && possibleQuestions.get( 0 ).getVeteran().equals( loggedInVeteran ) )
 			{
-				Engine engine = new Engine();
-				engine.removeTagsFromQuestion( Long.valueOf( request.getParameter ("qid") ) );
-				MySQL.getInstance().deleteFromTable( "questions", objectsToDelete );
-				request.getRequestDispatcher( "/Questions.jsp" ).forward( request, response );
-			}
-			catch (SQLException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				engine.removeQuestion( possibleQuestions.get( 0 ) );
 			}
 		}
 	}
@@ -68,14 +79,11 @@ public class UpdateVeteranQuestion extends HttpServlet {
 		if( currentSession.getAttribute( "question_form_request_type" ) == null )
 			return;
 
-		Map<String,String[]> questionParameters = request.getParameterMap();
 		Map<String,String> inputErrors = new HashMap<String,String>();
-		Map<String,Object> parameters = new HashMap<String,Object>();
-		Map<String,Object> whereParameters = new HashMap<String,Object>();
 
 		String command = currentSession.getAttribute( "question_form_request_type" ).toString();
 
-		getValidationErrors( request, response, inputErrors, parameters );
+		getValidationErrors( request, inputErrors );
 		if( inputErrors.isEmpty() )
 		{
 			if( command.equals( "insert" ) )
@@ -84,29 +92,7 @@ public class UpdateVeteranQuestion extends HttpServlet {
 			}
 			else if( command.equals( "update" ) )
 			{
-				try
-				{
-					long qid =  Long.valueOf( request.getSession().getAttribute( "question_form_update_question_id" ).toString() );
-					whereParameters.put( "vid", request.getSession().getAttribute( "aid" ) );
-					whereParameters.put( "qid", request.getSession().getAttribute( "question_form_update_question_id" ) );
-					MySQL.getInstance().updateTable( "questions", parameters, whereParameters );
-					MySQL.getInstance().removeTagsFromQuestion( qid );
-					if( request.getParameterValues( "tag" ) != null )
-					{
-						String[] tags = request.getParameterValues( "tag" );
-						for( int i = 0; i < tags.length; ++i )
-						{
-							if( !tags[i].equals("") )
-							{
-								MySQL.getInstance().attachTagsToQuestion( tags[i], qid );
-							}
-						}
-					}
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-				}
+				updateQuestion( request );
 			}
 			request.getRequestDispatcher( "/Questions.jsp").forward( request, response );
 		}
@@ -122,42 +108,91 @@ public class UpdateVeteranQuestion extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Creates a question from a given request, and inserts it into the server
+	 * @param request Request to retrieve the question from
+	 */
 	private void insertQuestion( HttpServletRequest request, HttpServletResponse response )
 	{
-		Engine engine = new Engine();
-		ResultSet generatedQuestionId = engine.insertVeteranQuestion(
-				request.getParameter( "question_title" ),
-				request.getParameter( "availability" ),
-				request.getParameter( "question_detailed_description" ),
-				Long.valueOf( request.getSession().getAttribute( "aid" ).toString() ) );
+		MongoEngine engine = new MongoEngine();
+		Question newQuestion = new Question();
+		User veteranThatAsked = engine.findUsers( "_id", request.getSession().getAttribute( "aid" ) ).get( 0 );
 
-		try
+		newQuestion.setQuestionTitle( request.getParameter( "question_title" ) );
+		newQuestion.setAvailability( request.getParameter( "availability" ) );
+		newQuestion.setDetailedDescription( request.getParameter( "question_detailed_description" ) );
+		newQuestion.setVeteran( veteranThatAsked );
+		List<Tag> questionTags = new ArrayList<Tag>();
+		addTags( request.getParameterValues( "tag" ), questionTags );
+		newQuestion.setTags( questionTags );
+		engine.insertQuestion( newQuestion );
+	}
+
+	/**
+	 * Updates the question from the given request.
+	 * @param request Request to retrieve the question from
+	 * @param response
+	 */
+	public void updateQuestion( HttpServletRequest request )
+	{
+		ObjectId questionId = (ObjectId) request.getSession().getAttribute( "question_form_update_question_id" );
+
+		MongoEngine engine = new MongoEngine();
+		Question updatedQuestion = engine.findQuestions( "_id", questionId ).get( 0 );
+		User veteranFromQuestion = engine.findUsers( "_id", request.getSession().getAttribute( "aid" ) ).get( 0 );
+
+		if( updatedQuestion.getVeteran().equals( veteranFromQuestion ) )
 		{
-			if( generatedQuestionId.next() && request.getParameterValues( "tag" ) != null )
-			{
-				long qid = generatedQuestionId.getLong( 1 );
-				String[] tags = request.getParameterValues( "tag" );
-				for( int i = 0; i < tags.length; ++i )
-				{
-					MySQL.getInstance().attachTagsToQuestion( tags[i], qid );
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
+			updatedQuestion.setQuestionTitle( request.getParameter( "question_title" ) );
+			updatedQuestion.setAvailability( request.getParameter( "availability" ) );
+			updatedQuestion.setDetailedDescription( request.getParameter( "question_detailed_description" ) );
+			updatedQuestion.setVeteran( veteranFromQuestion );
+			List<Tag> questionTags = new ArrayList<Tag>();
+			addTags( request.getParameterValues( "tag" ), questionTags );
+			updatedQuestion.setTags( questionTags );
+			engine.updateQuestion( updatedQuestion );
 		}
 	}
 
-	public void getValidationErrors
-	(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Map<String,String> inputErrors,
-			Map<String,Object> parametersForQuery
-			)
+	/**
+	 * Adds tags to a given tag list
+	 * @param aTagsToAdd Tags to add to list
+	 * @param aTagList Tag list to add to
+	 */
+	public void addTags( String[] aTagsToAdd, List<Tag> aTagList )
 	{
-		String[] requiredStrings = { "qid", "question_title", "availability", "question_detailed_description", "vid" };
+		MongoEngine engine = new MongoEngine();
+		if( aTagsToAdd != null )
+		{
+			for( int i = 0; i < aTagsToAdd.length; ++i )
+			{
+				List<Tag> possibleTags = engine.findTags( "name", aTagsToAdd[i] );
+				if( possibleTags.size() > 0  && !aTagList.contains( possibleTags.get( 0 ) ) )
+				{
+					aTagList.add( possibleTags.get( 0 ) );
+				}
+
+				if( possibleTags.size() == 0 )
+				{
+					Tag newTag = new Tag( aTagsToAdd[i] );
+					engine.insertTag( newTag );
+					aTagList.add( newTag );
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * Determines if a request has any input errors
+	 * @param request Request to check for errors
+	 * @param inputErrors (out) Errors that occured from the request.
+	 */
+	public void getValidationErrors( HttpServletRequest request, Map<String,String> inputErrors )
+	{
+		String[] requiredStrings = { "qid", "question_title", "availability",
+				"question_detailed_description", "vid" };
+
 		for( int i = 0; i <requiredStrings.length; ++i )
 		{
 			if( ( requiredStrings[i].equals( "vid" ) || requiredStrings[i].equals( "qid" ) ) )
@@ -168,12 +203,6 @@ public class UpdateVeteranQuestion extends HttpServlet {
 			{
 				inputErrors.put( requiredStrings[i], "required" );
 			}
-			else
-			{
-				parametersForQuery.put( requiredStrings[i], request.getParameter( requiredStrings[i] ) );
-			}
 		}
-
-		System.out.println( "Parameters size: " + parametersForQuery.size() );
 	}
 }

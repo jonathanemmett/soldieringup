@@ -1,10 +1,6 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,8 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.Engine;
-import org.soldieringup.Utilities;
+import org.bson.types.ObjectId;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
 
 /**
  * Servlet implementation class UpdateUserProfile
@@ -46,34 +43,49 @@ public class UpdateUserProfile extends HttpServlet {
 	{
 		if( request.getSession().getAttribute( "uid" ) != null )
 		{
-			Engine engine = new Engine();
-			long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
-			Set<String> keys = request.getParameterMap().keySet();
-			Map<String,Object> updateParameters = new HashMap<String,Object>();
-			Iterator<String> keysIterator = keys.iterator();
-			String[] userProfileColumns = { "id", "first_name", "last_name", "email", "address",
-					"primary_number", "secondary_number", "password","salt", "ZIP" };
+			MongoEngine engine = new MongoEngine();
+			ObjectId uid = (ObjectId) request.getSession().getAttribute( "uid" );
+			User userToUpdate = engine.findUsers( "_id", uid ).get( 0 );
 
-			while( keysIterator.hasNext() )
+			if( request.getParameter( "first_name" ) != null )
 			{
-				String currentKey = keysIterator.next();
-
-				if( Utilities.isElementInArray( currentKey, userProfileColumns ) )
-				{
-					updateParameters.put( currentKey, request.getParameter( currentKey ) );
-				}
+				userToUpdate.setFirstName( request.getParameter( "first_name") );
 			}
 
-			engine.updateUser( uid, updateParameters );
+			if( request.getParameter( "last_name" ) != null )
+			{
+				userToUpdate.setLastName( request.getParameter( "last_name" ) );
+			}
+
+			if( request.getParameter( "email" ) != null && !engine.emailExists( request.getParameter( "email" ) ) )
+			{
+				userToUpdate.setEmail( request.getParameter( "email" ) );
+			}
+
+			if( request.getParameter( "primary_number" ) != null )
+			{
+				userToUpdate.setPrimary_number( request.getParameter( "primary_number" ) );
+			}
+
+			if( request.getParameter( "secondary_number" ) != null )
+			{
+				userToUpdate.setSecondary_number( request.getParameter( "secondary_number" ) );
+			}
+
+			if( request.getParameter( "ZIP" ) != null && engine.findZip( request.getParameter( "ZIP" ) ) != null )
+			{
+				userToUpdate.setZip( request.getParameter( "ZIP" ) );
+			}
+
+			engine.updateUser( userToUpdate );
 
 			if( request.getSession().getAttribute( "editing_account_type" ).equals( "business" ) )
 			{
-				request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
+				response.sendRedirect( "UpdateBusiness" );
 			}
 			else
 			{
-				request.getRequestDispatcher("/editVeteranProfile.jsp").forward(request, response);
-
+				response.sendRedirect( "UpdateVeteran" );
 			}
 		}
 	}

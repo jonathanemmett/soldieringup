@@ -2,19 +2,19 @@ package org.soldieringup.servlets;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
-import org.soldieringup.Engine;
 import org.soldieringup.MeetingRequest;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.Question;
+import org.soldieringup.User;
 
 /**
  *	This servlet is used to process the meeting requests that veterans and businesses will have
@@ -27,9 +27,9 @@ public class MeetingRequests extends HttpServlet
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public MeetingRequests(){
+	public MeetingRequests()
+	{
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -38,12 +38,12 @@ public class MeetingRequests extends HttpServlet
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		if( request.getParameter( "qid" ) != null && request.getParameter( "bid" ) != null )
+		if( request.getParameter( "mid" ) != null )
 		{
-			Engine engine = new Engine();
-			Long qid = Long.valueOf( request.getParameter( "qid" ).toString() );
-			Long bid = Long.valueOf( request.getParameter( "bid" ).toString() );
-			MeetingRequest meetingRequest = engine.getMeetingRequestFromQIDAndBID( qid, bid );
+			MongoEngine engine = new MongoEngine();
+			ObjectId meetingRequestId = new ObjectId( request.getParameter( "mid" ) );
+			MeetingRequest meetingRequest = engine.findMeetingRequest( "_id", meetingRequestId ).get( 0 );
+
 			if( meetingRequest != null )
 			{
 				JSONObject meetingRequestJSON = new JSONObject();
@@ -85,23 +85,36 @@ public class MeetingRequests extends HttpServlet
 
 	private void insertNewMeetingRequest( HttpServletRequest request, HttpServletResponse response ) throws SQLException
 	{
-		Engine engine = new Engine();
-		String[] databaseColumns = { "qid", "time", "day", "location" };
-		HttpSession currentSession = request.getSession();
+		MongoEngine engine = new MongoEngine();
+		User veteran;
+		ObjectId businessId;
 
-		if( currentSession.getAttribute( "editing_account_type" ) != null &&
-				currentSession.getAttribute( "editing_account_type" ).equals( "business" ) )
+		if( request.getSession().getAttribute( "editing_account_type" ) == "veteran" )
 		{
-			Map<String,Object> newMeetingRequestParameters = new HashMap<String,Object>();
-
-			newMeetingRequestParameters.put( "bid", currentSession.getAttribute( "aid" ).toString() );
-
-			for( int i = 0; i < databaseColumns.length; ++i )
-			{
-				newMeetingRequestParameters.put( databaseColumns[i], request.getParameter( databaseColumns[i] ) );
-			}
-
-			engine.insertMeetingRequests(newMeetingRequestParameters);
+			veteran = engine.findUsers( "_id", request.getSession().getAttribute( "uid" ) ).get( 0 );
+			businessId = new ObjectId( request.getParameter( "aid" ) );
 		}
+		else
+		{
+			businessId = (ObjectId) request.getSession().getAttribute( "aid" );
+			ObjectId veteranId = new ObjectId( request.getParameter( "aid" ) );
+			veteran = engine.findUsers( "_id", veteranId ).get( 0 );
+		}
+
+		MeetingRequest meetingRequest = new MeetingRequest();
+		meetingRequest.setDay( request.getParameter( "day" ) );
+		meetingRequest.setTime( request.getParameter( "time" ) );
+		meetingRequest.setLocation( request.getParameter( "location" ) );
+		meetingRequest.setVeteran( veteran );
+		meetingRequest.setBusiness( businessId );
+
+		String questionId = request.getParameter( "qid" );
+		if( questionId != null && ObjectId.isValid( questionId ) )
+		{
+			Question questionFromId = engine.findQuestions( "_id", new ObjectId( questionId ) ).get( 0 );
+			meetingRequest.setQuestion( questionFromId );
+		}
+
+		engine.insertMeetingRequest( meetingRequest );
 	}
 }

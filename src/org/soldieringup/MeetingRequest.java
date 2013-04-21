@@ -2,6 +2,7 @@ package org.soldieringup;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 public class MeetingRequest
 {
@@ -14,6 +15,14 @@ public class MeetingRequest
 	private String location;
 	private String veteran_showed;
 	private char business_showed;
+
+	@DBRef
+	protected Question question;
+
+	@DBRef
+	protected User veteran;
+
+	protected ObjectId businessObjectId;
 
 	/**
 	 * Sets the id of the business who created the meeting request
@@ -79,6 +88,33 @@ public class MeetingRequest
 	}
 
 	/**
+	 * Sets the veteran of the meeting request
+	 * @param aVeteran Veteran of the meeting request
+	 */
+	public void setVeteran( User aVeteran )
+	{
+		this.veteran = aVeteran;
+	}
+
+	/**
+	 * Sets the business of the meeting request
+	 * @param aBusiness Business of the meeting request
+	 */
+	public void setBusiness( ObjectId aBusiness )
+	{
+		this.businessObjectId = aBusiness;
+	}
+
+	/**
+	 * Sets the related question for this meeting request
+	 * @param aQuestion Question the meeting request is for
+	 */
+	public void setQuestion( Question aQuestion )
+	{
+		this.question = aQuestion;
+	}
+
+	/**
 	 * Gets the id of the business who sent the request
 	 * @return The id of the business who sent the request
 	 */
@@ -139,5 +175,41 @@ public class MeetingRequest
 	public char getBusinessShowed()
 	{
 		return this.business_showed;
+	}
+
+	/**
+	 * Gets the question this meeting request is related to
+	 * @return Meeting request this question is related to
+	 */
+	public Question getRelated_question()
+	{
+		return this.question;
+	}
+
+	/**
+	 * Gets the related question for this meeting request
+	 * @return Question the meeting request is for
+	 */
+	public Question getQuestion()
+	{
+		return this.question;
+	}
+
+	/**
+	 * Gets the veteran of the meeting request
+	 * @return Veteran of the meeting request
+	 */
+	public User getVeteran()
+	{
+		return this.veteran;
+	}
+
+	/**
+	 * Gets the business that is responding to the meeting request
+	 * @return Business that is responding to the meeting request
+	 */
+	public ObjectId getBusiness()
+	{
+		return this.businessObjectId;
 	}
 }

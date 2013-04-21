@@ -1,5 +1,6 @@
 package org.soldieringup.database;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.soldieringup.Tag;
@@ -60,4 +61,32 @@ public class TagRepository
 	{
 		return op.find (new Query(Criteria.where(fieldName).is(fieldValue)),Tag.class);
 	}
+
+	/**
+	 * Find tags that are similiar to a given tag
+	 * @param aTag Tag to search for
+	 * @return The tags that are similiar to the given tag
+	 */
+	public List<Tag> findSimiliarTags( String aTag )
+	{
+		return op.find (new Query(Criteria.where( "name" ).regex( aTag ) ),Tag.class);
+	}
+
+	public List<Tag> findSimilarTagsFromMultipleTags( String[] aTags )
+	{
+		if( aTags.length > 0)
+		{
+			Criteria criteria = Criteria.where("name").regex( aTags[0] );
+			for( int i = 1; i < aTags.length; ++i )
+			{
+				criteria.orOperator( Criteria.where( "name" ).regex( aTags[i] ) );
+			}
+			return op.find( new Query( criteria ), Tag.class);
+		}
+		else
+		{
+			return new ArrayList<Tag>();
+		}
+	}
+
 }

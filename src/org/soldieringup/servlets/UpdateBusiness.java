@@ -1,72 +1,86 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import org.soldieringup.Engine;
-import org.soldieringup.Utilities;
+import org.bson.types.ObjectId;
+import org.soldieringup.Business;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
 
 /**
  * Servlet implementation class UpdateBusiness
  */
 @WebServlet("/UpdateBusiness")
-public class UpdateBusiness extends HttpServlet {
+public class UpdateBusiness extends HttpServlet
+{
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public UpdateBusiness() {
+	public UpdateBusiness()
+	{
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		HttpSession currentSession = request.getSession();
+		if( currentSession.getAttribute( "editing_account_type" ) != null &&
+				currentSession.getAttribute( "editing_account_type" ).equals( "business" ) )
+		{
+			MongoEngine engine = new MongoEngine();
+			ObjectId businessId = (ObjectId) request.getSession().getAttribute( "aid" );
+			Business businessToEdit = (Business) engine.findAccounts( "_id", businessId ).get( 0 );
+			User userFromBusiness = engine.findUsers( "_id", currentSession.getAttribute( "uid" ) ).get(0);
+
+			request.setAttribute( "business_to_edit", businessToEdit );
+			request.setAttribute( "user_to_edit", userFromBusiness );
+			request.setAttribute( "business_zip", engine.findZip( businessToEdit.getZip() ) );
+			request.getRequestDispatcher( "/editBusiness.jsp" ).forward( request, response );
+		}
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		if( request.getSession().getAttribute( "aid" ) != null )
 		{
-			Engine engine = new Engine();
-			long bid = Long.valueOf( request.getSession().getAttribute( "aid" ).toString() );
-			Set<String> keys = request.getParameterMap().keySet();
-			Map<String,Object> updateParameters = new HashMap<String,Object>();
-			Iterator<String> keysIterator = keys.iterator();
+			MongoEngine engine = new MongoEngine();
+			Business business = (Business) engine.findAccounts( "_id", request.getSession().getAttribute( "aid" ) ).get( 0 );
 
-			while( keysIterator.hasNext() )
+			if( request.getParameter( "address" ) != null )
 			{
-				String currentKey = keysIterator.next();
-				String[] requiredBusinessKeys = { "name", "short_summary", "long_summary",
-						"address", "ZIP" };
-
-				if( Utilities.isElementInArray( currentKey, requiredBusinessKeys ) )
-				{
-					updateParameters.put( currentKey, request.getParameter( currentKey ) );
-				}
+				business.setAddress( request.getParameter( "address" ) );
 			}
 
-			System.out.println( updateParameters.size() );
-			engine.updateBusiness( bid, updateParameters );
-			request.getRequestDispatcher("/editBusiness.jsp").forward(request, response);
+			if( request.getParameter( "short_summary" ) != null )
+			{
+				business.setShortSummary( request.getParameter( "short_summary" ) );
+			}
+
+			if( request.getParameter( "long_summary" ) != null )
+			{
+				business.setLongSummary( request.getParameter( "long_summary" ) );
+			}
+
+			if( request.getParameter( "name" ) != null )
+			{
+				business.setName( request.getParameter( "name" ) );
+			}
+
+			if( request.getParameter( "zip" ) != null )
+			{
+				business.setZip( request.getParameter( "zip" ) );
+			}
+
+			engine.updateAccount( business );
 		}
+		doGet( request, response );
 	}
 }
