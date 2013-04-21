@@ -1,17 +1,7 @@
 package org.soldieringup.servlets;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import java.security.NoSuchAlgorithmException;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -20,12 +10,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.Validate;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.soldieringup.Business;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
 import org.soldieringup.Utilities;
-import org.soldieringup.database.MySQL;
 import org.soldieringup.database.UserRegistration;
 
 /**
@@ -34,91 +23,81 @@ import org.soldieringup.database.UserRegistration;
  */
 @WebServlet("/BusinessRegistration")
 public class BusinessRegistration extends HttpServlet {
-	
+
 	private static final long serialVersionUID = 1L;
-	private static final Logger log = Logger.getLogger( MySQL.class.getName() );
-   
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public BusinessRegistration() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	private static final Logger log = Logger.getLogger( MongoEngine.class.getName() );
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public BusinessRegistration()
+	{
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException 
+	@Override
+	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
 	{
-		MySQL databaseConnection = MySQL.getInstance();
+		MongoEngine engine = new MongoEngine();
 		Map<String,String> registrationErrors = new HashMap<String,String>();
-		
-		String[] requiredBusinessKeys = { "business_name", "business_short_summary", "business_long_summary",	
-								  		  "business_address", "business_city", "business_state", "business_ZIP" };
+
+		String[] requiredBusinessKeys = { "business_name", "business_short_summary", "business_long_summary",
+				"business_address", "business_city", "business_state", "business_ZIP" };
 
 		// Check to make sure all the required keys are present in the request
 		for( String key : requiredBusinessKeys )
 		{
 			Utilities.checkParameterIsNull( key, request, registrationErrors );
 		}
-		
+
 		// Make sure that the zip numbers are numeric
 		if( !Utilities.stringIsNumeric( request.getParameter( "business_ZIP" ) ) )
 		{
 			registrationErrors.put( "business_ZIP", "Invalid ZIP" );
 		}
-		
+
 		if( registrationErrors.isEmpty() )
 		{
-			// A business registration requires a valid user registration  
-			ResultSet generatedId = UserRegistration.registerUser( request, registrationErrors );
-					
+			// A business registration requires a valid user registration
+			User registeredUser = UserRegistration.registerUser( request, registrationErrors );
+
 			// If the user was successfully inserted, go on ahead and register the business
-			if( generatedId != null )
+			if( registeredUser != null )
 			{
-				try 
-				{	
-					if( generatedId.first() )
-					{	
-						String primaryContactNumber;
-						primaryContactNumber = request.getParameter( "contact_primary_number" ).substring(1,4);
-						primaryContactNumber += request.getParameter( "contact_primary_number" ).substring(6,9);
-						primaryContactNumber += request.getParameter( "contact_primary_number" ).substring(10,14);
-						
-						ResultSet registeredBusiness = 
-								databaseConnection.registerBusiness( Integer.parseInt( generatedId.getString(1) ), 
-										  							 request.getParameter( "business_name" ), 
-										  							 request.getParameter( "business_short_summary" ), 
-										  							 request.getParameter( "business_long_summary" ), 
-										  							 primaryContactNumber, 
-										  							 request.getParameter( "business_address" ),
-										  							 request.getParameter( "business_city" ),
-										  							 request.getParameter( "business_state" ),
-										  							 request.getParameter( "business_ZIP" ) );
-						
-						if( registeredBusiness.first() )
-						{
-							request.getRequestDispatcher( "/accountCreationSuccess.jsp" ).forward( request, response );
-							return;
-						}
-					}
-				} 
-				catch (SQLException e)  
+				String primaryContactNumber;
+				primaryContactNumber = request.getParameter( "contact_primary_number" ).substring(1,4);
+				primaryContactNumber += request.getParameter( "contact_primary_number" ).substring(6,9);
+				primaryContactNumber += request.getParameter( "contact_primary_number" ).substring(10,14);
+
+				Business newBusiness = new Business();
+				newBusiness.setName( request.getParameter( "business_name" ) );
+				newBusiness.setShortSummary( request.getParameter( "business_short_summary" ) );
+				newBusiness.setLongSummary( request.getParameter( "business_long_summary" ) );
+				newBusiness.setPrimary_number( primaryContactNumber );
+				newBusiness.setAddress( request.getParameter( "business_address" ) );
+				newBusiness.setZip( request.getParameter( "business_ZIP" ) );
+				newBusiness.setOwner( registeredUser );
+				engine.insertAccount( newBusiness );
+
+				if( newBusiness.getObject_id() != null )
 				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					request.getRequestDispatcher( "/accountCreationSuccess.jsp" ).forward( request, response );
+					return;
 				}
 			}
 		}
-		
+
 		request.setAttribute( "registration_errors", registrationErrors );
 		request.getRequestDispatcher("/NewBusiness.jsp").forward( request, response );
 	}

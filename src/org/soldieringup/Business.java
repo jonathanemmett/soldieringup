@@ -1,6 +1,6 @@
 package org.soldieringup;
 
-import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 
 
@@ -11,20 +11,31 @@ import org.bson.types.ObjectId;
  */
 public class Business extends SoldierUpAccount {
 
-	private ObjectId owner_id;
 	private long bid;
 	private String name;
 	protected String short_summary;
 	protected String long_summary;
 	protected String work_number;
 
+	@DBRef
+	private User owner;
+
+	/**
+	 * Sets the id of the business owner
+	 * @param owner_id The ID of the business owner
+	 */
+	public void setOwner( User owner )
+	{
+		this.owner = owner;
+	}
+
 	/**
 	 * Gets the id of the business owner
 	 * @return The id of the business owner
 	 */
-	public ObjectId getOwner_id()
+	public User getOwner()
 	{
-		return owner_id;
+		return owner;
 	}
 
 	/**
