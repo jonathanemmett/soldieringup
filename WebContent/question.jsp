@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="org.soldieringup.Engine" %>
+<%@ page import="org.bson.types.ObjectId" %>    
+<%@ page import="org.soldieringup.MongoEngine" %>
 <%@ page import="org.soldieringup.Question" %>
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.Veteran" %>
@@ -10,18 +11,14 @@
 		%><jsp:forward page="/login.jsp"/><%
 	}
 
-	long questionIndex;
+	MongoEngine engine = new MongoEngine();
+	Question queriedQuestion = null;
+
 	if( request.getParameter( "qid" ) != null )
 	{
-		questionIndex = Long.valueOf( request.getParameter( "qid" ).toString() );
+		queriedQuestion = engine.findQuestions( "_id", request.getParameter( "qid" ) ).get( 0 );
 	}
-	else
-	{
-		questionIndex = 1;
-	}
-	
-	Engine engine = new Engine();
-	Question queriedQuestion = engine.getQuestionFromId( questionIndex );
+
 %>
 <!DOCTYPE html>
 <html>
@@ -110,14 +107,13 @@
 <%
 if( queriedQuestion != null)
 {
-	Veteran veteranFromQuestion = engine.getVeteran( 38 );
-	User associatedUser = engine.getUserFromId( 38 );
+	User veteranFromQuestion = queriedQuestion.getVeteran();
 %>
 <section id="right_question_section">
-<img src="Images/<%=associatedUser.getProfileSrc()%>"/>
-<p><%=associatedUser.getFirstName() + " " + associatedUser.getLastName()%></p>
+<img src="Images/<%=veteranFromQuestion.getProfileSrc()%>"/>
+<p><%=veteranFromQuestion.getFirstName() + " " + veteranFromQuestion.getLastName()%></p>
 <h1>Aspiration</h1>
-<p style="margin-top:5px; padding-top:0px;"><%=veteranFromQuestion.getGoal()%></p>
+<p style="margin-top:5px; padding-top:0px;"><%=veteranFromQuestion.getVeteran().getGoal()%></p>
 </section>
 <section id="left_question_section">
 <h3>Help Needed</h3>
@@ -125,19 +121,13 @@ if( queriedQuestion != null)
 <h3>Availability</h3>
 <p class="under_header"><%=queriedQuestion.getAvailability()%></p>
 <p id="question_description"><%=queriedQuestion.getDetailedDescription()%></p>
-<div id="meeting_request_button" style="border-radius:25px;background-image:url('Images/SoldierUpBackgroundButton.png');font-family:steamer; color:#FFF; text-align:center; vertical-align:middle; font-size:2.5em;padding:25px;">SoldierUp For <%=associatedUser.getFirstName()%></div>
+<div id="meeting_request_button" style="border-radius:25px;background-image:url('Images/SoldierUpBackgroundButton.png');font-family:steamer; color:#FFF; text-align:center; vertical-align:middle; font-size:2.5em;padding:25px;">SoldierUp For <%=veteranFromQuestion.getFirstName()%></div>
 </section>
-<%
-}
-else
-{
-	out.println("<p>Question does not exist</p>");
-}
-%>
 </section>
 <script>
 
-var currentQuestionId = <%=questionIndex+";"%>
+var currentQuestionId = <%="\""+queriedQuestion.getID().toString()+"\";"%>
+var askingVeteranId = <%="\""+veteranFromQuestion.getObject_id().toString()+"\";"%>
 $( "#meeting_request_button" ).click(function(){
 	var lightBox = new LightBox();
 
@@ -169,6 +159,11 @@ $( "#meeting_request_button" ).click(function(){
 		 		"type" : "hidden",
 		 		"name" : "qid",
 		 		"value"  : currentQuestionId
+		 	},
+		 	{
+		 		"type" : "hidden",
+		 		"name" : "aid",
+		 		"value"  : askingVeteranId
 		 	},
 		 	{
 		 		"type"  : "hidden",
@@ -250,5 +245,12 @@ $( "#meeting_request_button" ).click(function(){
 	
 });
 </script>
+<%
+}
+else
+{
+	out.println("<p>Question does not exist</p>");
+}
+%>
 </body>
 </html>

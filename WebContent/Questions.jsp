@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import ="java.util.ArrayList" %>
 <%@ page import ="java.util.Iterator" %>
+<%@ page import ="java.util.List" %>
 <%@ page import ="org.soldieringup.Business" %>
-<%@ page import ="org.soldieringup.Engine" %>
+<%@ page import ="org.soldieringup.MongoEngine" %>
 <%@ page import ="org.soldieringup.MeetingRequest" %>
 <%@ page import ="org.soldieringup.Question" %>
 <%@ page import ="org.soldieringup.User" %>
@@ -18,11 +18,9 @@
 	%><jsp:forward page="/login.jsp"/><% 
 	}
 
-	Engine engine = new Engine();
-	long uid = Long.valueOf( session.getAttribute( "uid" ).toString() );
-	User currentUser = engine.getUserFromId( uid );
-	Veteran currentVeteran = engine.getVeteran( uid );
-	ArrayList<Question> questionsAsked = engine.getQuestionsFromVeteran( currentUser.getAid() ); 
+	MongoEngine engine = new MongoEngine();
+	User currentUser = engine.findUsers( "_id", session.getAttribute( "uid" ) ).get( 0 );
+	List<Question> questionsAsked = engine.findQuestions( "veteran", currentUser ); 
 	Iterator<Question> questionsIterator = questionsAsked.iterator();
 %>
 <!DOCTYPE html>
@@ -38,7 +36,7 @@
 .veteran_question_div
 {
 	border-color:#eeeeee;
-	border-style:solid;;
+	border-style:solid;
 	border-width:1px 0px 0px 0px;
 	padding-top: 10px;
 }
@@ -57,20 +55,21 @@
 .meeting_requests
 {
 	display:inline-block;
-	float:right;
 	margin-top:0px;
-	position: relative;
+	position: absolute;
+	margin-left:670px;
 	list-style:none;
 	padding-left:0px;
 }
 
 .meeting_requests ul
 {
-	list-style-type:none;
-	position:absolute;
-	left:-5000px;
 	width:300px;
 	height:300px;
+	list-style-type:none;
+	position:absolute;
+	left: -5000px;
+	top: 0px;
 	overflow:auto;
 	background-color:#ffffff;
 	z-index: 99;
@@ -106,7 +105,7 @@
 <% while( questionsIterator.hasNext() )
 { 
 	Question currentQuestion = questionsIterator.next();
-	ArrayList<MeetingRequest> meetingRequests = engine.getMeetingRequestsForQuestion( currentQuestion.getQid() );
+	List<MeetingRequest> meetingRequests = engine.findMeetingRequest( "question", currentQuestion );
 %>
 	<div class="veteran_question_div">
 	<div><span><%=currentQuestion.getQuestionTitle()%></span>
@@ -119,16 +118,9 @@
 				while( meetingRequestsIt.hasNext() )
 				{
 					MeetingRequest currentMeetingRequest = meetingRequestsIt.next();
-					Business businessFromRequest = engine.getBusiness( currentMeetingRequest.getBid() );
-					%><li>
-						<h2><a href="business.jsp?aid=<%=businessFromRequest.getAid() %>"><%=businessFromRequest.getName()%></a></h2>
-						<p>Day: <%=currentMeetingRequest.getDay()%></p>
-						<p>Time: <%=currentMeetingRequest.getTime()%></p>
-						<p>Location: <%=currentMeetingRequest.getLocation()%></p>
-						<p><input type="submit" value="Accept"/><input type="submit" value="Decline"/></p>
-					</li><%
-					%><li>
-						<h2><%=businessFromRequest.getName()%></h2>
+					Business businessFromRequest = (Business) engine.findAccounts( "_id", currentMeetingRequest.getBusiness() ).get( 0 );
+						%><li>
+						<h2><a href="Account?aid=<%=businessFromRequest.getObject_id().toString() %>"><%=businessFromRequest.getName()%></a></h2>
 						<p>Day: <%=currentMeetingRequest.getDay()%></p>
 						<p>Time: <%=currentMeetingRequest.getTime()%></p>
 						<p>Location: <%=currentMeetingRequest.getLocation()%></p>
@@ -142,11 +134,11 @@
 		<%}%>
 	</div>
 	<p class ="question_links">
-	<a href="question.jsp?qid=<%=currentQuestion.getQid()%>">View</a>|
-	<a href="VeteranQuestionForm.jsp?qid=<%=currentQuestion.getQid()%>">Edit</a>|
-	<a href="UpdateVeteranQuestion?command=delete&qid=<%=currentQuestion.getQid()%>">Delete</a></p>
+	<a href="question.jsp?qid=<%=currentQuestion.getID().toString()%>">View</a>|
+	<a href="VeteranQuestionForm.jsp?qid=<%=currentQuestion.getID().toString()%>">Edit</a>|
+	<a href="UpdateVeteranQuestion?command=delete&qid=<%=currentQuestion.getID().toString()%>">Delete</a></p>
 	</div>
-<%} %>
+	<%} %>
 </section>
 </body>
 </html>
