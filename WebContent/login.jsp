@@ -11,6 +11,7 @@
 	margin: 16px;
 }
 </style>
+<link rel="stylesheet" type="text/css" href="./Styles/styles.css" media="screen">
 </head>
 <body onload='document.f.j_username.focus();'>
 	<h3>Login with Username and Password (Custom Page)</h3>

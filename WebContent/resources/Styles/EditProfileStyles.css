@@ -1,0 +1,110 @@
+@CHARSET "ISO-8859-1";
+
+#edit_profile_section .edit_profile_sub_section_left_side,
+#edit_profile_section .edit_profile_sub_section_right_side
+{
+	display:inline-block;
+	vertical-align: top;
+}
+
+.edit_profile_sub_section
+{
+	margin-top:20px;
+	clear:both;
+}
+
+#edit_profile_section .edit_profile_sub_section_left_side
+{
+	width:200px;
+}
+
+#edit_profile_section .edit_profile_sub_section_right_side
+{
+	margin-left:10px;
+}
+
+#password_change_form label, 
+#password_change_form input[type="password"]
+{
+	width:25%;
+	display:inline-block;
+}
+
+.no_top_margin
+{
+	margin-top:0px;	
+}
+
+.no_bottom_margin
+{
+	margin-bottom:0px;	
+}
+
+#edit_profile_section h3:first-child
+{
+	margin-top:0px;
+}
+
+p>textarea
+{
+	margin-top:0px;
+}
+
+/* Cover image upload elements */
+#cover_banner
+{
+	border:#000 solid 1px;
+	height:300px;
+	position:relative;
+	overflow:hidden;
+}
+
+#upload_cover_photo_input
+{
+	visibility:hidden;
+}
+
+#upload_coordinates
+{
+	background:#eeeeee;
+	position:absolute;
+	left:10px;
+	bottom:10px;
+}
+
+#upload_cover_photo_button
+{
+	position:absolute; 
+	right:10px; 
+	bottom:10px;
+}
+
+/* Styles for tag elements */
+.account_tag
+{
+	position:relative;
+}
+
+.account_tag p
+{
+	overflow:hidden;
+	position:relative;
+	border-radius:20px;
+	border:#000 solid 1px;
+	padding:3px 0px 3px 10px;
+	margin-right:30px;
+}
+
+.account_tag_hours_section
+{
+	padding:3px 10px 3px 5px;
+	position:absolute;
+	right:0px;
+	top:0px;
+	display:inline-block;
+	float:right;color:#ffffff;
+	background-color:#000000;
+	border-bottom-right-radius:20px;
+	border-top-right-radius:20px;
+}
+
