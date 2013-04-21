@@ -1,42 +1,32 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="org.soldieringup.Engine" %>
+<%@ page import="org.bson.types.ObjectId" %>
+<%@ page import="org.soldieringup.MongoEngine" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.Question" %>
 <%@ page import="java.lang.NumberFormatException" %>
 <%@ page import="java.util.*;" %>
 <%
-	session.setAttribute( "uid", 38 );
-	session.setAttribute( "aid", 9 );
-	session.setAttribute( "editing_account_type" , "veteran" );
-
 	if( session.getAttribute( "editing_account_type" ) == null ||
 	session.getAttribute( "editing_account_type" ) != "veteran" )
 	{
 		%><jsp:forward page="/login.jsp"/><% 
 	}
 	
-	long vid = Long.valueOf( session.getAttribute( "aid" ).toString() );
-	Engine engine = new Engine();
+	MongoEngine engine = new MongoEngine();
 	Question questionToModify = null;
 	Iterator<Tag> questionTags = null;
 	
 	boolean isUpdatingQuestion = false;
 	
-	if( request.getParameter( "qid" ) != null )
+	if( request.getParameter( "qid" ) != null && ObjectId.isValid( request.getParameter( "qid" ) ) )
 	{
-		try
+		questionToModify = engine.findQuestions( "_id", new ObjectId( request.getParameter( "qid" ) )  ).get( 0 );
+		isUpdatingQuestion = questionToModify.getVeteran().getObject_id().equals( session.getAttribute( "uid" ) );
+		if( isUpdatingQuestion )
 		{
-			questionToModify = engine.getQuestionFromId( Long.valueOf( request.getParameter( "qid" ).toString() ) );
-			isUpdatingQuestion = questionToModify.getVid() == vid;
-			if( isUpdatingQuestion )
-			{
-				ArrayList<Tag> questionTagsList = engine.getTagsFromQuestion( questionToModify.getQid() );
-				questionTags = questionTagsList.iterator();
-			}
-		}
-		catch( NumberFormatException e )
-		{
+			List<Tag> questionTagsList = questionToModify.getTags();
+			questionTags = questionTagsList.iterator();
 		}
 	}
 	
