@@ -54,5 +54,18 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-tx-3.1.4.RELEASE.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javacsv.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/gson-2.2.3.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-annotations-2.1.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-core-2.1.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-databind-2.1.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/org.springframework.web.servlet-3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-security-config-3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-security-core-3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-security-taglibs-3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-security-web-3.1.1.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-social-core-1.0.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-social-web-1.0.2.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-web-3.1.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/spring-webmvc-3.1.4.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
