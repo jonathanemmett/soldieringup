@@ -20,7 +20,7 @@ public class Veteran
 	private GregorianCalendar start;
 	private GregorianCalendar end;
 	@Indexed
-	private DEVISION devision;
+	private DIVISION devision;
 
 	/**
 	 * Gets the MySQL id for this veteran
@@ -95,7 +95,7 @@ public class Veteran
 	/**
 	 * @return the devision
 	 */
-	public DEVISION getDevision ()
+	public DIVISION getDevision ()
 	{
 		return devision;
 	}
@@ -103,7 +103,7 @@ public class Veteran
 	/**
 	 * @param devision the devision to set
 	 */
-	public void setDevision (DEVISION devision)
+	public void setDevision (DIVISION devision)
 	{
 		this.devision = devision;
 	}

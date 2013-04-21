@@ -52,7 +52,7 @@ public class MangodbTests
 		user.setLastName ("Doe");
 		user.setZip ("65301");
 		Veteran vet = new Veteran ();
-		vet.setDevision (DEVISION.AIRFORCE);
+		vet.setDevision (DIVISION.AIRFORCE);
 		user.setVeteran (vet);
 		War war = new War ();
 		war.setName ("Iraq");
@@ -66,7 +66,7 @@ public class MangodbTests
 		System.out.println ("Total Matches:" + results.size ());
 		System.out.println (results);
 		assertTrue (result.getZip ().equals (user.getZip ()));
-		assertTrue (result.getVeteran ().getDevision ().equals (DEVISION.AIRFORCE));
+		assertTrue (result.getVeteran ().getDevision ().equals (DIVISION.AIRFORCE));
 		System.out.println ("Vet fought in which war?=" + result.getWar ().getName ());
 	}
 
