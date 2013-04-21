@@ -4,14 +4,15 @@ import org.soldieringup.Business;
 import org.soldieringup.DIVISION;
 import org.soldieringup.User;
 import org.soldieringup.Veteran;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+@Controller
 public class JSONController extends BaseProtJSONController {
 	// Example:
-	//http://localhost:8080/soldieringup/rest/account/jared
+	//http://localhost:8080/soldieringup/rest/prot/accounts?email=jjennings
 
 	@RequestMapping(value="accounts", method = RequestMethod.GET)
 	public @ResponseBody String getShopInJSON(@RequestParam String email) {

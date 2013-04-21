@@ -7,9 +7,5 @@
 				
  	<import resource="./ApplicationContext-mongo.xml"/>
  	<import resource="./ApplicationContext-security.xml"/>
- 	
-	<context:component-scan base-package="org.soldieringup">
-		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
-	</context:component-scan>
      
 </beans>

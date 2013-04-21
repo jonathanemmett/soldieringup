@@ -5,7 +5,6 @@ package org.soldieringup.controllers;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author jjennings
  * @created April 20, 2013
  */
-@Controller
 @RequestMapping("/rest/prot")
 public abstract class BaseProtJSONController extends BaseJSONController
 {

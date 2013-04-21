@@ -3,7 +3,6 @@
  */
 package org.soldieringup.controllers;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author jjennings
  *
  */
-@Controller
 @RequestMapping("/rest/pub")
 public abstract class BasePubJSONController extends BaseJSONController
 {
