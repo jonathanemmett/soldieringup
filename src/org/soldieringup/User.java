@@ -1,7 +1,5 @@
 package org.soldieringup;
 
-import java.util.List;
-
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 /**
@@ -13,12 +11,12 @@ public class User extends SoldierUpAccount
 {
 	private String first_name;
 	private String last_name;
+	private long salt;
+	private String password;
 	private Business business;
 	private Veteran veteran;
 	@DBRef
 	private War war;
-	@DBRef
-	private List<Tag> tag;
 
 	public String getFirstName()
 	{
@@ -38,6 +36,42 @@ public class User extends SoldierUpAccount
 	public void setLastName( String last_name )
 	{
 		this.last_name = last_name;
+	}
+
+	/**
+	 * Gets the salt for the account password
+	 * @return The salt for the account password
+	 */
+	public long getSalt()
+	{
+		return this.salt;
+	}
+
+	/**
+	 * Gets the password for the account
+	 * @return The password for the account
+	 */
+	public String getPassword()
+	{
+		return this.password;
+	}
+
+	/**
+	 * Sets the salt for the account password
+	 * @param salt The salt for the account password
+	 */
+	public void setSalt( long salt )
+	{
+		this.salt = salt;
+	}
+
+	/**
+	 * Sets the password for the account
+	 * @param The password for the account
+	 */
+	public void setPassword( String password )
+	{
+		this.password = password;
 	}
 
 	/**
@@ -78,22 +112,6 @@ public class User extends SoldierUpAccount
 	public void setWar (War war)
 	{
 		this.war = war;
-	}
-
-	/**
-	 * @return the tag
-	 */
-	public List<Tag> getTag ()
-	{
-		return tag;
-	}
-
-	/**
-	 * @param tag the tag to set
-	 */
-	public void setTag (List<Tag> tag)
-	{
-		this.tag = tag;
 	}
 
 	/**

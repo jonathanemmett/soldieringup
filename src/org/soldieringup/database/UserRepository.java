@@ -3,6 +3,7 @@ package org.soldieringup.database;
 import java.util.List;
 
 import org.soldieringup.User;
+import org.soldieringup.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -19,6 +20,11 @@ public class UserRepository
 	public void insert (User user)
 	{
 		op.insert (user);
+	}
+
+	public void update (User user)
+	{
+		op.save (user);
 	}
 
 	/**
@@ -63,16 +69,33 @@ public class UserRepository
 	 */
 	public User validateUser( String aEmail, String aPassword ) throws Exception
 	{
-		//TODO: need to implement SHA1( CONCAT( salt, ? ) )
-		List<User> matches = op.find (new Query(Criteria.where("email").is(aEmail)),User.class);
+		List<User> matches = op.find ( new Query( Criteria.where("email").is( aEmail ) ), User.class );
 		User user = null;
-		if (matches != null) {
+		if (matches != null)
+		{
 			if (matches.size () > 1)
+			{
 				throw new Exception ("Too many users found in repository");
-			if (matches.size () == 1)
+			}
+			else if (matches.size () == 1 && passwordIsAccountPassword( aPassword, matches.get(0) ) )
+			{
 				user = matches.get (0);
+			}
 		}
 		return user;
+	}
+
+	/**
+	 * Checks to see if a given password is equal to the password of a given account
+	 * @param aPassword Password to check
+	 * @param aAccount Account to check the given password for
+	 * @return True if the given password is the same as the given account, false otherwise
+	 */
+	private boolean passwordIsAccountPassword( String aPassword, User aAccount )
+	{
+		String saltedAccountPassword = aAccount.getPassword();
+		String saltedInputedPassword = Utilities.sha1Output( aAccount.getSalt() + aPassword );
+		return saltedAccountPassword.equals( saltedInputedPassword );
 	}
 
 	/**

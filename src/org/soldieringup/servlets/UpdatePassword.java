@@ -3,7 +3,6 @@ package org.soldieringup.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.servlet.ServletException;
@@ -12,7 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soldieringup.Engine;
+import org.bson.types.ObjectId;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.User;
+import org.soldieringup.Utilities;
 import org.soldieringup.utils.PasswordValidator;
 
 /**
@@ -50,8 +52,8 @@ public class UpdatePassword extends HttpServlet {
 		String confirmPassword = request.getParameter( "confirm_password" );
 		if( password != null && confirmPassword != null && request.getSession().getAttribute( "uid" ) != null )
 		{
-			Engine engine = new Engine();
-			out.println( "Comparing: " + password + " " + confirmPassword );
+			ObjectId uid = (ObjectId) request.getSession().getAttribute( "uid" );
+			MongoEngine engine = new MongoEngine();
 			boolean passwordIsValid = password.equals( confirmPassword );
 
 			if( !passwordIsValid )
@@ -65,7 +67,6 @@ public class UpdatePassword extends HttpServlet {
 			validator.setMixedCaseAlphabetRequired( true );
 			validator.setNumberOfRequiredAlphabeticalCharacters( 8 );
 			validator.setNumberOfRequiredDigits( 3 );
-			out.println( "The password is " + password );
 			if( !validator.validatePassword( password ) )
 			{
 				ArrayList<String> validationErrors = validator.getValidationErrors();
@@ -78,10 +79,9 @@ public class UpdatePassword extends HttpServlet {
 			}
 			else
 			{
-				HashMap<String,Object> passwordParameter = new HashMap<String,Object>();
-				long uid = Long.valueOf( request.getSession().getAttribute( "uid" ).toString() );
-				passwordParameter.put( "password", password );
-				engine.updateUser( uid, passwordParameter );
+				User currentUser = engine.findUsers( "_id", uid ).get( 0 );
+				currentUser.setPassword( Utilities.sha1Output( currentUser.getSalt() + password ) );
+				engine.updateUser( currentUser );
 				out.println( "Password Successfully Updated" );
 			}
 		}
