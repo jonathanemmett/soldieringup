@@ -14,8 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.soldieringup.Engine;
-import org.soldieringup.database.MySQL;
+import org.soldieringup.MongoEngine;
+import org.soldieringup.SoldierUpAccount;
+import org.soldieringup.User;
 
 /**
  * Servlet implementation class ResizePhoto
@@ -56,34 +57,30 @@ public class ResizePhoto extends HttpServlet {
 	{
 		HttpSession currentSession = request.getSession();
 
-		// We are currently either processing a veteran or a business. In the future,
-		// this should be populated with a factory method in the Utilities section
-		long oid = Long.valueOf( currentSession.getAttribute( "aid" ).toString() );
-
-		Engine engine = new Engine();
+		MongoEngine engine = new MongoEngine();
+		SoldierUpAccount account = getLoggedInAccount( currentSession );
 
 		if( request.getParameter( "cover_photo_y" ) != null )
 		{
 			int coverPhotoYPosition = Integer.parseInt( request.getParameter( "cover_photo_y" ) );
 			if( coverPhotoYPosition <= 0 )
 			{
-				try
-				{
-					readjustCoverPhoto(
-							request.getSession().getAttribute( "temp_cover_src").toString(),
-							coverPhotoYPosition );
 
-					// Once the cover photo is repositioned, set the cover photo src for the current account.
-					MySQL.getInstance().setAccountPhoto(
-							oid,
-							MySQL.TEMP_UPLOAD_IMAGE_COVER,
-							request.getSession().getAttribute( "editing_account_type" ).toString(),
-							request.getSession().getAttribute( "temp_cover_src").toString() );
-				}
-				catch (SQLException e)
+				readjustCoverPhoto(
+						request.getSession().getAttribute( "temp_cover_src").toString(),
+						coverPhotoYPosition );
+
+				// Once the cover photo is repositioned, set the cover photo src for the current account.
+				account.setCoverSrc( request.getSession().getAttribute( "temp_cover_src" ).toString() );
+				if( currentSession.getAttribute( "editing_account_type" ).equals( "veteran" ) )
 				{
-					e.printStackTrace();
+					engine.updateUser( (User)account );
 				}
+				else
+				{
+					engine.updateAccount( account );
+				}
+
 			}
 		}
 		if( request.getParameter( "upload_profile_pic_x" ) != null && request.getParameter( "upload_profile_pic_y" ) != null &&
@@ -102,12 +99,16 @@ public class ResizePhoto extends HttpServlet {
 					profilePhotoHeight );
 
 			// Once we've adjusted the profile photo, set the profile photo src for the current account.
-			engine.setAccountPhoto(
-					oid,
-					MySQL.TEMP_UPLOAD_IMAGE_PROFILE,
-					request.getSession().getAttribute( "editing_account_type" ).toString(),
-					request.getSession().getAttribute( "temp_profile_src").toString() );
+			account.setProfileSrc( request.getSession().getAttribute( "temp_profile_src").toString() );
 
+			if( currentSession.getAttribute( "editing_account_type" ).equals( "veteran" ) )
+			{
+				engine.updateUser( (User)account );
+			}
+			else
+			{
+				engine.updateAccount( account );
+			}
 		}
 	}
 
@@ -119,7 +120,7 @@ public class ResizePhoto extends HttpServlet {
 	 * @param aPhotoYPosition Y position of the cover Photo
 	 * @throws SQLException
 	 */
-	protected void readjustCoverPhoto( String aPhotoSrc, int aPhotoYPosition ) throws SQLException
+	protected void readjustCoverPhoto( String aPhotoSrc, int aPhotoYPosition )
 	{
 		try
 		{
@@ -200,6 +201,24 @@ public class ResizePhoto extends HttpServlet {
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Gets the account ID associated with the account being edited
+	 * for a given session
+	 * @return The AID of the account for the given section
+	 */
+	public SoldierUpAccount getLoggedInAccount( HttpSession aSession )
+	{
+		MongoEngine engine = new MongoEngine();
+		if( aSession.getAttribute( "editing_account_type" ).equals( "veteran" ) )
+		{
+			return engine.findUsers( "id", aSession.getAttribute( "uid" ) ).get( 0 );
+		}
+		else
+		{
+			return engine.findAccounts( "id", aSession.getAttribute( "aid" ) ).get( 0 );
 		}
 	}
 }
