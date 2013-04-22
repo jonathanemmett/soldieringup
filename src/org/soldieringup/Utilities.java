@@ -178,4 +178,20 @@ public class Utilities {
 
 		return new String( password );
 	}
+
+	/**
+	 * If a value is null or has a length of zero, returns true.
+	 * Otherwise returns false.
+	 * 
+	 * @param obj
+	 * @return boolean
+	 */
+	public static boolean isNullOrEmpty (Object obj)
+	{
+		if (obj == null)
+			return true;
+		if (((String)obj).length () == 0)
+			return true;
+		return false;
+	}
 }
