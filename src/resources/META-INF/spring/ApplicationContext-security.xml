@@ -18,7 +18,7 @@
 		<intercept-url pattern="/welcome*" access="hasRole('ROLE_USER')" />
 		<intercept-url pattern="/rest/prot/*" access="hasRole('ROLE_USER')" />
 		<intercept-url pattern="/prot/*" access="hasRole('ROLE_USER')" />
-		<form-login login-page="/login.jsp" default-target-url="/welcome"
+		<form-login login-page="/login.jsp" default-target-url="/Welcome"
 			authentication-failure-url="/loginfailed" />
 		<logout logout-success-url="/logout" />
 	</http>
