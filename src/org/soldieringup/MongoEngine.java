@@ -8,29 +8,22 @@ import org.soldieringup.database.SoldierUpAccountRepository;
 import org.soldieringup.database.TagRepository;
 import org.soldieringup.database.UserRepository;
 import org.soldieringup.database.ZipRepository;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MongoEngine
 {
-	ConfigurableApplicationContext context;
-	UserRepository userRepository;
+	@Autowired
 	SoldierUpAccountRepository accountRepository;
+	@Autowired
 	ZipRepository zipRepository;
+	@Autowired
 	TagRepository tagRepository;
+	@Autowired
 	QuestionRepository questionRepository;
+	@Autowired
 	MeetingRequestRepository meetingRepository;
-
-	public MongoEngine()
-	{
-		context = new ClassPathXmlApplicationContext("org/soldieringup/mongo-config.xml");
-		userRepository = context.getBean(UserRepository.class);
-		accountRepository = context.getBean(SoldierUpAccountRepository.class);
-		zipRepository = context.getBean(ZipRepository.class);
-		tagRepository = context.getBean(TagRepository.class);
-		questionRepository = context.getBean(QuestionRepository.class);
-		meetingRepository = context.getBean(MeetingRequestRepository.class);
-	}
+	@Autowired
+	private UserRepository	userRepository;
 
 	public void insertUser( User aUser )
 	{
