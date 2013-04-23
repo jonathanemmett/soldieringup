@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class LoginController {
 
-	@RequestMapping(value="/welcome", method = RequestMethod.GET)
+	@RequestMapping(value="/mockup", method = RequestMethod.GET)
 	public String printWelcome(ModelMap model, Principal principal ) {
 
 		String name = principal.getName();
