@@ -1,29 +1,48 @@
-package org.soldieringup;
+package org.soldieringup.service;
 
 import java.util.List;
 
+import org.soldieringup.Business;
+import org.soldieringup.MeetingRequest;
+import org.soldieringup.Question;
+import org.soldieringup.Role;
+import org.soldieringup.SoldierUpAccount;
+import org.soldieringup.Tag;
+import org.soldieringup.User;
+import org.soldieringup.ZIP;
 import org.soldieringup.database.MeetingRequestRepository;
 import org.soldieringup.database.QuestionRepository;
+import org.soldieringup.database.RoleRepository;
 import org.soldieringup.database.SoldierUpAccountRepository;
 import org.soldieringup.database.TagRepository;
 import org.soldieringup.database.UserRepository;
 import org.soldieringup.database.ZipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MongoEngine
 {
 	@Autowired
-	SoldierUpAccountRepository accountRepository;
+	private SoldierUpAccountRepository accountRepository;
 	@Autowired
-	ZipRepository zipRepository;
+	private ZipRepository zipRepository;
 	@Autowired
-	TagRepository tagRepository;
+	private TagRepository tagRepository;
 	@Autowired
-	QuestionRepository questionRepository;
+	private QuestionRepository questionRepository;
 	@Autowired
-	MeetingRequestRepository meetingRepository;
+	private MeetingRequestRepository meetingRepository;
 	@Autowired
 	private UserRepository	userRepository;
+	@Autowired
+	private RoleRepository roleRepository;
+
+	public User getByEmailAndPassword (String email, String password)
+	{
+		return userRepository.findByEmailAndPassword (email, password);
+	}
 
 	public void insertUser( User aUser )
 	{
@@ -68,24 +87,6 @@ public class MongoEngine
 	public boolean emailExists (String email_address)
 	{
 		return userRepository.emailExists( email_address );
-	}
-
-	/**
-	 * Gets an account from a given login
-	 * @param aEmail Email of the account
-	 * @param aPassword Password of the account
-	 * @return User account associated with the login if valid
-	 */
-	public User getAccountFromLogin( String aEmail, String aPassword )
-	{
-		try
-		{
-			return userRepository.validateUser( aEmail, aPassword );
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
 	}
 
 	/**
@@ -192,5 +193,21 @@ public class MongoEngine
 	public List<MeetingRequest> findMeetingRequest( String aFieldName, Object aFieldValue )
 	{
 		return meetingRepository.find( aFieldName, aFieldValue );
+	}
+
+	/**
+	 * Returns full details about the Authenticated user
+	 * @param userDetails
+	 * @return User
+	 */
+	public User getUser (UserDetails userDetails)
+	{
+		User user = userRepository.getAuthenticatedUser (userDetails);
+		return user;
+	}
+
+	public Role getRole (String role)
+	{
+		return roleRepository.findOne (role);
 	}
 }

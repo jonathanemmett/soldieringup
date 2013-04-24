@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.bson.types.ObjectId" %>    
-<%@ page import="org.soldieringup.MongoEngine" %>
+<%@ page import="org.soldieringup.service.MongoEngine" %>
 <%@ page import="org.soldieringup.Question" %>
 <%@ page import="org.soldieringup.User" %>
 <%@ page import="org.soldieringup.Veteran" %>
@@ -117,10 +117,10 @@ if( queriedQuestion != null)
 </section>
 <section id="left_question_section">
 <h3>Help Needed</h3>
-<p class="under_header"><%=queriedQuestion.getQuestionTitle()%></p>
+<p class="under_header"><%=queriedQuestion.getTitle()%></p>
 <h3>Availability</h3>
 <p class="under_header"><%=queriedQuestion.getAvailability()%></p>
-<p id="question_description"><%=queriedQuestion.getDetailedDescription()%></p>
+<p id="question_description"><%=queriedQuestion.getDescription()%></p>
 <div id="meeting_request_button" style="border-radius:25px;background-image:url('Images/SoldierUpBackgroundButton.png');font-family:steamer; color:#FFF; text-align:center; vertical-align:middle; font-size:2.5em;padding:25px;">SoldierUp For <%=veteranFromQuestion.getFirstName()%></div>
 </section>
 </section>

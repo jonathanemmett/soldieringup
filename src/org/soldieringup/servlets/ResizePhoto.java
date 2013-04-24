@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.soldieringup.MongoEngine;
 import org.soldieringup.SoldierUpAccount;
 import org.soldieringup.User;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Servlet implementation class ResizePhoto

@@ -11,8 +11,8 @@ import javax.servlet.http.HttpSession;
 
 import org.bson.types.ObjectId;
 import org.soldieringup.Business;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.User;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Servlet implementation class UpdateBusiness

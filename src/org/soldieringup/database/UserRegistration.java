@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.soldieringup.EmailMessage;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.User;
 import org.soldieringup.Utilities;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Class that holds the methods for registering a general user account into the Database. The functions take in

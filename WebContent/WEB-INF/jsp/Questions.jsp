@@ -3,7 +3,7 @@
 <%@ page import ="java.util.Iterator" %>
 <%@ page import ="java.util.List" %>
 <%@ page import ="org.soldieringup.Business" %>
-<%@ page import ="org.soldieringup.MongoEngine" %>
+<%@ page import ="org.soldieringup.service.MongoEngine" %>
 <%@ page import ="org.soldieringup.MeetingRequest" %>
 <%@ page import ="org.soldieringup.Question" %>
 <%@ page import ="org.soldieringup.User" %>
@@ -108,7 +108,7 @@
 	List<MeetingRequest> meetingRequests = engine.findMeetingRequest( "question", currentQuestion );
 %>
 	<div class="veteran_question_div">
-	<div><span><%=currentQuestion.getQuestionTitle()%></span>
+	<div><span><%=currentQuestion.getTitle()%></span>
 		<% if( !meetingRequests.isEmpty() ){ %>
 			<ul class = "meeting_requests">
 				<li><a href="#" class="meeting_requests_header" style="float:right;">Meeting Requests (<%=meetingRequests.size() %>)

@@ -29,7 +29,7 @@ public class LocalAuthenticationProvider extends AbstractUserDetailsAuthenticati
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	UserService userService;
+	MongoEngine engine;
 
 	@Autowired
 	private transient PasswordEncoder encoder = null;
@@ -49,7 +49,7 @@ public class LocalAuthenticationProvider extends AbstractUserDetailsAuthenticati
 			throw new BadCredentialsException("Please enter password");
 		}
 
-		org.soldieringup.User user = userService.getByUsernameAndPassword(username, encoder.encodePassword(password, null));
+		org.soldieringup.User user = engine.getByEmailAndPassword(username, encoder.encodePassword(password, null));
 		if (user == null) {
 			logger.warn("Username {}, password {}: username and password not found", username, password);
 			throw new BadCredentialsException("Invalid Username/Password");

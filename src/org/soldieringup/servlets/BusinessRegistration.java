@@ -12,10 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.soldieringup.Business;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.User;
 import org.soldieringup.Utilities;
 import org.soldieringup.database.UserRegistration;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Business Registration servlet that tries to register a business given from

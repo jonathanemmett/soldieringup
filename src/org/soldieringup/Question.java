@@ -15,15 +15,13 @@ public class Question
 {
 	@Id
 	protected ObjectId id;
-	public long qid;
-	public String question_title;
+	public String title;
 	public String availability;
-	public String question_detailed_description;
+	public String description;
 	@DBRef
-	public User veteran;
+	public User user;
 	@DBRef
 	public List<Tag> tag;
-	public long mySqlVid;
 
 	/**
 	 * Constructor for question
@@ -34,20 +32,12 @@ public class Question
 	}
 
 	/**
-	 * Sets the MySQL id for the question
-	 * @param qid Question id
-	 */
-	public void setQid( long qid )
-	{
-		this.qid = qid;
-	}
-	/**
 	 * Sets the title of the question
 	 * @param aQuestionTitle The title to set the question to
 	 */
-	public void setQuestionTitle( String aQuestionTitle )
+	public void setTitle( String aQuestionTitle )
 	{
-		this.question_title = aQuestionTitle;
+		this.title = aQuestionTitle;
 	}
 
 	/**
@@ -60,21 +50,12 @@ public class Question
 	}
 
 	/**
-	 * Sets the id of the veteran that asked the question
-	 * @param aVid The id of the veteran
-	 */
-	public void setVid( long aVid )
-	{
-		this.mySqlVid = aVid;
-	}
-
-	/**
 	 * Sets the veteran that asked the question
 	 * @param aVeteran Veteran that asked the question
 	 */
-	public void setVeteran( User aVeteran )
+	public void setUser( User aUser )
 	{
-		this.veteran = aVeteran;
+		this.user = aUser;
 	}
 
 	/**
@@ -92,7 +73,7 @@ public class Question
 	 */
 	public void setDetailedDescription( String aDetailedDescription )
 	{
-		this.question_detailed_description = aDetailedDescription;
+		this.description = aDetailedDescription;
 	}
 
 	/**
@@ -105,21 +86,12 @@ public class Question
 	}
 
 	/**
-	 * Sets the MySQL id for the question
-	 * @param qid Question id
-	 */
-	public long getQid()
-	{
-		return this.qid;
-	}
-
-	/**
 	 * Gets the title of the question
 	 * @return The title of the question
 	 */
-	public String getQuestionTitle()
+	public String getTitle()
 	{
-		return question_title;
+		return title;
 	}
 
 	/**
@@ -132,21 +104,12 @@ public class Question
 	}
 
 	/**
-	 * Gets the id of the veteran that asked the question
-	 * @return The id of the veteran that asked the question
-	 */
-	public long getVid()
-	{
-		return mySqlVid;
-	}
-
-	/**
 	 * Gets the veteran that asked the question
 	 * @return Veteran that asked the question
 	 */
 	public User getVeteran()
 	{
-		return veteran;
+		return user;
 	}
 
 	/**
@@ -162,8 +125,8 @@ public class Question
 	 * Gets the detailed description of the question
 	 * @return The detailed description of the question
 	 */
-	public String getDetailedDescription()
+	public String getDescription()
 	{
-		return question_detailed_description;
+		return description;
 	}
 }

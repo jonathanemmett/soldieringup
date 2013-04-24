@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.soldieringup.MeetingRequest;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.Question;
 import org.soldieringup.User;
+import org.soldieringup.service.MongoEngine;
 
 /**
  *	This servlet is used to process the meeting requests that veterans and businesses will have

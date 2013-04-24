@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
 <%@ page import="org.soldieringup.Business" %>
-<%@ page import="org.soldieringup.MongoEngine" %> 
+<%@ page import="org.soldieringup.service.MongoEngine" %> 
 <%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.ZIP" %>
 <%@ page import="java.util.List" %>

@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.soldieringup.service.UserService;
+import org.soldieringup.service.MongoEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -29,7 +29,7 @@ public class DataInitializer
 	private MongoTemplate		mongoTemplate;
 
 	@Autowired
-	private UserService		userService;
+	private MongoEngine		mongoEngine;
 
 	/**
 	 * Password is test
@@ -55,36 +55,36 @@ public class DataInitializer
 		user.setFirstName ("Bob");
 		user.setLastName ("Doe");
 		user.setPassword (demoPasswordEncoded);
-		user.addRole (userService.getRole ("ROLE_USER"));
+		user.addRole (mongoEngine.getRole ("ROLE_USER"));
 		user.setEmail ("bob@bob.com");
-		userService.create (user);
+		mongoEngine.insertUser (user);
 		// simulate account activation
 		user.setEnabled (true);
 		user.setStatus (UserAccountStatus.STATUS_APPROVED);
-		userService.save (user);
+		mongoEngine.updateUser (user);
 
 		user = new User ();
 		user.setFirstName ("Jim");
 		user.setLastName ("Doe");
 		user.setPassword (demoPasswordEncoded);
-		user.addRole (userService.getRole ("ROLE_ADMIN"));
+		user.addRole (mongoEngine.getRole ("ROLE_ADMIN"));
 		user.setEmail ("jim@jim.com");
-		userService.create (user);
+		mongoEngine.insertUser (user);
 		user.setEnabled (true);
 		user.setStatus (UserAccountStatus.STATUS_APPROVED);
-		userService.save (user);
+		mongoEngine.updateUser (user);
 
 		user = new User ();
 		user.setFirstName ("Ted");
 		user.setLastName ("Doe");
 		user.setPassword (demoPasswordEncoded);
-		user.addRole (userService.getRole ("ROLE_USER"));
-		user.addRole (userService.getRole ("ROLE_ADMIN"));
+		user.addRole (mongoEngine.getRole ("ROLE_USER"));
+		user.addRole (mongoEngine.getRole ("ROLE_ADMIN"));
 		user.setEmail ("ted@ted.com");
-		userService.create (user);
+		mongoEngine.insertUser (user);
 		user.setEnabled (true);
 		user.setStatus (UserAccountStatus.STATUS_APPROVED);
-		userService.save (user);
+		mongoEngine.updateUser (user);
 
 	}
 }

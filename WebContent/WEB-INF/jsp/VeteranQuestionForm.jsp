@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@ page import="org.bson.types.ObjectId" %>
-<%@ page import="org.soldieringup.MongoEngine" %>
+<%@ page import="org.soldieringup.service.MongoEngine" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.Question" %>
 <%@ page import="java.lang.NumberFormatException" %>
@@ -63,7 +63,7 @@
 <h1 style="border-bottom:#000 solid 1px; font-size: medium; margin-top: 0px;">Fill out the following fields</h1>
 <form method="post" action="UpdateVeteranQuestion">	
 <p>
-	<label>Title:</label><input type="text" maxlength="50"  name="question_title" value="<%=isUpdatingQuestion ? questionToModify.getQuestionTitle() : ""%>"/>
+	<label>Title:</label><input type="text" maxlength="50"  name="question_title" value="<%=isUpdatingQuestion ? questionToModify.getTitle() : ""%>"/>
 </p>
 <p>
 	<label>Availability:</label><input type="text" name="availability" value="<%=isUpdatingQuestion ? questionToModify.getAvailability() : ""%>"/>
@@ -74,7 +74,7 @@
 	<input type="text" name="tag" value="<%=isUpdatingQuestion && questionTags.hasNext() ? questionTags.next().get_name() : ""  %>" />
 </p>
 <p>
-	<label style="display:inline-block;display:inline-block;width:200px">Question:</label><textarea style="margin-left:0px;padding:0px;display:inline-block;" name="question_detailed_description" rows="30" cols="50"><%=isUpdatingQuestion ? questionToModify.getDetailedDescription() : ""%></textarea>
+	<label style="display:inline-block;display:inline-block;width:200px">Question:</label><textarea style="margin-left:0px;padding:0px;display:inline-block;" name="question_detailed_description" rows="30" cols="50"><%=isUpdatingQuestion ? questionToModify.getDescription() : ""%></textarea>
 </p>
 <p>
 	<input type="submit" style="margin-left:200px;"name="UpdateQuestion" value="<%=isUpdatingQuestion ? "Update" : "Insert"%>">

@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.bson.types.ObjectId;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.User;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Servlet implementation class UpdateUserProfile

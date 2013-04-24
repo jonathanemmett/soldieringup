@@ -2,7 +2,7 @@
     pageEncoding="US-ASCII"%>
 <%@ page import="java.util.*" %>
 <%@ page import="org.soldieringup.Business" %>
-<%@ page import="org.soldieringup.MongoEngine" %>
+<%@ page import="org.soldieringup.service.MongoEngine" %>
 <%@ page import="org.soldieringup.Photo" %>
 <%@ page import="org.soldieringup.Tag" %>
 <%@ page import="org.soldieringup.User" %>

@@ -1,18 +1,21 @@
 package org.soldieringup.controllers;
 
-import org.soldieringup.Business;
-import org.soldieringup.DIVISION;
 import org.soldieringup.User;
-import org.soldieringup.Veteran;
+import org.soldieringup.service.MongoEngine;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
-public class JSONController extends BaseProtJSONController {
+public class JSONAccounts extends BaseProtJSONController {
 	// Example:
 	//http://localhost:8080/soldieringup/rest/prot/accounts?email=jjennings
+
+	@Autowired
+	private MongoEngine mongoEngine;
 
 	@RequestMapping(value="accounts", method = RequestMethod.GET)
 	public @ResponseBody String getShopInJSON(@RequestParam String email) {
@@ -27,22 +30,8 @@ public class JSONController extends BaseProtJSONController {
 
 	private User getUser (String email)
 	{
-		User user = new User ();
-
-		user.setFirstName("Jared");
-		user.setLastName ("Jennings");
-		user.setEmail (email);
-		user.setAddress ("705 Sheridan ST");
-		user.setZip ("64075");
-		user.setPrimary_number ("816.678.4152");
-		Business bus = new Business ();
-		bus.setName ("My Business Name");
-		user.setBusiness (bus);
-
-		Veteran vet = new Veteran ();
-		vet.setDevision (DIVISION.AIRFORCE);
-		user.setVeteran (vet);
-
+		UserDetails userDetails = (UserDetails) getAuthenticatedUser ().getPrincipal ();
+		User user = mongoEngine.getUser (userDetails);
 		return user;
 	}
 }

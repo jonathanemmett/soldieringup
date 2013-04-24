@@ -2,18 +2,21 @@ package org.soldieringup.database;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.soldieringup.User;
-import org.soldieringup.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserRepository
 {
 	private static final String COLLECTION_NAME = "user";
+	private final Logger log = LoggerFactory.getLogger("repository");
 
 	@Autowired
 	MongoOperations op;
@@ -62,44 +65,6 @@ public class UserRepository
 	}
 
 	/**
-	 * Returns null if no match found.
-	 * @param aEmail
-	 * @param aPassword
-	 * @return User
-	 * @throws Exception if too many users found.
-	 */
-	public User validateUser( String aEmail, String aPassword ) throws Exception
-	{
-		List<User> matches = op.find ( new Query( Criteria.where("email").is( aEmail ) ), User.class );
-		User user = null;
-		if (matches != null)
-		{
-			if (matches.size () > 1)
-			{
-				throw new Exception ("Too many users found in repository");
-			}
-			else if (matches.size () == 1 && passwordIsAccountPassword( aPassword, matches.get(0) ) )
-			{
-				user = matches.get (0);
-			}
-		}
-		return user;
-	}
-
-	/**
-	 * Checks to see if a given password is equal to the password of a given account
-	 * @param aPassword Password to check
-	 * @param aAccount Account to check the given password for
-	 * @return True if the given password is the same as the given account, false otherwise
-	 */
-	private boolean passwordIsAccountPassword( String aPassword, User aAccount )
-	{
-		String saltedAccountPassword = aAccount.getPassword();
-		String saltedInputedPassword = Utilities.sha1Output( aAccount.getSalt() + aPassword );
-		return saltedAccountPassword.equals( saltedInputedPassword );
-	}
-
-	/**
 	 * Checks for an existing e-mail address
 	 * @param email_address
 	 * @return
@@ -116,10 +81,18 @@ public class UserRepository
 		op.save (user);
 	}
 
-	public List<User> findByEmailAndPassword (String aEmail, String password)
+	/**
+	 * This will be the hashed password value (not the raw password value)
+	 * 
+	 * @param aEmail
+	 * @param password
+	 * @return List<User>
+	 */
+	public User findByEmailAndPassword (String aEmail, String password)
 	{
-		List<User> matches = op.find (new Query(Criteria.where("email").is(aEmail)),User.class);
-		return matches;
+		Query query = new Query(Criteria.where("email").is(aEmail));
+		query.addCriteria (Criteria.where ("password").is (password));
+		return op.findOne (query,User.class);
 	}
 
 	public void delete (User user)
@@ -139,4 +112,10 @@ public class UserRepository
 		}
 	}
 
+	public User getAuthenticatedUser (UserDetails userDetails)
+	{
+		User user = null;
+		user = op.findOne (new Query(Criteria.where("email").is(userDetails.getUsername ())), User.class);
+		return user;
+	}
 }

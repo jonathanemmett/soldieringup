@@ -14,10 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.bson.types.ObjectId;
-import org.soldieringup.MongoEngine;
 import org.soldieringup.Question;
 import org.soldieringup.Tag;
 import org.soldieringup.User;
+import org.soldieringup.service.MongoEngine;
 
 /**
  * Servlet implementation class UpdateVeteranQuestion
@@ -118,10 +118,10 @@ public class UpdateVeteranQuestion extends HttpServlet
 		Question newQuestion = new Question();
 		User veteranThatAsked = engine.findUsers( "_id", request.getSession().getAttribute( "aid" ) ).get( 0 );
 
-		newQuestion.setQuestionTitle( request.getParameter( "question_title" ) );
+		newQuestion.setTitle( request.getParameter( "question_title" ) );
 		newQuestion.setAvailability( request.getParameter( "availability" ) );
 		newQuestion.setDetailedDescription( request.getParameter( "question_detailed_description" ) );
-		newQuestion.setVeteran( veteranThatAsked );
+		newQuestion.setUser( veteranThatAsked );
 		List<Tag> questionTags = new ArrayList<Tag>();
 		addTags( request.getParameterValues( "tag" ), questionTags );
 		newQuestion.setTags( questionTags );
@@ -143,10 +143,10 @@ public class UpdateVeteranQuestion extends HttpServlet
 
 		if( updatedQuestion.getVeteran().equals( veteranFromQuestion ) )
 		{
-			updatedQuestion.setQuestionTitle( request.getParameter( "question_title" ) );
+			updatedQuestion.setTitle( request.getParameter( "question_title" ) );
 			updatedQuestion.setAvailability( request.getParameter( "availability" ) );
 			updatedQuestion.setDetailedDescription( request.getParameter( "question_detailed_description" ) );
-			updatedQuestion.setVeteran( veteranFromQuestion );
+			updatedQuestion.setUser( veteranFromQuestion );
 			List<Tag> questionTags = new ArrayList<Tag>();
 			addTags( request.getParameterValues( "tag" ), questionTags );
 			updatedQuestion.setTags( questionTags );

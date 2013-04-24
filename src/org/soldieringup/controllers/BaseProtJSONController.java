@@ -3,6 +3,7 @@
  */
 package org.soldieringup.controllers;
 
+import org.apache.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/rest/prot")
 public abstract class BaseProtJSONController extends BaseJSONController
 {
+	static final Logger log = Logger.getLogger ("controller");
 	/**
 	 * Returns the current authenticated User.
 	 * @return Authentication
@@ -24,6 +26,7 @@ public abstract class BaseProtJSONController extends BaseJSONController
 	protected Authentication getAuthenticatedUser ()
 	{
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		log.debug ("Authenticated User:" + auth.getName ());
 		return auth;
 	}
 }
