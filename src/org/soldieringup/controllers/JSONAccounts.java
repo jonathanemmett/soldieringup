@@ -1,8 +1,6 @@
 package org.soldieringup.controllers;
 
 import org.soldieringup.User;
-import org.soldieringup.service.MongoEngine;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +12,8 @@ public class JSONAccounts extends BaseProtJSONController {
 	// Example:
 	//http://localhost:8080/soldieringup/rest/prot/accounts?email=jjennings
 
-	@Autowired
-	private MongoEngine mongoEngine;
+	//@Autowired
+	//private MongoEngine mongoEngine;
 
 	@RequestMapping(value="accounts", method = RequestMethod.GET)
 	public @ResponseBody String getShopInJSON(@RequestParam String email) {
@@ -31,7 +29,9 @@ public class JSONAccounts extends BaseProtJSONController {
 	private User getUser (String email)
 	{
 		UserDetails userDetails = (UserDetails) getAuthenticatedUser ().getPrincipal ();
-		User user = mongoEngine.getUser (userDetails);
+		//User user = mongoEngine.getUser (userDetails);
+		User user = new User ();
+		user.setEmail (userDetails.getUsername ());
 		return user;
 	}
 }

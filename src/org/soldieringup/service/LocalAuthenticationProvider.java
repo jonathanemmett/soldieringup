@@ -2,7 +2,6 @@ package org.soldieringup.service;
 
 import java.util.List;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soldieringup.UserAccountStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,13 @@ import org.springframework.util.StringUtils;
 @Component
 public class LocalAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	@Autowired
-	MongoEngine engine;
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger (getClass());
 
 	@Autowired
 	private transient PasswordEncoder encoder = null;
+
+	@Autowired
+	private MongoEngine engine;
 
 	@Override
 	protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication)

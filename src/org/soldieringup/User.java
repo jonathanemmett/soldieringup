@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author Jake
  *
  */
+@Document(collection = "user")
 public class User extends SoldierUpAccount implements UserDetails
 {
 	private static final long			serialVersionUID	= 7885033133143889220L;
@@ -42,7 +44,7 @@ public class User extends SoldierUpAccount implements UserDetails
 
 	public User ()
 	{
-		// TODO Auto-generated constructor stub
+		super ();
 	}
 
 	public String getFirstName()

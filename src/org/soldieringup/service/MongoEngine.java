@@ -2,30 +2,32 @@ package org.soldieringup.service;
 
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.soldieringup.Business;
 import org.soldieringup.MeetingRequest;
 import org.soldieringup.Question;
 import org.soldieringup.Role;
-import org.soldieringup.SoldierUpAccount;
 import org.soldieringup.Tag;
 import org.soldieringup.User;
-import org.soldieringup.ZIP;
+import org.soldieringup.Zip;
+import org.soldieringup.database.BusinessRepository;
 import org.soldieringup.database.MeetingRequestRepository;
 import org.soldieringup.database.QuestionRepository;
 import org.soldieringup.database.RoleRepository;
-import org.soldieringup.database.SoldierUpAccountRepository;
 import org.soldieringup.database.TagRepository;
 import org.soldieringup.database.UserRepository;
 import org.soldieringup.database.ZipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MongoEngine
 {
 	@Autowired
-	private SoldierUpAccountRepository accountRepository;
+	private BusinessRepository businessRepository;
 	@Autowired
 	private ZipRepository zipRepository;
 	@Autowired
@@ -37,46 +39,26 @@ public class MongoEngine
 	@Autowired
 	private UserRepository	userRepository;
 	@Autowired
-	private RoleRepository roleRepository;
-
-	public User getByEmailAndPassword (String email, String password)
-	{
-		return userRepository.findByEmailAndPassword (email, password);
-	}
+	private RoleRepository	roleRepository;
 
 	public void insertUser( User aUser )
 	{
-		userRepository.insert( aUser );
+		userRepository.save ( aUser );
 	}
 
 	public void updateUser( User account )
 	{
-		userRepository.update( account );
+		userRepository.save ( account );
 	}
 
-	public List<User> findUsers( String aFieldName, Object aFieldValue )
+	public void savebusiness( Business aBusiness )
 	{
-		return userRepository.find( aFieldName, aFieldValue );
+		businessRepository.save ( aBusiness );
 	}
 
-	public void insertAccount( SoldierUpAccount aBusiness )
+	public void updateAccount( Business aBusiness )
 	{
-		accountRepository.insert( aBusiness );
-	}
-
-	public void updateAccount( SoldierUpAccount aBusiness )
-	{
-		accountRepository.update( aBusiness );
-	}
-
-	public List<SoldierUpAccount> findAccounts( String aFieldName, Object aFieldValue )
-	{
-		return accountRepository.findAccounts(aFieldName, aFieldValue);
-	}
-
-	public List<Business> findBusinessesFromTags( List<Tag> aTags )
-	{
-		return accountRepository.findBusinessesFromTags( aTags );
+		businessRepository.save ( aBusiness );
 	}
 
 	/**
@@ -93,36 +75,28 @@ public class MongoEngine
 	 * Inserts a zip into the database
 	 * @param aZip Zip to insert
 	 */
-	public void insertZip( ZIP aZip )
+	public void insertZip( Zip aZip )
 	{
-		zipRepository.insert( aZip );
+		zipRepository.save ( aZip );
 	}
 
 	/**
-	 * Gets the ZIP associated to a given zipcode
-	 * @param aZipCode Zip code of the ZIP to find
-	 * @return The ZIP from the zip code if found, false otherwise
+	 * Gets the Zip associated to a given zipcode
+	 * @param aZipCode Zip code of the Zip to find
+	 * @return The Zip from the zip code if found, false otherwise
 	 */
-	public ZIP findZip( String aZipCode )
+	public Zip findZip( String zip )
 	{
-		List<ZIP> possibleZipCodes = zipRepository.find( "zip", aZipCode );
-		if( possibleZipCodes.size() > 0 )
-		{
-			return possibleZipCodes.get( 0 );
-		}
-		else
-		{
-			return null;
-		}
+		return zipRepository.findOne( zip );
 	}
 
 	/**
-	 * Updates a given ZIP in the database
-	 * @param aZip ZIP to update
+	 * Updates a given Zip in the database
+	 * @param aZip Zip to update
 	 */
-	public void updateZip( ZIP aZip )
+	public void updateZip( Zip aZip )
 	{
-		zipRepository.update(aZip);
+		zipRepository.save (aZip);
 	}
 
 	/**
@@ -131,7 +105,7 @@ public class MongoEngine
 	 */
 	public void insertTag( Tag aTag )
 	{
-		tagRepository.insert( aTag );
+		tagRepository.save ( aTag );
 	}
 
 	/**
@@ -142,72 +116,78 @@ public class MongoEngine
 	 */
 	public List<Tag> findTags( String aFieldName, Object aFieldValue )
 	{
-		return tagRepository.find( aFieldName, aFieldValue );
+		//return tagRepository.find( aFieldName, aFieldValue );
+		throw new NotImplementedException ();
 	}
 
 	public List<Tag> findSimiliarTags( String aTag )
 	{
-		return tagRepository.findSimiliarTags( aTag );
+		//return tagRepository.findSimiliarTags( aTag );
+		throw new NotImplementedException ();
 	}
 
 	public List<Tag> findSimiliarTagsFromMultipleTags( String[] aTags)
 	{
-		return tagRepository.findSimilarTagsFromMultipleTags( aTags );
+		throw new NotImplementedException ();
 	}
 
 	public List<Question> findQuestions( String aFieldName, Object aFieldValue )
 	{
-		return questionRepository.find(aFieldName, aFieldValue);
+		//return questionRepository.find(aFieldName, aFieldValue);
+		throw new NotImplementedException ();
 	}
 
 	public void insertQuestion( Question aQuestion )
 	{
-		questionRepository.insert( aQuestion );
+		questionRepository.save ( aQuestion );
 	}
 
 	public void updateQuestion( Question aQuestion )
 	{
-		questionRepository.update( aQuestion );
+		questionRepository.save ( aQuestion );
 	}
 
 	public void removeQuestion( Question aQuestion )
 	{
-		questionRepository.remove( aQuestion);
+		questionRepository.delete ( aQuestion);
 	}
 
 	public void insertMeetingRequest( MeetingRequest aRequest )
 	{
-		meetingRepository.insert( aRequest );
+		meetingRepository.save ( aRequest );
 	}
 
 	public void updateMeetingRequest( MeetingRequest aRequest )
 	{
-		meetingRepository.update( aRequest );
+		meetingRepository.save ( aRequest );
 	}
 
 	public void removeMeetingRequest( MeetingRequest aRequest )
 	{
-		meetingRepository.remove( aRequest );
+		meetingRepository.delete ( aRequest );
 	}
 
 	public List<MeetingRequest> findMeetingRequest( String aFieldName, Object aFieldValue )
 	{
-		return meetingRepository.find( aFieldName, aFieldValue );
+		//return meetingRepository.find( aFieldName, aFieldValue );
+		throw new NotImplementedException ();
 	}
 
-	/**
-	 * Returns full details about the Authenticated user
-	 * @param userDetails
-	 * @return User
-	 */
-	public User getUser (UserDetails userDetails)
+	public List<Question> getTopQuestions ()
 	{
-		User user = userRepository.getAuthenticatedUser (userDetails);
-		return user;
+		Pageable p = new PageRequest(0, 20);
+		Page<Question> page = questionRepository.findAll (p);
+		List<Question> q = page.getContent ();
+		return q;
 	}
 
 	public Role getRole (String role)
 	{
-		return roleRepository.findOne (role);
+		return roleRepository.findOne(role);
+	}
+
+	public org.soldieringup.User getByEmailAndPassword (String username, String encodePassword)
+	{
+		return userRepository.findByUsernameAndPassword (username, encodePassword);
 	}
 }

@@ -16,30 +16,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "user")
 public abstract class SoldierUpAccount
 {
-
-	public interface IUserService
-	{
-
-		public abstract long countAllUsers ();
-
-		public abstract void deleteUser (User user);
-
-		public abstract User findUser (String id);
-
-		public abstract List<?> findAllUsers ();
-
-		public abstract List<?> findUserEntries (int firstResult, int maxResults);
-
-		public abstract User findByUsername (String username);
-
-		public abstract void saveUser (User user);
-
-		public abstract User updateUser (User user);
-
-		public abstract List<?> getUserRoles (String id);
-
-	}
-
 	@Id
 	protected ObjectId	id;
 	protected long		mAid;

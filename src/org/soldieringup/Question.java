@@ -1,34 +1,37 @@
 package org.soldieringup;
 
+import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Class the represents a question that a Veteran is asking
  * @author Jake
  *
  */
+@Document(collection = "question")
 public class Question
 {
 	@Id
-	protected ObjectId id;
-	public String title;
-	public String availability;
-	public String description;
+	private ObjectId id;
+	private String title;
+	private String availability;
+	private String description;
+	private Date postedDateTime;
+	private String author;
 	@DBRef
-	public User user;
-	@DBRef
-	public List<Tag> tag;
+	private List<Tag> tag;
 
 	/**
 	 * Constructor for question
 	 */
-	public Question()
+	public Question ()
 	{
-
+		super ();
 	}
 
 	/**
@@ -47,15 +50,6 @@ public class Question
 	public void setAvailability( String aAvailability )
 	{
 		this.availability = aAvailability;
-	}
-
-	/**
-	 * Sets the veteran that asked the question
-	 * @param aVeteran Veteran that asked the question
-	 */
-	public void setUser( User aUser )
-	{
-		this.user = aUser;
 	}
 
 	/**
@@ -104,15 +98,6 @@ public class Question
 	}
 
 	/**
-	 * Gets the veteran that asked the question
-	 * @return Veteran that asked the question
-	 */
-	public User getVeteran()
-	{
-		return user;
-	}
-
-	/**
 	 * Gets the tags associated to this question
 	 * @return The tags associated to this question
 	 */
@@ -128,5 +113,37 @@ public class Question
 	public String getDescription()
 	{
 		return description;
+	}
+
+	/**
+	 * @return the postedDateTime
+	 */
+	public Date getPostedDateTime ()
+	{
+		return postedDateTime;
+	}
+
+	/**
+	 * @param postedDateTime the postedDateTime to set
+	 */
+	public void setPostedDateTime (Date postedDateTime)
+	{
+		this.postedDateTime = postedDateTime;
+	}
+
+	/**
+	 * @return the poster
+	 */
+	public String getAuthor ()
+	{
+		return author;
+	}
+
+	/**
+	 * @param poster the poster to set
+	 */
+	public void setAuthor (String author)
+	{
+		this.author = author;
 	}
 }
