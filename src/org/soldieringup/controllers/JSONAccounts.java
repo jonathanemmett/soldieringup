@@ -17,11 +17,13 @@ public class JSONAccounts extends BaseProtJSONController {
 
 	@RequestMapping(value="accounts", method = RequestMethod.GET)
 	public @ResponseBody String getShopInJSON(@RequestParam String email) {
+		System.out.println ("Request for accounts");
 		return toJson (getUser (email));
 	}
 
 	@RequestMapping(value="account", method = RequestMethod.GET)
 	public @ResponseBody String getAccount() {
+		System.out.println ("Request for getAccount()");
 		String name = getAuthenticatedUser ().getName(); //get logged in username
 		return toJson (getUser (name));
 	}

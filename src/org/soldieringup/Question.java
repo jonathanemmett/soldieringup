@@ -8,6 +8,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.Since;
+
 /**
  * Class the represents a question that a Veteran is asking
  * @author Jake
@@ -17,13 +20,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Question
 {
 	@Id
+	@Expose
 	private ObjectId id;
+	@Since(1.0)
+	@Expose
 	private String title;
+	@Expose
 	private String availability;
+	@Expose
 	private String description;
+	@Expose
 	private Date postedDateTime;
+	@Expose
 	private String author;
 	@DBRef
+	@Expose
 	private List<Tag> tag;
 
 	/**

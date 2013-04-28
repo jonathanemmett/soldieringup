@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Class represents a user in the database
  * 
@@ -19,13 +21,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User extends SoldierUpAccount implements UserDetails
 {
 	private static final long			serialVersionUID	= 7885033133143889220L;
+	@Expose
 	private String first_name;
+	@Expose
 	private String last_name;
 	private long salt;
+	@Expose(deserialize = false)
 	private String password;
+	@Expose
 	private Business business;
+	@Expose
 	private Veteran veteran;
 	@DBRef
+	@Expose
 	private War war;
 
 	private List<Role>				roles;
