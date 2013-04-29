@@ -168,9 +168,27 @@
 	</div>
 	</script>
 	<script type="text/x-handlebars" id="profile">
-	<div class="well span12">
-		<p>If this were to be a real login, this will display user profile</p>
-		<p>TODO: Build up user profile.</p>
+	<div class="well">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#home" data-toggle="tab">Profile</a></li>
+			<li><a href="#profile" data-toggle="tab">Edit Profile</a></li>
+		</ul>
+		<div class="tab-content">
+			<div class="tab-pane active in" id="home">
+				<div class="row span3">
+
+				</div>
+			</div>
+		<div class="tab-pane fade" id="profile">
+    	<form id="tab2">
+        	<label>New Password</label>
+        	<input type="password" class="input-xlarge">
+        	<div>
+        	    <button class="btn btn-primary">Update</button>
+        	</div>
+    	</form>
+      </div>
+		</div>
 	</div>
 	</script>
 	<script type="text/x-handlebars" id="login-failure">
@@ -186,6 +204,7 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.0-rc.3/handlebars.min.js"></script>
 	
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/holder.js"></script>
     <script>
     	$(document).ready(function(){
     		/* Home */
