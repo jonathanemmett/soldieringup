@@ -1,6 +1,7 @@
 package org.soldieringup;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 
 
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
  * @author Jake
  *
  */
+@Document(collection = "user")
 public class Business extends SoldierUpAccount {
 
 	private long bid;

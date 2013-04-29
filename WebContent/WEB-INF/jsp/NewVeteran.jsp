@@ -4,7 +4,7 @@
 <%@ page import="org.soldieringup.Business" %>
 <%@ page import="org.soldieringup.User"%>
 <%@ page import="org.soldieringup.Veteran" %>
-<%@ page import="org.soldieringup.ZIP;"%>
+<%@ page import="org.soldieringup.Zip;"%>
 
 <!DOCTYPE html>
 <head>

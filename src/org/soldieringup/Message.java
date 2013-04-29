@@ -5,12 +5,14 @@ import java.util.GregorianCalendar;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Handles the different messages that a Vet and Ent. might pass between each other.
  * @author jjennings
  *
  */
+@Document
 public class Message
 {
 	@Id

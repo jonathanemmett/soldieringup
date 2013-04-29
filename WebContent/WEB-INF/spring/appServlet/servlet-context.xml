@@ -13,10 +13,6 @@
 
 	<mvc:default-servlet-handler />
 
-	<mvc:annotation-driven />
-	<mvc:resources mapping="/img/**" location="/img/" />
-	<mvc:resources mapping="/Styles/**" location="/Styles/" />
-
 	<!-- JSTL resolver -->
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -27,18 +23,19 @@
 	</bean>
 
 	<mvc:annotation-driven />
-
-	<bean
-		class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
 	<mvc:resources mapping="/css/**" location="/css/" />
 	<mvc:resources mapping="/images/**" location="/images/" />
 	<mvc:resources mapping="/js/**" location="/js/" />
+	<mvc:resources mapping="/img/**" location="/img/" />
+	<mvc:resources mapping="/Styles/**" location="/Styles/" />
+	<mvc:resources mapping="/html/**" location="/html/" />	
 
 	<bean id="messageSource"
 		class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basenames">
 			<list>
-				<value>mymessages</value>
+				<value>messages</value>
 			</list>
 		</property>
 	</bean>

@@ -13,7 +13,7 @@ public class War
 {
 	@Id
 	private ObjectId id;
-	@Indexed
+	@Indexed(unique = true)
 	private String name;
 	/**
 	 * @return the name

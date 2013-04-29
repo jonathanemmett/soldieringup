@@ -1,53 +1,57 @@
 package org.soldieringup;
 
+import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.Since;
 
 /**
  * Class the represents a question that a Veteran is asking
  * @author Jake
  *
  */
+@Document(collection = "question")
 public class Question
 {
 	@Id
-	protected ObjectId id;
-	public long qid;
-	public String question_title;
-	public String availability;
-	public String question_detailed_description;
+	@Expose
+	private ObjectId id;
+	@Since(1.0)
+	@Expose
+	private String title;
+	@Expose
+	private String availability;
+	@Expose
+	private String description;
+	@Expose
+	private Date postedDateTime;
+	@Expose
+	private String author;
 	@DBRef
-	public User veteran;
-	@DBRef
-	public List<Tag> tag;
-	public long mySqlVid;
+	@Expose
+	private List<Tag> tag;
 
 	/**
 	 * Constructor for question
 	 */
-	public Question()
+	public Question ()
 	{
-
+		super ();
 	}
 
-	/**
-	 * Sets the MySQL id for the question
-	 * @param qid Question id
-	 */
-	public void setQid( long qid )
-	{
-		this.qid = qid;
-	}
 	/**
 	 * Sets the title of the question
 	 * @param aQuestionTitle The title to set the question to
 	 */
-	public void setQuestionTitle( String aQuestionTitle )
+	public void setTitle( String aQuestionTitle )
 	{
-		this.question_title = aQuestionTitle;
+		this.title = aQuestionTitle;
 	}
 
 	/**
@@ -57,24 +61,6 @@ public class Question
 	public void setAvailability( String aAvailability )
 	{
 		this.availability = aAvailability;
-	}
-
-	/**
-	 * Sets the id of the veteran that asked the question
-	 * @param aVid The id of the veteran
-	 */
-	public void setVid( long aVid )
-	{
-		this.mySqlVid = aVid;
-	}
-
-	/**
-	 * Sets the veteran that asked the question
-	 * @param aVeteran Veteran that asked the question
-	 */
-	public void setVeteran( User aVeteran )
-	{
-		this.veteran = aVeteran;
 	}
 
 	/**
@@ -92,7 +78,7 @@ public class Question
 	 */
 	public void setDetailedDescription( String aDetailedDescription )
 	{
-		this.question_detailed_description = aDetailedDescription;
+		this.description = aDetailedDescription;
 	}
 
 	/**
@@ -105,21 +91,12 @@ public class Question
 	}
 
 	/**
-	 * Sets the MySQL id for the question
-	 * @param qid Question id
-	 */
-	public long getQid()
-	{
-		return this.qid;
-	}
-
-	/**
 	 * Gets the title of the question
 	 * @return The title of the question
 	 */
-	public String getQuestionTitle()
+	public String getTitle()
 	{
-		return question_title;
+		return title;
 	}
 
 	/**
@@ -129,24 +106,6 @@ public class Question
 	public String getAvailability()
 	{
 		return availability;
-	}
-
-	/**
-	 * Gets the id of the veteran that asked the question
-	 * @return The id of the veteran that asked the question
-	 */
-	public long getVid()
-	{
-		return mySqlVid;
-	}
-
-	/**
-	 * Gets the veteran that asked the question
-	 * @return Veteran that asked the question
-	 */
-	public User getVeteran()
-	{
-		return veteran;
 	}
 
 	/**
@@ -162,8 +121,40 @@ public class Question
 	 * Gets the detailed description of the question
 	 * @return The detailed description of the question
 	 */
-	public String getDetailedDescription()
+	public String getDescription()
 	{
-		return question_detailed_description;
+		return description;
+	}
+
+	/**
+	 * @return the postedDateTime
+	 */
+	public Date getPostedDateTime ()
+	{
+		return postedDateTime;
+	}
+
+	/**
+	 * @param postedDateTime the postedDateTime to set
+	 */
+	public void setPostedDateTime (Date postedDateTime)
+	{
+		this.postedDateTime = postedDateTime;
+	}
+
+	/**
+	 * @return the poster
+	 */
+	public String getAuthor ()
+	{
+		return author;
+	}
+
+	/**
+	 * @param poster the poster to set
+	 */
+	public void setAuthor (String author)
+	{
+		this.author = author;
 	}
 }

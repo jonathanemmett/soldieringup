@@ -17,11 +17,11 @@
 
 	<context:component-scan base-package="org.soldieringup" />
 
-	<mongo:repositories base-package="org.soldieringup.database" />
+	<mongo:repositories base-package="org.soldieringup" />
 
 	<mongo:mongo host="${mongo.host.name}" port="${mongo.host.port}" />
 
 	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate"
-		c:mongo-ref="mongo" c:databaseName="${mongo.db.name}" />
+		c:mongo-ref="mongo" c:databaseName="${mongo.db.name}" />	
 
 </beans>

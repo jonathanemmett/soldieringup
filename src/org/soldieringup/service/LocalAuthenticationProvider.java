@@ -2,7 +2,6 @@ package org.soldieringup.service;
 
 import java.util.List;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soldieringup.UserAccountStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,13 @@ import org.springframework.util.StringUtils;
 @Component
 public class LocalAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	@Autowired
-	UserService userService;
+	private final org.slf4j.Logger logger = LoggerFactory.getLogger (getClass());
 
 	@Autowired
 	private transient PasswordEncoder encoder = null;
+
+	@Autowired
+	private MongoEngine engine;
 
 	@Override
 	protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication)
@@ -49,7 +48,7 @@ public class LocalAuthenticationProvider extends AbstractUserDetailsAuthenticati
 			throw new BadCredentialsException("Please enter password");
 		}
 
-		org.soldieringup.User user = userService.getByUsernameAndPassword(username, encoder.encodePassword(password, null));
+		org.soldieringup.User user = engine.getByEmailAndPassword(username, encoder.encodePassword(password, null));
 		if (user == null) {
 			logger.warn("Username {}, password {}: username and password not found", username, password);
 			throw new BadCredentialsException("Invalid Username/Password");
